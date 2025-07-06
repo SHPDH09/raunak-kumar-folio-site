@@ -22,7 +22,9 @@ const Projects = () => {
       icon: <Database className="w-5 h-5" />,
       category: "Desktop App",
       image: bankingImg,
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
+      githubLink: "https://github.com/SHPDH09/Banking-System",
+      demoLink: ""
     },
     {
       title: "Police Cyber Crime Management",
@@ -31,7 +33,9 @@ const Projects = () => {
       icon: <Activity className="w-5 h-5" />,
       category: "System Management",
       image: railwayImg,
-      color: "from-purple-500 to-pink-500"
+      color: "from-purple-500 to-pink-500",
+      githubLink: "https://github.com/SHPDH09/Police-CyberCrime-System",
+      demoLink: ""
     },
     {
       title: "Objective & Coding Quiz App",
@@ -40,7 +44,9 @@ const Projects = () => {
       icon: <Code2 className="w-5 h-5" />,
       category: "Web App",
       image: quizImg,
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
+      githubLink: "https://github.com/SHPDH09/quiz-platform",
+      demoLink: "https://quiz_application_001.renderforestsites.com/"
     },
     {
       title: "Automatic Attendance Assistant",
@@ -49,7 +55,9 @@ const Projects = () => {
       icon: <Brain className="w-5 h-5" />,
       category: "AI/ML",
       image: aiImg,
-      color: "from-orange-500 to-red-500"
+      color: "from-orange-500 to-red-500",
+      githubLink: "https://github.com/SHPDH09/Automatic-Attendance-AI",
+      demoLink: ""
     },
     {
       title: "Fraud Detection System",
@@ -58,7 +66,9 @@ const Projects = () => {
       icon: <Brain className="w-5 h-5" />,
       category: "Machine Learning",
       image: analyticsImg,
-      color: "from-teal-500 to-blue-500"
+      color: "from-teal-500 to-blue-500",
+      githubLink: "https://github.com/SHPDH09/Fraud-Detection-ML",
+      demoLink: ""
     },
     {
       title: "Product Success Predictor",
@@ -67,7 +77,9 @@ const Projects = () => {
       icon: <Brain className="w-5 h-5" />,
       category: "ML",
       image: trackerImg,
-      color: "from-indigo-500 to-purple-500"
+      color: "from-indigo-500 to-purple-500",
+      githubLink: "https://github.com/SHPDH09/Product-Success-Predictor",
+      demoLink: ""
     },
     {
       title: "Satellite Imagery Detection",
@@ -76,7 +88,9 @@ const Projects = () => {
       icon: <Globe className="w-5 h-5" />,
       category: "AI/ML",
       image: medicalImg,
-      color: "from-pink-500 to-rose-500"
+      color: "from-pink-500 to-rose-500",
+      githubLink: "https://github.com/SHPDH09/Satellite-Imagery-AI",
+      demoLink: ""
     },
     {
       title: "ETL Pipeline for Sales Data",
@@ -85,7 +99,9 @@ const Projects = () => {
       icon: <Database className="w-5 h-5" />,
       category: "Data Engineering",
       image: clusteringImg,
-      color: "from-yellow-500 to-orange-500"
+      color: "from-yellow-500 to-orange-500",
+      githubLink: "https://github.com/SHPDH09/ETL-Sales-Pipeline",
+      demoLink: ""
     },
     {
       title: "Data Quality Monitoring",
@@ -94,7 +110,9 @@ const Projects = () => {
       icon: <Activity className="w-5 h-5" />,
       category: "Data Science",
       image: bankingImg,
-      color: "from-cyan-500 to-blue-500"
+      color: "from-cyan-500 to-blue-500",
+      githubLink: "https://github.com/SHPDH09/Data-Quality-Monitoring",
+      demoLink: ""
     }
   ];
 
@@ -160,11 +178,22 @@ const Projects = () => {
                 </div>
                 
                 <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" className="flex-1 text-xs py-1 h-7 hover-neon">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 text-xs py-1 h-7 hover-neon"
+                    onClick={() => window.open(project.githubLink, '_blank')}
+                    disabled={!project.githubLink}
+                  >
                     <Github className="w-3 h-3 mr-1" />
                     Code
                   </Button>
-                  <Button size="sm" className="flex-1 text-xs py-1 h-7 hover-neon">
+                  <Button 
+                    size="sm" 
+                    className="flex-1 text-xs py-1 h-7 hover-neon"
+                    onClick={() => project.demoLink && window.open(project.demoLink, '_blank')}
+                    disabled={!project.demoLink}
+                  >
                     <ExternalLink className="w-3 h-3 mr-1" />
                     Demo
                   </Button>
