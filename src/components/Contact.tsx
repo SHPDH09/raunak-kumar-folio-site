@@ -24,32 +24,27 @@ const Contact = () => {
     }));
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
+    await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
       method: "POST",
+      mode: "no-cors", // <-- Add this line
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
     });
 
-    const result = await response.json();
-    if (result.result === "success") {
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for reaching out. Your message has been saved successfully!",
-      });
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    } else {
-      toast({
-        title: "Submission Failed",
-        description: "Something went wrong. Please try again.",
-      });
-    }
+    // Since no-cors doesn't return a real response, we assume it's successful
+    toast({
+      title: "Message Sent!",
+      description: "Thank you for reaching out. Your message has been sent.",
+    });
+
+    setFormData({ name: '', email: '', subject: '', message: '' });
   } catch (error) {
     toast({
       title: "Error!",
@@ -59,6 +54,7 @@ const Contact = () => {
 
   setIsSubmitting(false);
 };
+
 
 
   const contactInfo = [
