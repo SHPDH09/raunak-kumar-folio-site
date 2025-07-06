@@ -15,17 +15,7 @@ import clusteringImg from '@/assets/clustering-project.jpg';
 
 const Projects = () => {
   const projects = [
-    {
-      title: "Banking System",
-      description: "Complete banking management system built with Java Swing for secure transactions.",
-      tech: ["Java", "Swing", "SQL"],
-      icon: <Database className="w-5 h-5" />,
-      category: "Desktop App",
-      image: bankingImg,
-      color: "from-blue-500 to-cyan-500",
-      githubLink: "https://github.com/SHPDH09/Banking-System",
-      demoLink: ""
-    },
+   
     {
       title: "Police Cyber Crime Management",
       description: "Comprehensive system for managing and tracking cyber crime cases.",
@@ -34,7 +24,7 @@ const Projects = () => {
       category: "System Management",
       image: railwayImg,
       color: "from-purple-500 to-pink-500",
-      githubLink: "https://github.com/SHPDH09/Police-CyberCrime-System",
+      githubLink: "https://github.com/SHPDH09/police-cybercrime-management-system/tree/main",
       demoLink: ""
     },
     {
@@ -45,7 +35,7 @@ const Projects = () => {
       category: "Web App",
       image: quizImg,
       color: "from-green-500 to-emerald-500",
-      githubLink: "https://github.com/SHPDH09/quiz-platform",
+      githubLink: "https://github.com/SHPDH09/Quiz-Application-Java/tree/main",
       demoLink: "https://quiz_application_001.renderforestsites.com/"
     },
     {
