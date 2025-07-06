@@ -25,6 +25,7 @@ const Navigation = () => {
     { name: 'About', id: 'about' },
     { name: 'Projects', id: 'projects' },
     { name: 'Experience', id: 'experience' },
+    { name: 'Applications', id: 'applications' },
     { name: 'Contact', id: 'contact' }
   ];
 
@@ -54,14 +55,6 @@ const Navigation = () => {
               </button>
             ))}
             <div className="flex items-center space-x-3 ml-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent transition-smooth"
-                onClick={() => scrollToSection('contact')}
-              >
-                Connect
-              </Button>
               <Button
                 size="sm"
                 className="bg-primary hover:bg-primary/90 transition-smooth"

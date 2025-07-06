@@ -35,9 +35,18 @@ const About = () => {
           {/* Personal Info Card */}
           <Card className="card-gradient shadow-card hover-lift">
             <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <User className="w-6 h-6 text-primary mr-3" />
-                <h3 className="text-2xl font-semibold text-foreground">Personal Info</h3>
+              <div className="flex flex-col items-center mb-6">
+                <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-primary/20 shadow-glow">
+                  <img 
+                    src="/lovable-uploads/a40bf5f4-14e7-48e5-9e6a-1363bb767db7.png" 
+                    alt="Raunak Kumar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <User className="w-6 h-6 text-primary mr-3" />
+                  <h3 className="text-2xl font-semibold text-foreground">Personal Details</h3>
+                </div>
               </div>
               
               <div className="space-y-4">

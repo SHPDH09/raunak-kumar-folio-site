@@ -3,6 +3,9 @@ import Hero from '@/components/Hero';
 import About from '@/components/About';
 import Projects from '@/components/Projects';
 import Experience from '@/components/Experience';
+import SoftSkills from '@/components/SoftSkills';
+import Achievements from '@/components/Achievements';
+import Applications from '@/components/Applications';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
@@ -17,6 +20,9 @@ const Portfolio = () => {
         <About />
         <Projects />
         <Experience />
+        <SoftSkills />
+        <Achievements />
+        <Applications />
         <Contact />
       </main>
       <Footer />

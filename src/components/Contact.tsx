@@ -43,14 +43,14 @@ const Contact = () => {
     {
       icon: <Mail className="w-5 h-5" />,
       label: "Email",
-      value: "raunak.kumar@example.com",
-      link: "mailto:raunak.kumar@example.com"
+      value: "rk331159@gmail.com",
+      link: "mailto:rk331159@gmail.com"
     },
     {
       icon: <Phone className="w-5 h-5" />,
       label: "Phone",
-      value: "+91 XXXXX XXXXX",
-      link: "tel:+91XXXXXXXXX"
+      value: "+91 6206158459",
+      link: "tel:+916206158459"
     },
     {
       icon: <MapPin className="w-5 h-5" />,
