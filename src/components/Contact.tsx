@@ -216,10 +216,18 @@ const Contact = () => {
                 
                 <div>
                   <h4 className="font-semibold text-foreground mb-3">Download Resume</h4>
+                  <a 
+  href="/Raunak_Kumar_Resume.pdf" 
+  download 
+  className="inline-flex items-center justify-center w-full px-4 py-3 text-sm font-medium border rounded-md bg-background hover:bg-accent transition-all">
+ 
+
+
                   <Button variant="outline" className="w-full">
                     <Download className="w-5 h-5 mr-2" />
                     Download CV/Resume
                   </Button>
+                    </a>
                 </div>
 
                 <div>
