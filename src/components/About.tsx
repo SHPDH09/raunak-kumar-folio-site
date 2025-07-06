@@ -3,15 +3,20 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, GraduationCap, User, Heart } from 'lucide-react';
 
 const About = () => {
-  const skills = [
+  const programmingSkills = [
     'Python', 'Java', 'C', 'C++', 'SQL', 'HTML', 'CSS', 'JavaScript', 
-    'React', 'Flask', 'Django', 'Spring Boot', 'Node.js', 'Pandas', 
-    'NumPy', 'Scikit-learn', 'Selenium', 'OpenCV', 'Java Swing'
+    'React', 'Flask', 'Django', 'Spring Boot', 'Node.js'
+  ];
+
+  const frameworks = [
+    'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn',
+    'TensorFlow', 'Keras', 'NLTK', 'SpaCy', 'Selenium', 'BeautifulSoup',
+    'OpenCV', 'Tkinter', 'Streamlit', 'Power BI', 'SAS', 'Alteryx'
   ];
 
   const interests = [
-    'Data Science', 'Machine Learning', 'Web Development', 
-    'Automation', 'UI/UX Design', 'Research'
+    'Data Analytics & Visualization', 'Machine Learning & AI', 'Java OOPs Concepts', 
+    'Competitive Programming (DSA)', 'Web Development', 'Automation'
   ];
 
   return (
@@ -39,14 +44,21 @@ const About = () => {
                 <div className="flex items-center">
                   <Calendar className="w-5 h-5 text-muted-foreground mr-3" />
                   <span className="text-foreground">
-                    <strong>Date of Birth:</strong> May 21, 2003
+                    <strong>Date of Birth:</strong> 21-05-2003
                   </span>
                 </div>
                 
                 <div className="flex items-center">
                   <GraduationCap className="w-5 h-5 text-muted-foreground mr-3" />
                   <span className="text-foreground">
-                    <strong>Education:</strong> BCA (AIDA), LNCT University, Section C
+                    <strong>Course:</strong> BCA in AIDA
+                  </span>
+                </div>
+
+                <div className="flex items-center">
+                  <GraduationCap className="w-5 h-5 text-muted-foreground mr-3" />
+                  <span className="text-foreground">
+                    <strong>Institution:</strong> LNCT University
                   </span>
                 </div>
                 
@@ -72,9 +84,9 @@ const About = () => {
           <div className="space-y-8">
             <Card className="card-gradient shadow-card hover-lift">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-semibold text-foreground mb-6">Technical Skills</h3>
+                <h3 className="text-2xl font-semibold text-foreground mb-6">Programming Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
+                  {programmingSkills.map((skill, index) => (
                     <Badge 
                       key={index} 
                       variant="secondary" 
@@ -89,9 +101,26 @@ const About = () => {
 
             <Card className="card-gradient shadow-card hover-lift">
               <CardContent className="p-8">
+                <h3 className="text-2xl font-semibold text-foreground mb-6">Frameworks & Libraries</h3>
+                <div className="flex flex-wrap gap-2">
+                  {frameworks.map((framework, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="px-3 py-2 text-sm border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-smooth"
+                    >
+                      {framework}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="card-gradient shadow-card hover-lift">
+              <CardContent className="p-8">
                 <div className="flex items-center mb-6">
                   <Heart className="w-6 h-6 text-primary mr-3" />
-                  <h3 className="text-2xl font-semibold text-foreground">Interests</h3>
+                  <h3 className="text-2xl font-semibold text-foreground">Learning Interests</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {interests.map((interest, index) => (

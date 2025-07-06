@@ -17,75 +17,84 @@ const Projects = () => {
   const projects = [
     {
       title: "Banking System",
-      description: "Comprehensive banking application with account management and transactions.",
-      tech: ["Java", "Swing", "MySQL"],
+      description: "Complete banking management system built with Java Swing for secure transactions.",
+      tech: ["Java", "Swing", "SQL"],
       icon: <Database className="w-5 h-5" />,
       category: "Desktop App",
       image: bankingImg,
       color: "from-blue-500 to-cyan-500"
     },
     {
-      title: "Railway Reservation",
-      description: "Complete railway booking system with seat selection dashboard.",
-      tech: ["Java", "Spring Boot", "MySQL"],
+      title: "Police Cyber Crime Management",
+      description: "Comprehensive system for managing and tracking cyber crime cases.",
+      tech: ["Java", "MySQL", "Security"],
       icon: <Activity className="w-5 h-5" />,
-      category: "Web App",
+      category: "System Management",
       image: railwayImg,
       color: "from-purple-500 to-pink-500"
     },
     {
-      title: "AI Publication Tool",
-      description: "Intelligent research publication summarizer using NLP.",
-      tech: ["Python", "NLP", "Flask"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "AI/ML",
-      image: aiImg,
-      color: "from-green-500 to-emerald-500"
-    },
-    {
-      title: "Quiz Application",
-      description: "Interactive quiz platform with coding questions.",
-      tech: ["React", "Node.js", "MongoDB"],
+      title: "Objective & Coding Quiz App",
+      description: "Interactive quiz platform with coding IDE integration for assessment.",
+      tech: ["JavaScript", "React", "IDE"],
       icon: <Code2 className="w-5 h-5" />,
       category: "Web App",
       image: quizImg,
+      color: "from-green-500 to-emerald-500"
+    },
+    {
+      title: "Automatic Attendance Assistant",
+      description: "AI-powered attendance system using facial recognition technology.",
+      tech: ["Python", "OpenCV", "AI"],
+      icon: <Brain className="w-5 h-5" />,
+      category: "AI/ML",
+      image: aiImg,
       color: "from-orange-500 to-red-500"
     },
     {
-      title: "Product Predictor",
-      description: "ML model predicting product success rates.",
-      tech: ["Python", "Scikit-learn", "Flask"],
+      title: "Fraud Detection System",
+      description: "ML model for detecting fraudulent transactions in financial systems.",
+      tech: ["Python", "ML", "TensorFlow"],
       icon: <Brain className="w-5 h-5" />,
-      category: "ML",
+      category: "Machine Learning",
       image: analyticsImg,
       color: "from-teal-500 to-blue-500"
     },
     {
-      title: "Work Tracker",
-      description: "Multi-department analytics dashboard.",
-      tech: ["React", "Django", "PostgreSQL"],
-      icon: <Users className="w-5 h-5" />,
-      category: "Dashboard",
+      title: "Product Success Predictor",
+      description: "E-commerce ML model predicting product success using analytics.",
+      tech: ["Python", "Scikit-learn", "Analytics"],
+      icon: <Brain className="w-5 h-5" />,
+      category: "ML",
       image: trackerImg,
       color: "from-indigo-500 to-purple-500"
     },
     {
-      title: "Medical System",
-      description: "Healthcare appointment management platform.",
-      tech: ["Java", "Spring Boot", "MySQL"],
+      title: "Satellite Imagery Detection",
+      description: "AI/ML-based feature detection in satellite imagery data.",
+      tech: ["Python", "Computer Vision", "ML"],
       icon: <Globe className="w-5 h-5" />,
-      category: "Web App",
+      category: "AI/ML",
       image: medicalImg,
       color: "from-pink-500 to-rose-500"
     },
     {
-      title: "Customer Segmentation",
-      description: "K-Means clustering for targeted marketing.",
-      tech: ["Python", "Pandas", "Matplotlib"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "Data Science",
+      title: "ETL Pipeline for Sales Data",
+      description: "Automated ETL pipeline for processing large-scale sales data efficiently.",
+      tech: ["Python", "ETL", "Data Pipeline"],
+      icon: <Database className="w-5 h-5" />,
+      category: "Data Engineering",
       image: clusteringImg,
       color: "from-yellow-500 to-orange-500"
+    },
+    {
+      title: "Data Quality Monitoring",
+      description: "Real-time monitoring system ensuring data quality across sources.",
+      tech: ["Python", "Monitoring", "Quality"],
+      icon: <Activity className="w-5 h-5" />,
+      category: "Data Science",
+      image: bankingImg,
+      color: "from-cyan-500 to-blue-500"
     }
   ];
 

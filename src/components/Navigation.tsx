@@ -43,7 +43,7 @@ const Navigation = () => {
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -53,6 +53,23 @@ const Navigation = () => {
                 {item.name}
               </button>
             ))}
+            <div className="flex items-center space-x-3 ml-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent transition-smooth"
+                onClick={() => scrollToSection('contact')}
+              >
+                Connect
+              </Button>
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90 transition-smooth"
+                onClick={() => window.open('#resume', '_blank')}
+              >
+                Resume
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
