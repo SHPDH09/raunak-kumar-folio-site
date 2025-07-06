@@ -39,7 +39,7 @@ const Experience = () => {
       type: "internship",
       title: "Python Development",
       company: "Code Clouse PVT. LTD. (Remote)",
-      duration: "Nov 2024 - Dec 2024",
+      duration: "jun 2024 - Aug 2024",
       description: "Built robust applications using Python, implemented efficient algorithms, and integrated APIs with various libraries.",
       achievements: [
         "Built robust Python applications",
@@ -54,7 +54,7 @@ const Experience = () => {
       type: "education",
       title: "Bachelor of Computer Applications (AIDA)",
       company: "LNCT University",
-      duration: "2021 - 2024",
+      duration: "2023 - 2026",
       description: "Specializing in Artificial Intelligence & Data Analytics with focus on practical applications and research.",
       achievements: [
         "Specialization in AI & Data Analytics",
