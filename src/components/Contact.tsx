@@ -24,20 +24,42 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+    if (result.result === "success") {
       toast({
         title: "Message Sent!",
-        description: "Thank you for reaching out. I'll get back to you soon!",
+        description: "Thank you for reaching out. Your message has been saved successfully!",
       });
       setFormData({ name: '', email: '', subject: '', message: '' });
-      setIsSubmitting(false);
-    }, 1000);
-  };
+    } else {
+      toast({
+        title: "Submission Failed",
+        description: "Something went wrong. Please try again.",
+      });
+    }
+  } catch (error) {
+    toast({
+      title: "Error!",
+      description: "Could not send data. Check your internet or script URL.",
+    });
+  }
+
+  setIsSubmitting(false);
+};
+
 
   const contactInfo = [
     {
