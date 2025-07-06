@@ -41,7 +41,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Since no-cors doesn't return a real response, we assume it's successful
     toast({
       title: "Message Sent!",
-      description: "Thank you for reaching out. Your message has been sent.",
+      description: "Thank you for reaching out 📧 . Your message has been sent.",
     });
 
     setFormData({ name: '', email: '', subject: '', message: '' });
