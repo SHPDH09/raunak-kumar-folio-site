@@ -43,7 +43,7 @@ const Navigation = () => {
             <img 
               src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png" 
               alt="Portfolio Logo" 
-              className="h-10 w-10 object-contain"
+              className="h-10 w-10 object-contain rounded-full opacity-80"
             />
           </button>
 
