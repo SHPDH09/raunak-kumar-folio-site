@@ -5,18 +5,18 @@ import { Calendar, MapPin, GraduationCap, User, Heart } from 'lucide-react';
 const About = () => {
   const programmingSkills = [
     'Python', 'Java', 'C', 'C++', 'SQL', 'HTML', 'CSS', 'JavaScript', 
-    'React', 'Flask', 'Django', 'Spring Boot', 'Node.js'
+    'R Programing', 'Flask'
   ];
 
   const frameworks = [
     'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn',
-    'TensorFlow', 'Keras', 'NLTK', 'SpaCy', 'Selenium', 'BeautifulSoup',
+    'TensorFlow' 'NLTK', 'Selenium',
     'OpenCV', 'Tkinter', 'Streamlit', 'Power BI', 'SAS', 'Alteryx'
   ];
 
   const interests = [
     'Data Analytics & Visualization', 'Machine Learning & AI', 'Java OOPs Concepts', 
-    'Competitive Programming (DSA)', 'Web Development', 'Automation'
+    'Competitive Programming (DSA)', 'Automation'  ,'Data Engineering'
   ];
 
   return (
