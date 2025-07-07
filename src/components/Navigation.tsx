@@ -38,9 +38,13 @@ const Navigation = () => {
           {/* Logo */}
           <button 
             onClick={() => scrollToSection('hero')}
-            className="text-2xl font-bold text-gradient hover:scale-105 transition-smooth"
+            className="hover:scale-105 transition-smooth"
           >
-            RK
+            <img 
+              src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png" 
+              alt="Portfolio Logo" 
+              className="h-10 w-10 object-contain"
+            />
           </button>
 
           {/* Desktop Navigation */}
