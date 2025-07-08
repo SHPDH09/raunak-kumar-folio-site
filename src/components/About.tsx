@@ -10,7 +10,7 @@ const About = () => {
 
   const frameworks = [
     'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn',
-    'TensorFlow' 'NLTK', 'Selenium',
+    'TensorFlow', 'NLTK', 'Selenium',
     'OpenCV', 'Tkinter', 'Streamlit', 'Power BI', 'SAS', 'Alteryx'
   ];
 

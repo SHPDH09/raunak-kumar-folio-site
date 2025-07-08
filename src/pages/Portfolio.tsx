@@ -8,6 +8,7 @@ import Achievements from '@/components/Achievements';
 import Applications from '@/components/Applications';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
+import ChatBox from '@/components/ChatBox';
 
 const Portfolio = () => {
   return (
@@ -26,6 +27,7 @@ const Portfolio = () => {
         <Contact />
       </main>
       <Footer />
+      <ChatBox />
     </div>
   );
 };
