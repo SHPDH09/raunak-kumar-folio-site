@@ -17,7 +17,7 @@ const ChatBox = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm Raunak's AI assistant. Ask me about his projects, skills, or experience!",
+      text: "Hello! I'm Raunak's AI Assistant. I can help you learn about his technical skills, projects, education, and professional experience. What would you like to know about Raunak?",
       isUser: false,
       timestamp: new Date()
     }
@@ -52,16 +52,23 @@ const ChatBox = () => {
   const getAIResponse = (input: string): string => {
     const lowerInput = input.toLowerCase();
     
+    // Check if question is about Raunak's details
     if (lowerInput.includes('project')) {
-      return "Raunak has worked on various projects including AI/ML applications, data analytics dashboards, and web applications. You can scroll down to see his featured projects!";
-    } else if (lowerInput.includes('skill')) {
-      return "Raunak specializes in AI & ML, Data Analytics, Python, Java, and web technologies. He's proficient in frameworks like TensorFlow, Pandas, and Scikit-learn.";
-    } else if (lowerInput.includes('experience')) {
-      return "Raunak is currently pursuing BCA in AI & Data Analytics at LNCT University. He has hands-on experience in machine learning, data visualization, and software development.";
-    } else if (lowerInput.includes('contact')) {
-      return "You can reach out to Raunak through the contact section below or connect with him on LinkedIn!";
+      return "Raunak has worked on various AI/ML projects including Medical Prediction System, Banking Management System, Railway Reservation System, and Data Analytics dashboards. He specializes in Python, Machine Learning, and Data Visualization.";
+    } else if (lowerInput.includes('skill') || lowerInput.includes('technology')) {
+      return "Raunak's technical skills include: Programming Languages - Python, Java, C++, SQL, JavaScript, R; Frameworks - TensorFlow, Pandas, NumPy, Scikit-learn, Flask, Streamlit; Tools - Power BI, SAS, Alteryx, OpenCV.";
+    } else if (lowerInput.includes('education') || lowerInput.includes('study') || lowerInput.includes('college') || lowerInput.includes('university')) {
+      return "Raunak is pursuing BCA in Artificial Intelligence & Data Analytics (AIDA) from LNCT University. Born on 21-05-2003, currently focused on AI/ML and Data Science.";
+    } else if (lowerInput.includes('experience') || lowerInput.includes('work')) {
+      return "Raunak has hands-on experience in AI/ML model development, data analytics, web development with Flask, automation projects, and competitive programming with strong DSA knowledge.";
+    } else if (lowerInput.includes('contact') || lowerInput.includes('reach') || lowerInput.includes('connect')) {
+      return "You can connect with Raunak through the contact section on this portfolio or reach out via LinkedIn for professional opportunities.";
+    } else if (lowerInput.includes('name') || lowerInput.includes('who')) {
+      return "I'm here to help you learn about Raunak Kumar - an AI & ML Developer and Data Analyst currently pursuing BCA in AIDA at LNCT University.";
+    } else if (lowerInput.includes('location') || lowerInput.includes('where')) {
+      return "Raunak is based in India and available for remote opportunities in AI/ML and Data Analytics domains.";
     } else {
-      return "That's interesting! Feel free to ask me about Raunak's projects, skills, experience, or how to contact him.";
+      return "I can only provide information about Raunak Kumar's professional details, projects, skills, education, and contact information. Please ask me something about Raunak's portfolio!";
     }
   };
 
@@ -86,43 +93,49 @@ const ChatBox = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-80 h-96 card-gradient shadow-card border-primary/20">
+        <Card className="fixed bottom-6 right-6 z-50 w-96 h-[500px] card-gradient shadow-card border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
             <div className="flex items-center space-x-2">
-              <Bot className="w-5 h-5 text-primary" />
-              <CardTitle className="text-sm">AI Assistant</CardTitle>
+              <Bot className="w-5 h-5 text-primary animate-pulse" />
+              <CardTitle className="text-sm font-semibold">Raunak's AI Assistant</CardTitle>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="h-6 w-6 p-0"
+              className="h-6 w-6 p-0 hover:bg-destructive/20"
             >
               <X className="w-4 h-4" />
             </Button>
           </CardHeader>
           
           <CardContent className="p-0 flex flex-col h-full">
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-4 max-h-[350px]">
+              <div className="space-y-3">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} items-start gap-2`}
                   >
+                    {!message.isUser && (
+                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot className="w-3 h-3 text-primary" />
+                      </div>
+                    )}
                     <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
+                      className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
                         message.isUser
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground rounded-br-md'
+                          : 'bg-card text-card-foreground border border-border rounded-bl-md'
                       }`}
                     >
-                      <div className="flex items-start space-x-2">
-                        {!message.isUser && <Bot className="w-4 h-4 mt-0.5 text-primary" />}
-                        {message.isUser && <User className="w-4 h-4 mt-0.5" />}
-                        <p className="text-sm">{message.text}</p>
-                      </div>
+                      {message.text}
                     </div>
+                    {message.isUser && (
+                      <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
+                        <User className="w-3 h-3 text-accent" />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
