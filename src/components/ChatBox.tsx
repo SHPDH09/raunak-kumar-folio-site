@@ -15,7 +15,7 @@ interface Message {
 const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
+  const [apiKey, setApiKey] = useState(localStorage.getItem('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') || '');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -29,7 +29,7 @@ const ChatBox = () => {
   const [inputMessage, setInputMessage] = useState('');
 
   const saveApiKey = () => {
-    localStorage.setItem('openai_api_key', apiKeyInput);
+    localStorage.setItem('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', apiKeyInput);
     setApiKey(apiKeyInput);
     setShowSettings(false);
     setApiKeyInput('');
