@@ -117,44 +117,47 @@ const Certifications = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {certifications.map((cert, index) => (
-            <Card key={index} className="hover:shadow-elegant transition-smooth group">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <Award className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                  <Badge variant="secondary" className="text-xs">
-                    {cert.issuer}
-                  </Badge>
-                </div>
-                <CardTitle className="text-lg leading-tight group-hover:text-primary transition-smooth">
-                  {cert.title}
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {cert.dateOfIssue}
-                </div>
-                
-                {cert.certificateId !== "Not mentioned" && (
-                  <div className="text-sm">
-                    <span className="font-medium">Certificate ID: </span>
-                    <span className="text-muted-foreground">{cert.certificateId}</span>
+            <Card key={index} className="certification-card group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 opacity-60"></div>
+              <div className="relative">
+                <CardHeader className="pb-2 space-y-2">
+                  <div className="flex items-start justify-between">
+                    <Award className="h-4 w-4 text-primary flex-shrink-0" />
+                    <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
+                      {cert.issuer}
+                    </Badge>
                   </div>
-                )}
+                  <CardTitle className="text-sm font-semibold leading-tight group-hover:text-primary transition-smooth line-clamp-2">
+                    {cert.title}
+                  </CardTitle>
+                </CardHeader>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-smooth"
-                  onClick={() => window.open(cert.link, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Certificate
-                </Button>
-              </CardContent>
+                <CardContent className="pt-0 space-y-2">
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {cert.dateOfIssue}
+                  </div>
+                  
+                  {cert.certificateId !== "Not mentioned" && (
+                    <div className="text-xs">
+                      <span className="font-medium">ID: </span>
+                      <span className="text-muted-foreground">{cert.certificateId}</span>
+                    </div>
+                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-xs h-7 group-hover:bg-primary group-hover:text-primary-foreground transition-smooth border-primary/30 hover:border-primary"
+                    onClick={() => window.open(cert.link, '_blank')}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                </CardContent>
+              </div>
             </Card>
           ))}
         </div>
