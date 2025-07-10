@@ -34,8 +34,8 @@ const Navigation = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
       isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-elegant' : 'bg-transparent'
     }`}>
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <button 
             onClick={() => scrollToSection('hero')}
@@ -83,17 +83,26 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border">
-            <div className="py-4 space-y-2">
+          <div className="md:hidden absolute top-14 sm:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border">
+            <div className="py-2 sm:py-4 space-y-1">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className="block w-full text-left px-6 py-3 text-foreground hover:text-primary hover:bg-muted/50 transition-smooth"
+                  className="block w-full text-left px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-foreground hover:text-primary hover:bg-muted/50 transition-smooth"
                 >
                   {item.name}
                 </button>
               ))}
+              <div className="px-4 sm:px-6 py-2">
+                <Button
+                  size="sm"
+                  className="w-full bg-primary hover:bg-primary/90 transition-smooth"
+                  onClick={() => window.open('#resume', '_blank')}
+                >
+                  Resume
+                </Button>
+              </div>
             </div>
           </div>
         )}

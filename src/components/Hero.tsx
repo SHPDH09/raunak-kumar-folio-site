@@ -38,20 +38,20 @@ const Hero = () => {
         <div className="absolute bottom-1/4 right-1/4 w-20 h-20 bg-primary/20 rounded-full animate-rotate-slow" style={{ animationDelay: '10s' }}></div>
       </div>
       
-      <div className="container mx-auto px-6 text-center relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
         <div className="animate-fade-in">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 font-inter">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 font-inter">
             Hi, I'm <span className="text-neon animate-pulse-neon">Raunak Kumar</span>
           </h1>
           
-          <div className="h-16 mb-8">
-            <p className="text-xl md:text-2xl text-foreground/90 font-mono min-h-[2rem]">
+          <div className="h-12 sm:h-16 mb-6 sm:mb-8">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground/90 font-mono min-h-[1.5rem] px-2">
               {typedText}
               <span className="animate-pulse border-r-2 border-accent ml-1"></span>
             </p>
           </div>
           
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4">
             BCA Student specializing in <span className="text-gradient">Artificial Intelligence & Data Analytics</span> at LNCT University. 
             Passionate about building intelligent solutions that make a difference.
           </p>
