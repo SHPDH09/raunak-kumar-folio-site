@@ -5,7 +5,7 @@ import heroBackground from '@/assets/hero-bg.jpg';
 
 const Hero = () => {
   const [typedText, setTypedText] = useState('');
-  const fullText = "AI & ML Developer | Data Analyst | Java Swing Specialist";
+  const fullText = "AI & ML Developer | Data Analyst | Data Visualization";
   
   useEffect(() => {
     let i = 0;
