@@ -69,7 +69,7 @@ const saveApiKey = () => {
     } catch (error) {
       const errorResponse: Message = {
         id: messages.length + 2,
-        text: "Sorry, I encountered an error. Please check your API key or try again later.",
+        text: error instanceof Error ? error.message : "Sorry, I encountered an error. Please try again later.",
         isUser: false,
         timestamp: new Date()
       };
@@ -144,7 +144,17 @@ const saveApiKey = () => {
     });
 
     if (!response.ok) {
-      throw new Error('API request failed');
+      const errorData = await response.json().catch(() => ({}));
+      
+      if (response.status === 429) {
+        throw new Error('API quota exceeded. Please check your OpenAI billing or try again later.');
+      } else if (response.status === 401) {
+        throw new Error('Invalid API key. Please check your OpenAI API key in settings.');
+      } else if (response.status === 400) {
+        throw new Error('Invalid request. Please try again with a different message.');
+      } else {
+        throw new Error(`API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
+      }
     }
 
     const data = await response.json();
