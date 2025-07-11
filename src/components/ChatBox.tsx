@@ -145,15 +145,16 @@ const saveApiKey = () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.log('API Error:', response.status, errorData);
       
       if (response.status === 429) {
-        throw new Error('API quota exceeded. Please check your OpenAI billing or try again later.');
+        throw new Error('🚫 API quota exceeded! Your OpenAI API key has reached its usage limit. Please check your billing at platform.openai.com');
       } else if (response.status === 401) {
-        throw new Error('Invalid API key. Please check your OpenAI API key in settings.');
+        throw new Error('🔑 Invalid API key! Please check your OpenAI API key in settings.');
       } else if (response.status === 400) {
-        throw new Error('Invalid request. Please try again with a different message.');
+        throw new Error('❌ Invalid request. Please try again with a different message.');
       } else {
-        throw new Error(`API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`⚠️ API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
       }
     }
 
