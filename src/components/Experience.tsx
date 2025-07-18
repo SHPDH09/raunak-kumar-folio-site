@@ -4,37 +4,7 @@ import { Briefcase, GraduationCap, Award, Users } from 'lucide-react';
 
 const Experience = () => {
   const experiences = [
-    {
-      type: "current",
-      title: "Co-Team Leader (Data Analytics)",
-      company: "BlueStock (Remote)",
-      duration: "May 2025 - Continue",
-      description: "Promoted for consistent performance and leadership skills. Leading team operations, quality assurance, and project coordination.",
-      achievements: [
-        "Promoted for consistent performance and leadership skills",
-        "Guide team and assign tasks ensuring smooth workflow",
-        "Review data models and dashboards for quality before submission",
-        "Maintain timely project delivery with accuracy",
-        "Act as communication bridge between team and project manager"
-      ],
-      skills: ["Leadership", "Data Analytics", "Team Management", "Quality Assurance"],
-      isPromotion: true
-    },
-    {
-      type: "internship",
-      title: "Data Analytics",
-      company: "BlueStock (Remote)",
-      duration: "Mar 2025 - May 2025",
-      description: "Systematic computational analysis of data to discover patterns, correlations, and trends using statistical models and machine learning algorithms.",
-      achievements: [
-        "Implemented statistical models and ML algorithms",
-        "Performed data collection and preprocessing",
-        "Conducted exploratory data analysis (EDA)",
-        "Created data visualization tools and reports",
-        "Supported data-driven decision-making strategies"
-      ],
-      skills: ["Data Analytics", "Machine Learning", "Statistical Modeling", "Data Visualization"]
-    },
+   
     {
       type: "internship",
       title: "Python Development",
