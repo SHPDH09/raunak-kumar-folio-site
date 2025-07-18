@@ -18,7 +18,7 @@ const VisitorCounter = () => {
   }, []);
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-lg">
+    <div className="fixed top-16 left-4 z-50">
       <div className="flex items-center gap-2 text-sm">
         <Eye className="h-4 w-4 text-primary" />
         <span className="text-foreground font-medium">
