@@ -79,13 +79,6 @@ const Experience = () => {
                 {/* Timeline Node */}
                 <div className="absolute left-6 w-4 h-4 bg-primary rounded-full border-4 border-background shadow-glow"></div>
                 
-                {/* Promotion Arrow */}
-                {exp.isPromotion && (
-                  <div className="absolute left-2 -top-6 flex items-center text-accent text-sm font-semibold animate-pulse">
-                    <span className="text-lg mr-1">↗</span>
-                    <span>PROMOTED</span>
-                  </div>
-                )}
                 
                 {/* Experience Card */}
                 <div className="ml-16">

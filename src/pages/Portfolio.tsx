@@ -10,6 +10,7 @@ import Applications from '@/components/Applications';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import ChatBox from '@/components/ChatBox';
+import VisitorCounter from '@/components/VisitorCounter';
 
 const Portfolio = () => {
   return (
@@ -30,6 +31,7 @@ const Portfolio = () => {
       </main>
       <Footer />
       <ChatBox />
+      <VisitorCounter />
     </div>
   );
 };
