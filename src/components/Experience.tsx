@@ -198,7 +198,6 @@ const Experience = () => {
                                     <div className="text-center">
                                       <p className="text-xs text-muted-foreground mb-1">SGPA</p>
                                       <p className="text-lg font-bold text-accent">{sem.sgpa}</p>
-                                      <p className="text-xs text-primary font-medium">{(sem.sgpa * 10).toFixed(1)}%</p>
                                       <div className="w-full bg-muted/20 rounded-full h-1.5 mt-1">
                                         <div 
                                           className="bg-gradient-to-r from-accent to-primary-glow h-1.5 rounded-full transition-all duration-500"
