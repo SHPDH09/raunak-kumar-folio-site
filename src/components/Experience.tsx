@@ -31,7 +31,15 @@ const Experience = () => {
         "Active in tech communities and projects",
         "Strong foundation in programming and analytics"
       ],
-      skills: ["AI/ML", "Data Science", "Programming", "Research"]
+      skills: ["AI/ML", "Data Science", "Programming", "Research"],
+      semesters: [
+        { semester: 1, cgpa: 8.50, sgpa: 8.50, date: "DEC 2023", status: "completed" },
+        { semester: 2, cgpa: 8.75, sgpa: 9.00, date: "JUNE 2024", status: "completed" },
+        { semester: 3, cgpa: 8.72, sgpa: 8.67, date: "DEC 2024", status: "completed" },
+        { semester: 4, cgpa: 8.84, sgpa: 9.17, date: "JUNE 2025", status: "completed" },
+        { semester: 5, cgpa: 0, sgpa: 0, date: "DEC 2025", status: "ongoing" },
+        { semester: 6, cgpa: 0, sgpa: 0, date: "JUNE 2026", status: "upcoming" }
+      ]
     }
   ];
 
@@ -124,6 +132,117 @@ const Experience = () => {
                           ))}
                         </ul>
                       </div>
+                      
+                      {/* Semester Breakdown for Education */}
+                      {exp.type === "education" && exp.semesters && (
+                        <div className="mb-6">
+                          <h4 className="font-semibold text-foreground mb-4 flex items-center">
+                            <span className="w-2 h-2 bg-accent rounded-full mr-2"></span>
+                            Academic Performance (CGPA out of 10):
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {exp.semesters.map((sem, semIndex) => (
+                              <div 
+                                key={semIndex} 
+                                className={`relative p-4 rounded-lg border transition-all duration-300 ${
+                                  sem.status === 'completed' 
+                                    ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20' 
+                                    : sem.status === 'ongoing'
+                                    ? 'bg-yellow-500/10 border-yellow-500/30 animate-pulse'
+                                    : 'bg-muted/10 border-muted/30 opacity-60'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <Badge 
+                                      variant="outline" 
+                                      className={`text-xs ${
+                                        sem.status === 'completed' 
+                                          ? 'text-green-400 border-green-500/30' 
+                                          : sem.status === 'ongoing'
+                                          ? 'text-yellow-400 border-yellow-500/30'
+                                          : 'text-muted-foreground border-muted/30'
+                                      }`}
+                                    >
+                                      Semester {sem.semester}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">{sem.date}</span>
+                                  </div>
+                                  <Badge 
+                                    variant="secondary" 
+                                    className={`text-xs ${
+                                      sem.status === 'completed' 
+                                        ? 'bg-green-500/20 text-green-400' 
+                                        : sem.status === 'ongoing'
+                                        ? 'bg-yellow-500/20 text-yellow-400'
+                                        : 'bg-muted/20 text-muted-foreground'
+                                    }`}
+                                  >
+                                    {sem.status === 'completed' ? '✓ Completed' : sem.status === 'ongoing' ? '⏳ Ongoing' : '⏳ Upcoming'}
+                                  </Badge>
+                                </div>
+                                
+                                {sem.status === 'completed' && (
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground mb-1">CGPA</p>
+                                      <p className="text-lg font-bold text-primary">{sem.cgpa}</p>
+                                      <div className="w-full bg-muted/20 rounded-full h-1.5 mt-1">
+                                        <div 
+                                          className="bg-gradient-to-r from-primary to-accent h-1.5 rounded-full transition-all duration-500"
+                                          style={{ width: `${(sem.cgpa / 10) * 100}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground mb-1">SGPA</p>
+                                      <p className="text-lg font-bold text-accent">{sem.sgpa}</p>
+                                      <div className="w-full bg-muted/20 rounded-full h-1.5 mt-1">
+                                        <div 
+                                          className="bg-gradient-to-r from-accent to-primary-glow h-1.5 rounded-full transition-all duration-500"
+                                          style={{ width: `${(sem.sgpa / 10) * 100}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {sem.status === 'ongoing' && (
+                                  <div className="text-center py-2">
+                                    <p className="text-sm text-yellow-400 font-medium">Currently in progress...</p>
+                                  </div>
+                                )}
+                                
+                                {sem.status === 'upcoming' && (
+                                  <div className="text-center py-2">
+                                    <p className="text-sm text-muted-foreground">Yet to commence</p>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Overall Performance Summary */}
+                          <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Current Overall CGPA</p>
+                                <p className="text-2xl font-bold text-primary">8.84/10</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">Progress</p>
+                                <p className="text-lg font-semibold text-accent">4/6 Semesters</p>
+                              </div>
+                            </div>
+                            <div className="w-full bg-muted/20 rounded-full h-2 mt-3">
+                              <div 
+                                className="bg-gradient-to-r from-primary via-accent to-primary-glow h-2 rounded-full transition-all duration-1000"
+                                style={{ width: '66.67%' }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="flex flex-wrap gap-2">
                         {exp.skills.map((skill, skillIndex) => (
