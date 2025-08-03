@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Menu, X } from 'lucide-react';
 
 const Navigation = () => {
@@ -60,13 +61,28 @@ const Navigation = () => {
               </button>
             ))}
             <div className="flex items-center space-x-3 ml-4">
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90 transition-smooth"
-                onClick={() => window.open('#resume', '_blank')}
-              >
-                Resume
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 transition-smooth"
+                  >
+                    Resume
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl w-full h-[90vh]">
+                  <DialogHeader>
+                    <DialogTitle>Resume Preview</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex-1 w-full h-full">
+                    <iframe
+                      src="/RAUNAK KUMAR.pdf"
+                      className="w-full h-full border-0"
+                      title="Resume Preview"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -95,13 +111,28 @@ const Navigation = () => {
                 </button>
               ))}
               <div className="px-4 sm:px-6 py-2">
-                <Button
-                  size="sm"
-                  className="w-full bg-primary hover:bg-primary/90 transition-smooth"
-                  onClick={() => window.open('#resume', '_blank')}
-                >
-                  Resume
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="w-full bg-primary hover:bg-primary/90 transition-smooth"
+                    >
+                      Resume
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl w-full h-[90vh]">
+                    <DialogHeader>
+                      <DialogTitle>Resume Preview</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 w-full h-full">
+                      <iframe
+                        src="/RAUNAK KUMAR.pdf"
+                        className="w-full h-full border-0"
+                        title="Resume Preview"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
