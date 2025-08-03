@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Menu, X } from 'lucide-react';
 
 const Navigation = () => {
@@ -73,6 +73,9 @@ const Navigation = () => {
                 <DialogContent className="max-w-4xl w-full h-[90vh]">
                   <DialogHeader>
                     <DialogTitle>Resume Preview</DialogTitle>
+                    <DialogDescription>
+                      View and download my complete resume
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="flex-1 w-full h-full">
                     <iframe
@@ -123,6 +126,9 @@ const Navigation = () => {
                   <DialogContent className="max-w-4xl w-full h-[90vh]">
                     <DialogHeader>
                       <DialogTitle>Resume Preview</DialogTitle>
+                      <DialogDescription>
+                        View and download my complete resume
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="flex-1 w-full h-full">
                       <iframe
