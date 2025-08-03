@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -31,6 +32,12 @@ const Navigation = () => {
     { name: 'Contact', id: 'contact' }
   ];
 
+  const handleResumeClick = () => {
+    console.log('Resume button clicked');
+    // Try opening PDF in new tab as fallback
+    window.open('/RAUNAK KUMAR.pdf', '_blank');
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
       isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-elegant' : 'bg-transparent'
@@ -61,31 +68,13 @@ const Navigation = () => {
               </button>
             ))}
             <div className="flex items-center space-x-3 ml-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 transition-smooth"
-                  >
-                    Resume
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl w-full h-[90vh]">
-                  <DialogHeader>
-                    <DialogTitle>Resume Preview</DialogTitle>
-                    <DialogDescription>
-                      View and download my complete resume
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex-1 w-full h-full">
-                    <iframe
-                      src="/RAUNAK KUMAR.pdf"
-                      className="w-full h-full border-0"
-                      title="Resume Preview"
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button
+                size="sm"
+                onClick={handleResumeClick}
+                className="bg-primary hover:bg-primary/90 transition-smooth"
+              >
+                Resume
+              </Button>
             </div>
           </div>
 
@@ -114,31 +103,13 @@ const Navigation = () => {
                 </button>
               ))}
               <div className="px-4 sm:px-6 py-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 transition-smooth"
-                    >
-                      Resume
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl w-full h-[90vh]">
-                    <DialogHeader>
-                      <DialogTitle>Resume Preview</DialogTitle>
-                      <DialogDescription>
-                        View and download my complete resume
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex-1 w-full h-full">
-                      <iframe
-                        src="/RAUNAK KUMAR.pdf"
-                        className="w-full h-full border-0"
-                        title="Resume Preview"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button
+                  size="sm"
+                  onClick={handleResumeClick}
+                  className="w-full bg-primary hover:bg-primary/90 transition-smooth"
+                >
+                  Resume
+                </Button>
               </div>
             </div>
           </div>
