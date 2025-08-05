@@ -40,7 +40,7 @@ const Projects = () => {
       githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
       demoLink: "https://burnoutai.streamlit.app/"
     }
-  ];
+  
 
 
     {
