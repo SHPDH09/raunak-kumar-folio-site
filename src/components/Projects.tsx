@@ -16,17 +16,7 @@ import clusteringImg from '@/assets/clustering-project.jpg';
 const Projects = () => {
   const projects = [
    
-    {
-      title: "Police Cyber Crime Management",
-      description: "Comprehensive system for managing and tracking cyber crime cases.",
-      tech: ["Java", "MySQL", "Security"],
-      icon: <Activity className="w-5 h-5" />,
-      category: "System Management",
-      image: railwayImg,
-      color: "from-purple-500 to-pink-500",
-      githubLink: "https://github.com/SHPDH09/police-cybercrime-management-system/tree/main",
-      demoLink: ""
-    },
+   
     {
       title: "Objective & Coding Quiz App",
       description: "Interactive quiz platform with coding IDE integration for assessment.",
@@ -38,50 +28,21 @@ const Projects = () => {
       githubLink: "https://github.com/SHPDH09/Quiz-Application-Java/tree/main",
       demoLink: "https://quiz_application_001.renderforestsites.com/"
     },
-    {
-      title: "Automatic Attendance Assistant",
-      description: "AI-powered attendance system using facial recognition technology.",
-      tech: ["Python", "OpenCV", "AI"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "AI/ML",
-      image: aiImg,
-      color: "from-orange-500 to-red-500",
-      githubLink: "https://github.com/SHPDH09/Automatic-Attendance-AI",
-      demoLink: ""
-    },
-    {
-      title: "Fraud Detection System",
-      description: "ML model for detecting fraudulent transactions in financial systems.",
-      tech: ["Python", "ML", "TensorFlow"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "Machine Learning",
-      image: analyticsImg,
-      color: "from-teal-500 to-blue-500",
-      githubLink: "https://github.com/SHPDH09/Fraud-Detection-ML",
-      demoLink: ""
-    },
-    {
-      title: "Product Success Predictor",
-      description: "E-commerce ML model predicting product success using analytics.",
-      tech: ["Python", "Scikit-learn", "Analytics"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "ML",
-      image: trackerImg,
-      color: "from-indigo-500 to-purple-500",
-      githubLink: "https://github.com/SHPDH09/Product-Success-Predictor",
-      demoLink: ""
-    },
-    {
-      title: "Satellite Imagery Detection",
-      description: "AI/ML-based feature detection in satellite imagery data.",
-      tech: ["Python", "Computer Vision", "ML"],
-      icon: <Globe className="w-5 h-5" />,
-      category: "AI/ML",
-      image: medicalImg,
-      color: "from-pink-500 to-rose-500",
-      githubLink: "https://github.com/SHPDH09/Satellite-Imagery-AI",
-      demoLink: ""
-    },
+
+   {
+      title: "AI-Based-Workforce-Productivity-Burnout-Analyzer",
+      description: "AI-Powered Employee Performance & Burnout Analysis Dashboard (Manager Panel)",
+      tech: ["Python", "Streamlit ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
+      icon: <Activity className="w-5 h-5" />,
+      category: "ML/Data Analyst",
+      image: bankingImg,
+      color: "from-cyan-500 to-blue-500",
+      githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
+      demoLink: "https://burnoutai.streamlit.app/"
+    }
+  ];
+
+
     {
       title: "ETL Pipeline for Sales Data",
       description: "Automated ETL pipeline for processing large-scale sales data efficiently.",
