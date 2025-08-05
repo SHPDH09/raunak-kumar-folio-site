@@ -121,6 +121,39 @@ const Certifications = () => {
           {certifications.map((cert, index) => (
             <Card key={index} className="certification-card group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 opacity-60"></div>
+              {/* Company Logo Background */}
+              <div className="absolute top-2 left-2 w-8 h-8 opacity-20 group-hover:opacity-30 transition-smooth">
+                {cert.issuer.toLowerCase().includes('geeksforgeeks') && (
+                  <div className="w-full h-full bg-green-500 rounded text-white text-xs font-bold flex items-center justify-center">GFG</div>
+                )}
+                {cert.issuer.toLowerCase().includes('samatrix') && (
+                  <div className="w-full h-full bg-blue-500 rounded text-white text-xs font-bold flex items-center justify-center">SMX</div>
+                )}
+                {cert.issuer.toLowerCase().includes('cisco') && (
+                  <div className="w-full h-full bg-blue-600 rounded text-white text-xs font-bold flex items-center justify-center">CISCO</div>
+                )}
+                {cert.issuer.toLowerCase().includes('iit') && (
+                  <div className="w-full h-full bg-orange-500 rounded text-white text-xs font-bold flex items-center justify-center">IIT</div>
+                )}
+                {cert.issuer.toLowerCase().includes('internship') && (
+                  <div className="w-full h-full bg-purple-500 rounded text-white text-xs font-bold flex items-center justify-center">IS</div>
+                )}
+                {cert.issuer.toLowerCase().includes('infosys') && (
+                  <div className="w-full h-full bg-blue-700 rounded text-white text-xs font-bold flex items-center justify-center">INFO</div>
+                )}
+                {cert.issuer.toLowerCase().includes('linkedin') && (
+                  <div className="w-full h-full bg-blue-800 rounded text-white text-xs font-bold flex items-center justify-center">LI</div>
+                )}
+                {cert.issuer.toLowerCase().includes('tech') && !cert.issuer.toLowerCase().includes('codec') && (
+                  <div className="w-full h-full bg-gray-600 rounded text-white text-xs font-bold flex items-center justify-center">TECH</div>
+                )}
+                {cert.issuer.toLowerCase().includes('coursera') && (
+                  <div className="w-full h-full bg-blue-500 rounded text-white text-xs font-bold flex items-center justify-center">CRA</div>
+                )}
+                {cert.issuer.toLowerCase().includes('codec') && (
+                  <div className="w-full h-full bg-red-500 rounded text-white text-xs font-bold flex items-center justify-center">CODE</div>
+                )}
+              </div>
               <div className="relative">
                 <CardHeader className="pb-2 space-y-2">
                   <div className="flex items-start justify-between">

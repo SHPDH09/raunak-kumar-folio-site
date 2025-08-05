@@ -11,7 +11,7 @@ const About = () => {
   const frameworks = [
     'Scikit-learn', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn',
     'TensorFlow', 'NLTK', 'Selenium',
-    'OpenCV', 'Tkinter', 'Streamlit', 'Power BI', 'SAS', 'Alteryx'
+    'OpenCV', 'Tkinter', 'Streamlit', 'Power BI', 'SAS'
   ];
 
   const interests = [
