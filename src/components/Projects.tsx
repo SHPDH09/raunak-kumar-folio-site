@@ -39,10 +39,7 @@ const Projects = () => {
       color: "from-cyan-500 to-blue-500",
       githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
       demoLink: "https://burnoutai.streamlit.app/"
-    }
-  
-
-
+    },
     {
       title: "ETL Pipeline for Sales Data",
       description: "Automated ETL pipeline for processing large-scale sales data efficiently.",
