@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Award } from "lucide-react";
 
 const certifications = [
+       {
+    title: "Internship Completion  Certificate",
+    issuer: "Reserve Bank Of India",
+    certificateId: "QR",
+    dateOfIssue: "08/08/2024",
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_internship-certificate-activity-7225098992253063168-cLsB?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
+  },
   {
     title: "Data Engineer",
     issuer: "GeeksforGeeks",
@@ -16,91 +23,99 @@ const certifications = [
     issuer: "Samatrix",
     certificateId: "roy8y8ffJy",
     dateOfIssue: "01/04/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-activity-7312783420038823937-B_WK?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analysis Using Python",
     issuer: "Samatrix",
     certificateId: "roy8a3a1h2",
     dateOfIssue: "01/04/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-activity-7312783420038823937-B_WK?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Probability Modeling Using Python",
     issuer: "Samatrix",
     certificateId: "roy8lz8t5f",
     dateOfIssue: "01/04/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-activity-7312783420038823937-B_WK?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Network Support and Security",
     issuer: "CISCO Networking Academy",
     certificateId: "QR (Scanned QR-based)",
     dateOfIssue: "28/01/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-activity-7289998125933481984-loPh?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analytics Essentials",
     issuer: "CISCO Networking Academy",
     certificateId: "QR (Scanned QR-based)",
     dateOfIssue: "28/01/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-activity-7289998125933481984-loPh?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analytics Intern",
     issuer: "CodeC Technologies India (ICAC)",
     certificateId: "QR",
     dateOfIssue: "07/01/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_internship-complition-certificate-activity-7282332352284966912-tM6c?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Kharagpur Data Science Hackathon 2025",
     issuer: "IIT Kharagpur",
     certificateId: "Not mentioned",
     dateOfIssue: "03/01/2025",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_hackathon-iitkgp-datascience-activity-7280791821469835264-FquR?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analytics Training",
     issuer: "Internship Studio",
     certificateId: "ISDTAI518429",
     dateOfIssue: "18/10/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_internship-certificate-activity-7256246166382661632-uv-x?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Excel for Data Analytics",
     issuer: "Infosys Springboard",
     certificateId: "QR",
     dateOfIssue: "08/08/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_basicabrexcelabrtraining-excel-techaabrmicrosoftabrexcel-activity-7227975580112064512--hai?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
+    {
+    title: "RBI90Quiz 2024",
+    issuer: "Reserve Bank Of India",
+    certificateId: "QR",
+    dateOfIssue: "08/08/2024",
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_rbi90quiz-lnctuniversity-gratitude-activity-7267157900253405184-XR0X?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
+  },
+ 
   {
     title: "TechA Microsoft for Data Analytics",
     issuer: "Infosys Springboard",
     certificateId: "QR",
     dateOfIssue: "08/08/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_dataanalytics-powerbi-datavisualization-activity-7203017914164121602-9GaB?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analytics",
     issuer: "LinkedIn Learning",
     certificateId: "Not mentioned",
     dateOfIssue: "24/07/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_certificate-of-completion-activity-7221859626483372033-4BwW?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Data Analytics Using Power BI",
     issuer: "TECH Tip 24",
     certificateId: "QR",
     dateOfIssue: "02/06/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_dataanalytics-powerbi-datavisualization-activity-7203017914164121602-9GaB?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   },
   {
     title: "Introduction to Cloud Computing",
     issuer: "Coursera",
     certificateId: "Not mentioned",
     dateOfIssue: "03/05/2024",
-    link: "#"
+    link: "https://www.linkedin.com/posts/raunak-kumar-766328248_completion-certificate-for-the-bits-and-bytes-activity-7200222241547075584-MRCU?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
   }
 ];
 
