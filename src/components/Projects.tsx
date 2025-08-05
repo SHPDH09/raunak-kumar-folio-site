@@ -48,8 +48,7 @@ const Projects = () => {
       category: "Data Engineering",
       image: clusteringImg,
       color: "from-yellow-500 to-orange-500",
-      githubLink: "https://github.com/SHPDH09/ETL-Sales-Pipeline",
-      demoLink: ""
+      githubLink: "https://github.com/SHPDH09/Blustock-Team-1/blob/main/ETL_Pipeline_for_Sales_Data.ipynb"
     },
     {
       title: "Data Quality Monitoring",
@@ -59,8 +58,7 @@ const Projects = () => {
       category: "Data Science",
       image: bankingImg,
       color: "from-cyan-500 to-blue-500",
-      githubLink: "https://github.com/SHPDH09/Data-Quality-Monitoring",
-      demoLink: ""
+      githubLink: "https://github.com/SHPDH09/Blustock-Team-1/blob/main/Data_Quality_Monitoring_Project.ipynb"
     }
   ];
 
