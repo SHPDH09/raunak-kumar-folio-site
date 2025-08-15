@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Award } from "lucide-react";
 
 const certifications = [
+  {
+    title: "Google Analytics",
+    issuer: "Google",
+    certificateId: "158243226",
+    dateOfIssue: "15/08/2025",
+    link: "https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/158243226"
+  },
        {
     title: "Internship Completion  Certificate",
     issuer: "Reserve Bank Of India",
@@ -138,6 +145,9 @@ const Certifications = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 opacity-60"></div>
               {/* Company Logo Background */}
               <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-15 transition-smooth">
+                {cert.issuer.toLowerCase().includes('google') && (
+                  <div className="text-6xl font-bold text-blue-500">GOOGLE</div>
+                )}
                 {cert.issuer.toLowerCase().includes('geeksforgeeks') && (
                   <div className="text-8xl font-bold text-green-500">GFG</div>
                 )}
