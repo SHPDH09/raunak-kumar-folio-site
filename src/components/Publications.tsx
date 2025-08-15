@@ -9,7 +9,7 @@ const Publications = () => {
       title: "Employee Attrition Prediction Using Machine Learning Techniques",
       journal: "Academia.edu",
       type: "Research Paper",
-      date: "2024",
+      date: "Aug-2025",
       authors: ["Raunak Kumar"],
       abstract: "This research paper explores the application of machine learning techniques for predicting employee attrition in organizations. The study analyzes various factors contributing to employee turnover and implements predictive models to help organizations retain talent.",
       link: "https://www.academia.edu/143335578/Employee_Attrition_Prediction_Using_Machine_Learning_Techniques",
