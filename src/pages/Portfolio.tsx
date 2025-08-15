@@ -7,6 +7,7 @@ import SoftSkills from '@/components/SoftSkills';
 import Achievements from '@/components/Achievements';
 import Certifications from '@/components/Certifications';
 import Applications from '@/components/Applications';
+import Publications from '@/components/Publications';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import ChatBox from '@/components/ChatBox';
@@ -26,6 +27,7 @@ const Portfolio = () => {
         <SoftSkills />
         <Achievements />
         <Certifications />
+        <Publications />
         <Applications />
         <Contact />
       </main>

@@ -16,7 +16,7 @@ const About = () => {
 
   const interests = [
     'Data Analytics & Visualization', 'Machine Learning & AI', 'Java OOPs Concepts', 
-    'Competitive Programming (DSA)', 'Automation'  ,'Data Engineering'
+    'Competitive Programming (DSA)', 'Automation', 'Data Engineering', 'Google Analyst'
   ];
 
   return (
