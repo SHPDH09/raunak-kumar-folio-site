@@ -12,8 +12,8 @@ const certifications = [
     link: "https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/158243226"
   },
        {
-    title: "Internship Completion  Certificate",
-    issuer: "Reserve Bank Of India",
+    title: "Python Development Internship Completion  Certificate",
+    issuer: "CodeClouse PVT. LTD.",
     certificateId: "QR",
     dateOfIssue: "08/08/2024",
     link: "https://www.linkedin.com/posts/raunak-kumar-766328248_internship-certificate-activity-7225098992253063168-cLsB?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD1FwD4BwYYr90gtBTKGHH8Yj353myFWYTQ"
