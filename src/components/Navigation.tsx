@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Image } from 'lucide-react';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,7 +30,8 @@ const Navigation = () => {
     { name: 'Certifications', id: 'certifications' },
     { name: 'Publications', id: 'publications' },
     { name: 'Applications', id: 'applications' },
-    { name: 'Contact', id: 'contact' }
+    { name: 'Contact', id: 'contact' },
+    { name: 'Gallery', href: '/gallery', icon: Image }
   ];
 
   const handleResumeClick = () => {
@@ -60,13 +61,24 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className="text-foreground hover:text-primary transition-smooth font-medium"
-              >
-                {item.name}
-              </button>
+              item.href ? (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-foreground hover:text-primary transition-smooth font-medium flex items-center gap-2"
+                >
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {item.name}
+                </a>
+              ) : (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="text-foreground hover:text-primary transition-smooth font-medium"
+                >
+                  {item.name}
+                </button>
+              )
             ))}
             <div className="flex items-center space-x-3 ml-4">
               <Button
@@ -95,13 +107,25 @@ const Navigation = () => {
           <div className="md:hidden absolute top-14 sm:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border">
             <div className="py-2 sm:py-4 space-y-1">
               {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className="block w-full text-left px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-foreground hover:text-primary hover:bg-muted/50 transition-smooth"
-                >
-                  {item.name}
-                </button>
+                item.href ? (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="block w-full text-left px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-foreground hover:text-primary hover:bg-muted/50 transition-smooth flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.icon && <item.icon className="h-4 w-4" />}
+                    {item.name}
+                  </a>
+                ) : (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className="block w-full text-left px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-foreground hover:text-primary hover:bg-muted/50 transition-smooth"
+                  >
+                    {item.name}
+                  </button>
+                )
               ))}
               <div className="px-4 sm:px-6 py-2">
                 <Button
