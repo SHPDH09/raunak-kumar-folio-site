@@ -54,7 +54,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'noreply@resend.dev',
+          from: 'onboarding@resend.dev',
           to: [email],
           subject: 'Your OTP Code',
           html: `
