@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api/send-otp': {
-        target: 'https://your-project-id.supabase.co/functions/v1/send-otp',
+        target: process.env.VITE_SUPABASE_URL ? `${process.env.VITE_SUPABASE_URL}/functions/v1/send-otp` : 'http://localhost:54321/functions/v1/send-otp',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/send-otp/, ''),
       },
