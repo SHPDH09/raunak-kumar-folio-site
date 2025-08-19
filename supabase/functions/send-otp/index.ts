@@ -12,10 +12,13 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Function called with method:', req.method)
     const { email, action } = await req.json()
+    console.log('Request body parsed:', { email, action })
 
     // Only allow specific email
     if (email !== 'rk331159@gmail.com') {
+      console.log('Unauthorized email attempted:', email)
       return new Response(
         JSON.stringify({ error: 'Email not authorized' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -24,8 +27,13 @@ serve(async (req) => {
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const OTP_SECRET = Deno.env.get('OTP_SECRET')
+    console.log('Environment variables check:', { 
+      hasResendKey: !!RESEND_API_KEY, 
+      hasOtpSecret: !!OTP_SECRET 
+    })
 
     if (!RESEND_API_KEY || !OTP_SECRET) {
+      console.error('Missing environment variables')
       throw new Error('Missing required environment variables')
     }
 
