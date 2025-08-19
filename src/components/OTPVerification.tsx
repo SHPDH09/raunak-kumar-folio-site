@@ -24,9 +24,17 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/send-otp', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const apiUrl = supabaseUrl 
+        ? `${supabaseUrl}/functions/v1/send-otp`
+        : 'http://localhost:54321/functions/v1/send-otp';
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ email, action: 'send' }),
       });
 
@@ -54,9 +62,17 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/send-otp', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const apiUrl = supabaseUrl 
+        ? `${supabaseUrl}/functions/v1/send-otp`
+        : 'http://localhost:54321/functions/v1/send-otp';
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify({ 
           email, 
           otp, 
