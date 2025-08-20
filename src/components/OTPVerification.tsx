@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Mail, Shield } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface OTPVerificationProps {
   onVerified: () => void;
@@ -20,6 +20,11 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
   const sendOTP = async () => {
     if (email !== 'rk331159@gmail.com') {
       toast.error('Access restricted to authorized email only');
+      return;
+    }
+
+    if (!isSupabaseConfigured() || !supabase) {
+      toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
       return;
     }
 
@@ -48,6 +53,11 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
   const verifyOTP = async () => {
     if (otp.length !== 6) {
       toast.error('Please enter a 6-digit OTP');
+      return;
+    }
+
+    if (!isSupabaseConfigured() || !supabase) {
+      toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
       return;
     }
 
