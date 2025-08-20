@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, X, Image } from 'lucide-react';
+import { Menu, X, Image, Wrench } from 'lucide-react';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -31,6 +31,7 @@ const Navigation = () => {
     { name: 'Publications', id: 'publications' },
     { name: 'Applications', id: 'applications' },
     { name: 'Contact', id: 'contact' },
+    { name: 'Tools', href: '/tools', icon: Wrench },
     { name: 'Gallery', href: '/gallery', icon: Image }
   ];
 
