@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Mail, Shield } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface OTPVerificationProps {
   onVerified: () => void;
@@ -24,28 +25,18 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
     setLoading(true);
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const apiUrl = supabaseUrl 
-        ? `${supabaseUrl}/functions/v1/send-otp`
-        : 'http://localhost:54321/functions/v1/send-otp';
-      
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ email, action: 'send' }),
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false, // Only allow existing users
+        }
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setToken(data.token);
+      if (error) {
+        toast.error(error.message);
+      } else {
         setStep('otp');
         toast.success('OTP sent to your email');
-      } else {
-        toast.error(data.error || 'Failed to send OTP');
       }
     } catch (error) {
       toast.error('Network error. Please try again.');
@@ -55,39 +46,26 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
   };
 
   const verifyOTP = async () => {
-    if (otp.length !== 5) {
-      toast.error('Please enter a 5-digit OTP');
+    if (otp.length !== 6) {
+      toast.error('Please enter a 6-digit OTP');
       return;
     }
 
     setLoading(true);
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const apiUrl = supabaseUrl 
-        ? `${supabaseUrl}/functions/v1/send-otp`
-        : 'http://localhost:54321/functions/v1/send-otp';
-      
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ 
-          email, 
-          otp, 
-          token, 
-          action: 'verify' 
-        }),
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: otp,
+        type: 'email'
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
+      if (error) {
+        toast.error(error.message);
+      } else if (data.user) {
         toast.success('Access granted!');
         onVerified();
       } else {
-        toast.error(data.error || 'Invalid OTP');
+        toast.error('Invalid OTP');
       }
     } catch (error) {
       toast.error('Network error. Please try again.');
@@ -105,7 +83,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
           </div>
           <CardTitle>Private Access</CardTitle>
           <CardDescription>
-            Enter your email to receive a 5-digit OTP code
+            Enter your email to receive a 6-digit OTP code
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -142,14 +120,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
           ) : (
             <>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Enter 5-Digit OTP</label>
+                <label className="text-sm font-medium">Enter 6-Digit OTP</label>
                 <Input
                   type="text"
-                  placeholder="12345"
+                  placeholder="123456"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="text-center text-lg font-mono tracking-widest"
-                  maxLength={5}
+                  maxLength={6}
                 />
                 <p className="text-xs text-muted-foreground text-center">
                   Code sent to {email}
@@ -158,7 +136,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
               <div className="space-y-2">
                 <Button 
                   onClick={verifyOTP} 
-                  disabled={otp.length !== 5 || loading}
+                  disabled={otp.length !== 6 || loading}
                   className="w-full"
                 >
                   {loading ? (
