@@ -23,13 +23,16 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       return;
     }
 
-    if (!isSupabaseConfigured() || !supabase) {
+    console.log('Checking Supabase configuration...')
+    if (!isSupabaseConfigured()) {
+      console.error('Supabase not configured')
       toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
       return;
     }
 
     setLoading(true);
     try {
+      console.log('Attempting to send OTP...')
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
@@ -38,12 +41,15 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       });
 
       if (error) {
+        console.error('Supabase OTP error:', error)
         toast.error(error.message);
       } else {
+        console.log('OTP sent successfully')
         setStep('otp');
         toast.success('OTP sent to your email');
       }
     } catch (error) {
+      console.error('Network error:', error)
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -56,13 +62,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       return;
     }
 
-    if (!isSupabaseConfigured() || !supabase) {
+    if (!isSupabaseConfigured()) {
       toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
       return;
     }
 
     setLoading(true);
     try {
+      console.log('Attempting to verify OTP...')
       const { data, error } = await supabase.auth.verifyOtp({
         email: email,
         token: otp,
@@ -70,14 +77,17 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       });
 
       if (error) {
+        console.error('OTP verification error:', error)
         toast.error(error.message);
       } else if (data.user) {
+        console.log('OTP verified successfully')
         toast.success('Access granted!');
         onVerified();
       } else {
         toast.error('Invalid OTP');
       }
     } catch (error) {
+      console.error('Verification network error:', error)
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
