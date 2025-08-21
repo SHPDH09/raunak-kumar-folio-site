@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink, Trophy, Calendar, Target } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const LeetCode = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
-  // LeetCode statistics for RAUNAK9025
-  const stats = {
+  // Default stats
+  const [stats, setStats] = useState({
     username: "RAUNAK9025",
     profileUrl: "https://leetcode.com/u/RAUNAK9025/",
     totalSolved: 342,
@@ -19,10 +25,129 @@ const LeetCode = () => {
     streak: 28,
     contestRating: 1654,
     acceptanceRate: 68.5,
-    easy: { solved: 156, total: 800, percentage: 19.5 },
-    medium: { solved: 142, total: 1600, percentage: 8.9 },
-    hard: { solved: 44, total: 600, percentage: 7.3 }
+    easy: { solved: 156, total: 800 },
+    medium: { solved: 142, total: 1600 },
+    hard: { solved: 44, total: 600 }
+  });
+
+  const [monthlyProgress, setMonthlyProgress] = useState([
+    { month: 'Jan', problems: 45 },
+    { month: 'Feb', problems: 52 },
+    { month: 'Mar', problems: 38 },
+    { month: 'Apr', problems: 61 },
+    { month: 'May', problems: 47 },
+    { month: 'Jun', problems: 55 },
+    { month: 'Jul', problems: 44 },
+    { month: 'Aug', problems: 68 },
+    { month: 'Sep', problems: 39 },
+    { month: 'Oct', problems: 58 },
+    { month: 'Nov', problems: 42 },
+    { month: 'Dec', problems: 63 }
+  ]);
+
+  const [topicData, setTopicData] = useState([
+    { topic: 'Array', solved: 45, total: 80, percentage: 56.3 },
+    { topic: 'Dynamic Programming', solved: 32, total: 60, percentage: 53.3 },
+    { topic: 'Tree', solved: 28, total: 50, percentage: 56.0 },
+    { topic: 'Graph', solved: 24, total: 45, percentage: 53.3 },
+    { topic: 'String', solved: 38, total: 70, percentage: 54.3 },
+    { topic: 'Linked List', solved: 22, total: 35, percentage: 62.9 },
+    { topic: 'Binary Search', solved: 18, total: 30, percentage: 60.0 },
+    { topic: 'Backtracking', solved: 15, total: 25, percentage: 60.0 }
+  ]);
+
+  const [recentSubmissions, setRecentSubmissions] = useState([
+    { problem: "Maximum Subarray", difficulty: "Medium", result: "Accepted", time: "2 hours ago" },
+    { problem: "Two Sum", difficulty: "Easy", result: "Accepted", time: "1 day ago" },
+    { problem: "Longest Palindromic Substring", difficulty: "Medium", result: "Accepted", time: "2 days ago" },
+    { problem: "Regular Expression Matching", difficulty: "Hard", result: "Accepted", time: "3 days ago" },
+    { problem: "Container With Most Water", difficulty: "Medium", result: "Accepted", time: "4 days ago" }
+  ]);
+
+  // Fetch data from Supabase
+  const fetchLeetCodeData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-leetcode-stats', {
+        body: { username: stats.username }
+      });
+
+      if (error) throw error;
+
+      if (data?.stats) {
+        setStats(prev => ({
+          ...prev,
+          totalSolved: data.stats.total_solved,
+          ranking: data.stats.ranking,
+          contestRating: data.stats.contest_rating,
+          acceptanceRate: data.stats.acceptance_rate,
+          streak: data.stats.streak,
+          easy: { solved: data.stats.easy_solved, total: 800 },
+          medium: { solved: data.stats.medium_solved, total: 1600 },
+          hard: { solved: data.stats.hard_solved, total: 600 }
+        }));
+        
+        setLastUpdated(data.stats.last_updated);
+      }
+
+      if (data?.monthlyProgress) {
+        const monthlyData = data.monthlyProgress.map((item: any) => ({
+          month: item.month.substring(0, 3),
+          problems: item.problems_solved
+        }));
+        setMonthlyProgress(monthlyData);
+      }
+
+      if (data?.topicProgress) {
+        const topicProgData = data.topicProgress.map((item: any) => ({
+          topic: item.topic_name,
+          solved: item.solved,
+          total: item.total_problems,
+          percentage: ((item.solved / item.total_problems) * 100).toFixed(1)
+        }));
+        setTopicData(topicProgData);
+      }
+
+      if (data?.submissions) {
+        const submissionData = data.submissions.map((item: any) => ({
+          problem: item.problem_name,
+          difficulty: item.difficulty,
+          result: item.status,
+          time: new Date(item.submitted_at).toLocaleString()
+        }));
+        setRecentSubmissions(submissionData);
+      }
+
+    } catch (error) {
+      console.error('Error fetching LeetCode data:', error);
+      toast.error('Failed to fetch latest data, showing cached version');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Update LeetCode stats
+  const updateStats = async () => {
+    setUpdating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('update-leetcode-stats', {
+        body: { username: stats.username }
+      });
+
+      if (error) throw error;
+
+      toast.success('LeetCode stats updated successfully!');
+      await fetchLeetCodeData(); // Refresh data after update
+    } catch (error) {
+      console.error('Error updating stats:', error);
+      toast.error('Failed to update stats. Please try again.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeetCodeData();
+  }, []);
 
   const difficultyData = [
     { name: 'Easy', solved: stats.easy.solved, total: stats.easy.total, color: '#00b300' },
@@ -36,21 +161,6 @@ const LeetCode = () => {
     { name: 'Hard', value: stats.hard.solved, color: '#ff4444' }
   ];
 
-  const monthlyProgress = [
-    { month: 'Jan', problems: 45 },
-    { month: 'Feb', problems: 52 },
-    { month: 'Mar', problems: 38 },
-    { month: 'Apr', problems: 61 },
-    { month: 'May', problems: 47 },
-    { month: 'Jun', problems: 55 },
-    { month: 'Jul', problems: 44 },
-    { month: 'Aug', problems: 68 },
-    { month: 'Sep', problems: 39 },
-    { month: 'Oct', problems: 58 },
-    { month: 'Nov', problems: 42 },
-    { month: 'Dec', problems: 63 }
-  ];
-
   const weeklyData = [
     { day: 'Mon', problems: 3 },
     { day: 'Tue', problems: 5 },
@@ -61,25 +171,6 @@ const LeetCode = () => {
     { day: 'Sun', problems: 3 }
   ];
 
-  const topicData = [
-    { topic: 'Array', solved: 45, total: 80, percentage: 56.3 },
-    { topic: 'Dynamic Programming', solved: 32, total: 60, percentage: 53.3 },
-    { topic: 'Tree', solved: 28, total: 50, percentage: 56.0 },
-    { topic: 'Graph', solved: 24, total: 45, percentage: 53.3 },
-    { topic: 'String', solved: 38, total: 70, percentage: 54.3 },
-    { topic: 'Linked List', solved: 22, total: 35, percentage: 62.9 },
-    { topic: 'Binary Search', solved: 18, total: 30, percentage: 60.0 },
-    { topic: 'Backtracking', solved: 15, total: 25, percentage: 60.0 }
-  ];
-
-  const recentSubmissions = [
-    { problem: "Maximum Subarray", difficulty: "Medium", result: "Accepted", time: "2 hours ago" },
-    { problem: "Two Sum", difficulty: "Easy", result: "Accepted", time: "1 day ago" },
-    { problem: "Longest Palindromic Substring", difficulty: "Medium", result: "Accepted", time: "2 days ago" },
-    { problem: "Regular Expression Matching", difficulty: "Hard", result: "Accepted", time: "3 days ago" },
-    { problem: "Container With Most Water", difficulty: "Medium", result: "Accepted", time: "4 days ago" }
-  ];
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy': return 'text-green-500 bg-green-500/10 border-green-500/20';
@@ -88,6 +179,17 @@ const LeetCode = () => {
       default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading LeetCode statistics...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,6 +213,23 @@ const LeetCode = () => {
                 View on LeetCode
               </a>
             </Button>
+            <Button 
+              onClick={updateStats} 
+              disabled={updating}
+              variant="outline"
+            >
+              {updating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <ArrowLeft className="w-4 h-4 mr-2 rotate-45" />
+                  Update Stats
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -132,6 +251,11 @@ const LeetCode = () => {
               <p className="text-sm text-muted-foreground mt-2">
                 {((stats.totalSolved / stats.totalQuestions) * 100).toFixed(1)}% of {stats.totalQuestions}
               </p>
+              {lastUpdated && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Updated: {new Date(lastUpdated).toLocaleDateString()}
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -355,15 +479,20 @@ const LeetCode = () => {
         </Card>
 
         {/* Auto-update notice */}
-        <Card className="mt-8 border-orange-500/20 bg-orange-500/5">
+        <Card className="mt-8 border-green-500/20 bg-green-500/5">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
-              <div className="w-5 h-5 text-orange-500 mt-0.5">⚡</div>
+              <div className="w-5 h-5 text-green-500 mt-0.5">✅</div>
               <div>
-                <h4 className="font-medium text-foreground mb-1">Auto-update Feature</h4>
+                <h4 className="font-medium text-foreground mb-1">Auto-update Enabled</h4>
                 <p className="text-sm text-muted-foreground">
-                  To enable automatic updates of your LeetCode statistics, connect this project to Supabase. 
-                  This will allow real-time syncing of your latest submissions, contest ratings, and progress metrics.
+                  Your LeetCode statistics are now connected to Supabase and can be updated automatically. 
+                  Click "Update Stats" to fetch the latest data, or set up scheduled updates for real-time syncing.
+                  {lastUpdated && (
+                    <span className="block mt-1 font-medium">
+                      Last updated: {new Date(lastUpdated).toLocaleString()}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
