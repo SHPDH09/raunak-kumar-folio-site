@@ -65,30 +65,65 @@ const LeetCode = () => {
   ]);
 
   // Fetch data from Supabase
-const updateStats = async () => {
-  setUpdating(true);
-  try {
-    const { data, error } = await supabase.functions.invoke('update-leetcode-stats', {
-      body: { username: stats.username },
-      headers: { 'Content-Type': 'application/json' }
-    });
+  const fetchLeetCodeData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-leetcode-stats', {
+        body: { username: stats.username }
+      });
 
-    console.log("Update Function Response:", { data, error });
+      if (error) throw error;
 
-    if (error) {
-      throw error;
+      if (data?.stats) {
+        setStats(prev => ({
+          ...prev,
+          totalSolved: data.stats.total_solved,
+          ranking: data.stats.ranking,
+          contestRating: data.stats.contest_rating,
+          acceptanceRate: data.stats.acceptance_rate,
+          streak: data.stats.streak,
+          easy: { solved: data.stats.easy_solved, total: 800 },
+          medium: { solved: data.stats.medium_solved, total: 1600 },
+          hard: { solved: data.stats.hard_solved, total: 600 }
+        }));
+        
+        setLastUpdated(data.stats.last_updated);
+      }
+
+      if (data?.monthlyProgress) {
+        const monthlyData = data.monthlyProgress.map((item: any) => ({
+          month: item.month.substring(0, 3),
+          problems: item.problems_solved
+        }));
+        setMonthlyProgress(monthlyData);
+      }
+
+      if (data?.topicProgress) {
+        const topicProgData = data.topicProgress.map((item: any) => ({
+          topic: item.topic_name,
+          solved: item.solved,
+          total: item.total_problems,
+          percentage: ((item.solved / item.total_problems) * 100).toFixed(1)
+        }));
+        setTopicData(topicProgData);
+      }
+
+      if (data?.submissions) {
+        const submissionData = data.submissions.map((item: any) => ({
+          problem: item.problem_name,
+          difficulty: item.difficulty,
+          result: item.status,
+          time: new Date(item.submitted_at).toLocaleString()
+        }));
+        setRecentSubmissions(submissionData);
+      }
+
+    } catch (error) {
+      console.error('Error fetching LeetCode data:', error);
+      toast.error('Failed to fetch latest data, showing cached version');
+    } finally {
+      setLoading(false);
     }
-
-    toast.success('LeetCode stats updated successfully!');
-    await fetchLeetCodeData();
-  } catch (err) {
-    console.error('Error updating stats:', err);
-    toast.error('Failed to update stats. Please check console for details.');
-  } finally {
-    setUpdating(false);
-  }
-};
-
+  };
 
   // Update LeetCode stats
   const updateStats = async () => {
