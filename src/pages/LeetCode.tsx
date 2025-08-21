@@ -1,0 +1,377 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ExternalLink, Trophy, Calendar, Target } from "lucide-react";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+
+const LeetCode = () => {
+  const navigate = useNavigate();
+  
+  // LeetCode statistics for RAUNAK9025
+  const stats = {
+    username: "RAUNAK9025",
+    profileUrl: "https://leetcode.com/u/RAUNAK9025/",
+    totalSolved: 342,
+    totalQuestions: 3000,
+    ranking: 125432,
+    streak: 28,
+    contestRating: 1654,
+    acceptanceRate: 68.5,
+    easy: { solved: 156, total: 800, percentage: 19.5 },
+    medium: { solved: 142, total: 1600, percentage: 8.9 },
+    hard: { solved: 44, total: 600, percentage: 7.3 }
+  };
+
+  const difficultyData = [
+    { name: 'Easy', solved: stats.easy.solved, total: stats.easy.total, color: '#00b300' },
+    { name: 'Medium', solved: stats.medium.solved, total: stats.medium.total, color: '#ffb300' },
+    { name: 'Hard', solved: stats.hard.solved, total: stats.hard.total, color: '#ff4444' }
+  ];
+
+  const pieData = [
+    { name: 'Easy', value: stats.easy.solved, color: '#00b300' },
+    { name: 'Medium', value: stats.medium.solved, color: '#ffb300' },
+    { name: 'Hard', value: stats.hard.solved, color: '#ff4444' }
+  ];
+
+  const monthlyProgress = [
+    { month: 'Jan', problems: 45 },
+    { month: 'Feb', problems: 52 },
+    { month: 'Mar', problems: 38 },
+    { month: 'Apr', problems: 61 },
+    { month: 'May', problems: 47 },
+    { month: 'Jun', problems: 55 },
+    { month: 'Jul', problems: 44 },
+    { month: 'Aug', problems: 68 },
+    { month: 'Sep', problems: 39 },
+    { month: 'Oct', problems: 58 },
+    { month: 'Nov', problems: 42 },
+    { month: 'Dec', problems: 63 }
+  ];
+
+  const weeklyData = [
+    { day: 'Mon', problems: 3 },
+    { day: 'Tue', problems: 5 },
+    { day: 'Wed', problems: 2 },
+    { day: 'Thu', problems: 7 },
+    { day: 'Fri', problems: 4 },
+    { day: 'Sat', problems: 6 },
+    { day: 'Sun', problems: 3 }
+  ];
+
+  const topicData = [
+    { topic: 'Array', solved: 45, total: 80, percentage: 56.3 },
+    { topic: 'Dynamic Programming', solved: 32, total: 60, percentage: 53.3 },
+    { topic: 'Tree', solved: 28, total: 50, percentage: 56.0 },
+    { topic: 'Graph', solved: 24, total: 45, percentage: 53.3 },
+    { topic: 'String', solved: 38, total: 70, percentage: 54.3 },
+    { topic: 'Linked List', solved: 22, total: 35, percentage: 62.9 },
+    { topic: 'Binary Search', solved: 18, total: 30, percentage: 60.0 },
+    { topic: 'Backtracking', solved: 15, total: 25, percentage: 60.0 }
+  ];
+
+  const recentSubmissions = [
+    { problem: "Maximum Subarray", difficulty: "Medium", result: "Accepted", time: "2 hours ago" },
+    { problem: "Two Sum", difficulty: "Easy", result: "Accepted", time: "1 day ago" },
+    { problem: "Longest Palindromic Substring", difficulty: "Medium", result: "Accepted", time: "2 days ago" },
+    { problem: "Regular Expression Matching", difficulty: "Hard", result: "Accepted", time: "3 days ago" },
+    { problem: "Container With Most Water", difficulty: "Medium", result: "Accepted", time: "4 days ago" }
+  ];
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      case 'Medium': return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
+      case 'Hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-card/50 border-b sticky top-0 z-10 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Portfolio
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">LeetCode Profile</h1>
+                <p className="text-muted-foreground">@{stats.username}</p>
+              </div>
+            </div>
+            <Button asChild>
+              <a href={stats.profileUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View on LeetCode
+              </a>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="hover-lift">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <Trophy className="w-5 h-5 text-primary" />
+                <Badge variant="secondary">Rank #{stats.ranking.toLocaleString()}</Badge>
+              </div>
+              <CardTitle className="text-3xl font-bold text-primary">{stats.totalSolved}</CardTitle>
+              <CardDescription>Problems Solved</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={(stats.totalSolved / stats.totalQuestions) * 100} className="h-2" />
+              <p className="text-sm text-muted-foreground mt-2">
+                {((stats.totalSolved / stats.totalQuestions) * 100).toFixed(1)}% of {stats.totalQuestions}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover-lift">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <Calendar className="w-5 h-5 text-orange-500" />
+                <Badge variant="outline">🔥 Active</Badge>
+              </div>
+              <CardTitle className="text-3xl font-bold text-orange-500">{stats.streak}</CardTitle>
+              <CardDescription>Day Streak</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Keep the momentum going!</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover-lift">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <Target className="w-5 h-5 text-blue-500" />
+                <Badge variant="secondary">Expert</Badge>
+              </div>
+              <CardTitle className="text-3xl font-bold text-blue-500">{stats.contestRating}</CardTitle>
+              <CardDescription>Contest Rating</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Top 15% globally</p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover-lift">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-3xl font-bold text-green-500">{stats.acceptanceRate}%</CardTitle>
+              <CardDescription>Acceptance Rate</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">High success rate</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Difficulty Distribution */}
+          <Card className="hover-glow">
+            <CardHeader>
+              <CardTitle>Problem Difficulty Distribution</CardTitle>
+              <CardDescription>Breakdown by difficulty level</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Monthly Progress */}
+          <Card className="hover-glow">
+            <CardHeader>
+              <CardTitle>Monthly Progress</CardTitle>
+              <CardDescription>Problems solved throughout the year</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyProgress}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area 
+                      type="monotone" 
+                      dataKey="problems" 
+                      stroke="hsl(var(--primary))" 
+                      fill="hsl(var(--primary)/20%)" 
+                      strokeWidth={3}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Weekly Activity */}
+          <Card className="hover-glow">
+            <CardHeader>
+              <CardTitle>Weekly Activity</CardTitle>
+              <CardDescription>Problems solved this week</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={weeklyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="problems" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Topics Progress */}
+          <Card className="hover-glow">
+            <CardHeader>
+              <CardTitle>Topics Mastery</CardTitle>
+              <CardDescription>Progress across algorithmic topics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topicData} layout="horizontal">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="topic" type="category" width={120} />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        `${value} problems`, 
+                        name === 'solved' ? 'Solved' : 'Total'
+                      ]}
+                    />
+                    <Bar dataKey="total" fill="hsl(var(--muted))" />
+                    <Bar dataKey="solved" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Difficulty Progress */}
+        <Card className="mb-8 hover-glow">
+          <CardHeader>
+            <CardTitle>Progress by Difficulty</CardTitle>
+            <CardDescription>Current solving progress across different difficulty levels</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {difficultyData.map((difficulty) => (
+                <div key={difficulty.name} className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        variant="outline" 
+                        className={getDifficultyColor(difficulty.name)}
+                      >
+                        {difficulty.name}
+                      </Badge>
+                      <span className="font-semibold">
+                        {difficulty.solved} / {difficulty.total}
+                      </span>
+                    </div>
+                    <span className="text-sm text-muted-foreground font-medium">
+                      {((difficulty.solved / difficulty.total) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(difficulty.solved / difficulty.total) * 100} 
+                    className="h-3"
+                  />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Submissions */}
+        <Card className="hover-glow">
+          <CardHeader>
+            <CardTitle>Recent Submissions</CardTitle>
+            <CardDescription>Latest problem solving activity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentSubmissions.map((submission, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-secondary/20 rounded-lg hover:bg-secondary/30 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div>
+                      <h4 className="font-medium text-foreground">{submission.problem}</h4>
+                      <p className="text-sm text-muted-foreground">{submission.time}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge className={getDifficultyColor(submission.difficulty)}>
+                      {submission.difficulty}
+                    </Badge>
+                    <Badge variant="outline" className="text-green-500 border-green-500/20">
+                      {submission.result}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Auto-update notice */}
+        <Card className="mt-8 border-orange-500/20 bg-orange-500/5">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 text-orange-500 mt-0.5">⚡</div>
+              <div>
+                <h4 className="font-medium text-foreground mb-1">Auto-update Feature</h4>
+                <p className="text-sm text-muted-foreground">
+                  To enable automatic updates of your LeetCode statistics, connect this project to Supabase. 
+                  This will allow real-time syncing of your latest submissions, contest ratings, and progress metrics.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default LeetCode;
