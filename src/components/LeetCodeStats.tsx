@@ -93,47 +93,6 @@ const LeetCodeStats = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Achievement Highlights */}
-          <Card className="hover-lift shadow-card">
-            <CardHeader>
-              <CardTitle className="text-xl">Key Achievements</CardTitle>
-              <CardDescription>Highlights from my problem-solving journey</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium text-green-700 dark:text-green-400">Top 15% Global Ranking</p>
-                  <p className="text-sm text-muted-foreground">Ranked #{stats.ranking.toLocaleString()} worldwide</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium text-blue-700 dark:text-blue-400">Contest Expert Level</p>
-                  <p className="text-sm text-muted-foreground">Rating: {stats.contestRating} (Expert tier)</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium text-orange-700 dark:text-orange-400">Active Problem Solver</p>
-                  <p className="text-sm text-muted-foreground">{stats.streak} day solving streak</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <div>
-                  <p className="font-medium text-purple-700 dark:text-purple-400">Diverse Problem Portfolio</p>
-                  <p className="text-sm text-muted-foreground">Solved across all difficulty levels</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </section>
