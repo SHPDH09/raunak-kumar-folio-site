@@ -67,6 +67,13 @@ const LeetCode = () => {
   // Fetch data from Supabase
   const fetchLeetCodeData = async () => {
     try {
+      // Check if Supabase is configured
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        console.log('Supabase not configured, using static data');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('get-leetcode-stats', {
         body: { username: stats.username }
       });
@@ -127,6 +134,12 @@ const LeetCode = () => {
 
   // Update LeetCode stats
   const updateStats = async () => {
+    // Check if Supabase is configured
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      toast.error('Supabase not configured. Please connect to Supabase to enable auto-updates.');
+      return;
+    }
+
     setUpdating(true);
     try {
       const { data, error } = await supabase.functions.invoke('update-leetcode-stats', {
