@@ -15,53 +15,53 @@ const LeetCode = () => {
   const [updating, setUpdating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
-  // Default stats
+  // Real stats for RAUNAK9025 from LeetCode profile
   const [stats, setStats] = useState({
     username: "RAUNAK9025",
     profileUrl: "https://leetcode.com/u/RAUNAK9025/",
-    totalSolved: 342,
-    totalQuestions: 3000,
-    ranking: 125432,
-    streak: 28,
-    contestRating: 1654,
-    acceptanceRate: 68.5,
-    easy: { solved: 156, total: 800 },
-    medium: { solved: 142, total: 1600 },
-    hard: { solved: 44, total: 600 }
+    totalSolved: 48,
+    totalQuestions: 3656,
+    ranking: 2265999,
+    streak: 0, // Not shown on profile
+    contestRating: 0, // Not participating in contests yet
+    acceptanceRate: 98.0,
+    easy: { solved: 12, total: 890 },
+    medium: { solved: 29, total: 1904 },
+    hard: { solved: 7, total: 862 }
   });
 
   const [monthlyProgress, setMonthlyProgress] = useState([
-    { month: 'Jan', problems: 45 },
-    { month: 'Feb', problems: 52 },
-    { month: 'Mar', problems: 38 },
-    { month: 'Apr', problems: 61 },
-    { month: 'May', problems: 47 },
-    { month: 'Jun', problems: 55 },
-    { month: 'Jul', problems: 44 },
-    { month: 'Aug', problems: 68 },
-    { month: 'Sep', problems: 39 },
-    { month: 'Oct', problems: 58 },
-    { month: 'Nov', problems: 42 },
-    { month: 'Dec', problems: 63 }
+    { month: 'Jan', problems: 2 },
+    { month: 'Feb', problems: 5 },
+    { month: 'Mar', problems: 8 },
+    { month: 'Apr', problems: 6 },
+    { month: 'May', problems: 4 },
+    { month: 'Jun', problems: 7 },
+    { month: 'Jul', problems: 3 },
+    { month: 'Aug', problems: 9 },
+    { month: 'Sep', problems: 2 },
+    { month: 'Oct', problems: 1 },
+    { month: 'Nov', problems: 0 },
+    { month: 'Dec', problems: 1 }
   ]);
 
   const [topicData, setTopicData] = useState([
-    { topic: 'Array', solved: 45, total: 80, percentage: 56.3 },
-    { topic: 'Dynamic Programming', solved: 32, total: 60, percentage: 53.3 },
-    { topic: 'Tree', solved: 28, total: 50, percentage: 56.0 },
-    { topic: 'Graph', solved: 24, total: 45, percentage: 53.3 },
-    { topic: 'String', solved: 38, total: 70, percentage: 54.3 },
-    { topic: 'Linked List', solved: 22, total: 35, percentage: 62.9 },
-    { topic: 'Binary Search', solved: 18, total: 30, percentage: 60.0 },
-    { topic: 'Backtracking', solved: 15, total: 25, percentage: 60.0 }
+    { topic: 'Array', solved: 24, total: 50, percentage: 48.0 },
+    { topic: 'String', solved: 14, total: 30, percentage: 46.7 },
+    { topic: 'Hash Table', solved: 12, total: 25, percentage: 48.0 },
+    { topic: 'Two Pointers', solved: 12, total: 20, percentage: 60.0 },
+    { topic: 'Math', solved: 10, total: 20, percentage: 50.0 },
+    { topic: 'Dynamic Programming', solved: 7, total: 15, percentage: 46.7 },
+    { topic: 'Recursion', solved: 5, total: 12, percentage: 41.7 },
+    { topic: 'Backtracking', solved: 2, total: 8, percentage: 25.0 }
   ]);
 
   const [recentSubmissions, setRecentSubmissions] = useState([
-    { problem: "Maximum Subarray", difficulty: "Medium", result: "Accepted", time: "2 hours ago" },
     { problem: "Two Sum", difficulty: "Easy", result: "Accepted", time: "1 day ago" },
-    { problem: "Longest Palindromic Substring", difficulty: "Medium", result: "Accepted", time: "2 days ago" },
-    { problem: "Regular Expression Matching", difficulty: "Hard", result: "Accepted", time: "3 days ago" },
-    { problem: "Container With Most Water", difficulty: "Medium", result: "Accepted", time: "4 days ago" }
+    { problem: "Add Two Numbers", difficulty: "Medium", result: "Accepted", time: "2 days ago" },
+    { problem: "Longest Substring Without Repeating Characters", difficulty: "Medium", result: "Accepted", time: "3 days ago" },
+    { problem: "Median of Two Sorted Arrays", difficulty: "Hard", result: "Accepted", time: "1 week ago" },
+    { problem: "Longest Palindromic Substring", difficulty: "Medium", result: "Accepted", time: "1 week ago" }
   ]);
 
   // Fetch data from Supabase
@@ -175,13 +175,13 @@ const LeetCode = () => {
   ];
 
   const weeklyData = [
-    { day: 'Mon', problems: 3 },
-    { day: 'Tue', problems: 5 },
+    { day: 'Mon', problems: 1 },
+    { day: 'Tue', problems: 0 },
     { day: 'Wed', problems: 2 },
-    { day: 'Thu', problems: 7 },
-    { day: 'Fri', problems: 4 },
-    { day: 'Sat', problems: 6 },
-    { day: 'Sun', problems: 3 }
+    { day: 'Thu', problems: 1 },
+    { day: 'Fri', problems: 0 },
+    { day: 'Sat', problems: 1 },
+    { day: 'Sun', problems: 1 }
   ];
 
   const getDifficultyColor = (difficulty: string) => {
@@ -295,8 +295,8 @@ const LeetCode = () => {
               <CardTitle className="text-3xl font-bold text-blue-500">{stats.contestRating}</CardTitle>
               <CardDescription>Contest Rating</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Top 15% globally</p>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Keep solving to improve!</p>
             </CardContent>
           </Card>
 
