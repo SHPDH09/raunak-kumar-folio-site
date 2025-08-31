@@ -41,6 +41,17 @@ const Projects = () => {
       demoLink: "https://burnoutai.streamlit.app/"
     },
     {
+      title: "AI Data Analyzer",
+      description: "AI-Powered Employee Performance & Burnout Analysis Dashboard (Manager Panel)",
+      tech: ["Python", "Streamlit ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
+      icon: <Activity className="w-5 h-5" />,
+      category: "ML/Data Analyst",
+      image: bankingImg,
+      color: "from-cyan-300 to-green-500",
+      githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
+      demoLink: "https://auto-data-analyst.netlify.app/"
+    },
+    {
       title: "ETL Pipeline for Sales Data",
       description: "Automated ETL pipeline for processing large-scale sales data efficiently.",
       tech: ["Python", "ETL", "Data Pipeline"],
