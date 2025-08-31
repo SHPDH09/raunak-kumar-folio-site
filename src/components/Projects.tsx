@@ -43,7 +43,7 @@ const Projects = () => {
     {
       title: "AI Data Analyzer",
       description: "AI-Powered Employee Performance & Burnout Analysis Dashboard (Manager Panel)",
-      tech: ["Python", "Streamlit ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
+      tech: ["Python", "Type Script ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
       icon: <Activity className="w-5 h-5" />,
       category: "ML/Data Analyst",
       image: bankingImg,
