@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Mail, Shield } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OTPVerificationProps {
   onVerified: () => void;
@@ -23,12 +23,6 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       return;
     }
 
-    console.log('Checking Supabase configuration...')
-    if (!isSupabaseConfigured()) {
-      console.error('Supabase not configured')
-      toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
-      return;
-    }
 
     setLoading(true);
     try {
@@ -62,10 +56,6 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
       return;
     }
 
-    if (!isSupabaseConfigured()) {
-      toast.error('Supabase authentication is not configured. Please connect your project to Supabase first.');
-      return;
-    }
 
     setLoading(true);
     try {
