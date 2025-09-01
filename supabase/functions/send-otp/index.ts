@@ -14,10 +14,13 @@ serve(async (req) => {
     const body = await req.json();
     const { email, action, otp, token } = body;
 
-    // ✅ restrict access if needed
-    if (email !== "rk331159@gmail.com") {
+    // ✅ restrict access in test mode (Resend onboarding sender only allows one recipient)
+    const ALLOWED_TEST_EMAIL = "raunakkumarpandit0011@gmail.com";
+    if (email !== ALLOWED_TEST_EMAIL) {
       return new Response(
-        JSON.stringify({ error: "Email not authorized" }),
+        JSON.stringify({
+          error: `In test mode, OTP can only be sent to ${ALLOWED_TEST_EMAIL}. Please use this email or verify a domain at resend.com/domains and update the 'from' address.`,
+        }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -75,7 +78,7 @@ serve(async (req) => {
         console.error("Resend send error:", emailResponse.status, errJson);
         return new Response(
           JSON.stringify({
-            error: errJson?.error?.message || errJson?.message || "Failed to send email",
+            error: errJson?.error?.message || errJson?.message || errJson?.error || "Failed to send email",
             status: emailResponse.status,
           }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
