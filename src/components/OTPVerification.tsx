@@ -26,19 +26,19 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
     setLoading(true);
     try {
-      console.log('Attempting to send OTP...')
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false, // Only allow existing users
-        }
+      console.log('Attempting to send OTP via edge function...')
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: { action: 'send', email }
       });
 
       if (error) {
-        console.error('Supabase OTP error:', error)
-        toast.error(error.message);
+        console.error('Edge function OTP error:', error)
+        toast.error(error.message || 'Failed to send OTP');
       } else {
-        console.log('OTP sent successfully')
+        console.log('OTP sent successfully via edge function')
+        if (data && typeof data === 'object' && 'token' in data) {
+          setToken((data as any).token || '');
+        }
         setStep('otp');
         toast.success('OTP sent to your email');
       }
@@ -59,18 +59,16 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
     setLoading(true);
     try {
-      console.log('Attempting to verify OTP...')
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email,
-        token: otp,
-        type: 'email'
+      console.log('Attempting to verify OTP via edge function...')
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: { action: 'verify', email, otp, token }
       });
 
       if (error) {
-        console.error('OTP verification error:', error)
-        toast.error(error.message);
-      } else if (data.user) {
-        console.log('OTP verified successfully')
+        console.error('OTP verification error (edge):', error)
+        toast.error(error.message || 'Failed to verify OTP');
+      } else if (data && (data as any).success) {
+        console.log('OTP verified successfully via edge function')
         toast.success('Access granted!');
         onVerified();
       } else {
