@@ -57,7 +57,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "no-reply@yourdomain.com", // ⚠️ must be a verified sender in Resend
+          from: "Lovable OTP <onboarding@resend.dev>", // Verified sender by Resend
           to: [email],
           subject: "Your OTP Code",
           html: `
@@ -70,7 +70,17 @@ serve(async (req) => {
         }),
       });
 
-      if (!emailResponse.ok) throw new Error("Failed to send email");
+      if (!emailResponse.ok) {
+        const errJson = await emailResponse.json().catch(() => ({} as any));
+        console.error("Resend send error:", emailResponse.status, errJson);
+        return new Response(
+          JSON.stringify({
+            error: errJson?.error?.message || errJson?.message || "Failed to send email",
+            status: emailResponse.status,
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       return new Response(
         JSON.stringify({
