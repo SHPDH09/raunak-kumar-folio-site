@@ -12,18 +12,18 @@ interface OTPVerificationProps {
 
 const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
   const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('raunakkumarpandit0011@gmail.com');
   const [otp, setOtp] = useState('');
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
 
   const sendOTP = async () => {
-    if (email !== 'rk331159@gmail.com') {
-      toast.error('Access restricted to authorized email only');
+    // Resend sandbox: only the verified test recipient works
+    const allowedEmail = 'raunakkumarpandit0011@gmail.com';
+    if (email !== allowedEmail) {
+      toast.error(`In test mode, OTP can only be sent to ${allowedEmail}.`);
       return;
     }
-
-
     setLoading(true);
     try {
       console.log('Attempting to send OTP via edge function...')
@@ -33,7 +33,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
 
       if (error) {
         console.error('Edge function OTP error:', error)
-        toast.error(error.message || 'Failed to send OTP');
+        toast.error(error.message || 'Failed to send OTP. Use the sandbox email or verify a domain in Resend.');
       } else {
         console.log('OTP sent successfully via edge function')
         if (data && typeof data === 'object' && 'token' in data) {
@@ -51,8 +51,8 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
   };
 
   const verifyOTP = async () => {
-    if (otp.length !== 6) {
-      toast.error('Please enter a 6-digit OTP');
+  if (otp.length !== 5) {
+      toast.error('Please enter a 5-digit OTP');
       return;
     }
 
@@ -91,7 +91,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
           </div>
           <CardTitle>Private Access</CardTitle>
           <CardDescription>
-            Enter your email to receive a 6-digit OTP code
+            Enter your email to receive a 5-digit OTP code. In sandbox, use raunakkumarpandit0011@gmail.com.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -103,7 +103,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter email (sandbox: raunakkumarpandit0011@gmail.com)"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -128,14 +128,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
           ) : (
             <>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Enter 6-Digit OTP</label>
+                <label className="text-sm font-medium">Enter 5-Digit OTP</label>
                 <Input
                   type="text"
-                  placeholder="123456"
+                  placeholder="12345"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 5))}
                   className="text-center text-lg font-mono tracking-widest"
-                  maxLength={6}
+                  maxLength={5}
                 />
                 <p className="text-xs text-muted-foreground text-center">
                   Code sent to {email}
@@ -144,7 +144,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ onVerified }) => {
               <div className="space-y-2">
                 <Button 
                   onClick={verifyOTP} 
-                  disabled={otp.length !== 6 || loading}
+                  disabled={otp.length !== 5 || loading}
                   className="w-full"
                 >
                   {loading ? (
