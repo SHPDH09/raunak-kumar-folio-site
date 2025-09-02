@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import OTPVerification from '@/components/OTPVerification';
-import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2 } from 'lucide-react';
+import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ImageGallery = () => {
@@ -200,9 +200,23 @@ const ImageGallery = () => {
                   }
                 </p>
               </div>
-              <Button variant="outline" onClick={() => setView('menu')}>
-                Back to Menu
-              </Button>
+              <div className="flex gap-2">
+                {view === 'private' && (
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => {
+                      setIsVerified(false);
+                      toast.success('Logged out successfully!');
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setView('menu')}>
+                  Back to Menu
+                </Button>
+              </div>
             </div>
 
             {renderImageGrid(images, view === 'private')}
