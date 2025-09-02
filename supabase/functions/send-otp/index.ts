@@ -60,15 +60,16 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Lovable OTP <onboarding@resend.dev>", // Verified sender by Resend
+          from: "Private Account Acsess <onboarding@resend.dev>", // Verified sender by Resend
           to: [email],
-          subject: "Your OTP Code",
+          subject: "Security Code 6 Digit",
           html: `
-            <h2>Your OTP Code</h2>
+            <h2>Your OTP Code Here</h2>
             <p style="font-size: 24px; font-weight: bold; color: #2563eb;">
               ${otp}
             </p>
-            <p>This code is valid for 5 minutes.</p>
+            <p>This code is valid for 5 minutes. Do Not Share This OTP </p>
+            <p>Regards,<br>Raunak Kumar</p>
           `,
         }),
       });
