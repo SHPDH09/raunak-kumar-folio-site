@@ -1,26 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import OTPVerification from '@/components/OTPVerification';
-import { Eye, Lock, Upload, Image as ImageIcon } from 'lucide-react';
+import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ImageGallery = () => {
   const [view, setView] = useState<'menu' | 'public' | 'private'>('menu');
   const [isVerified, setIsVerified] = useState(false);
-
-  const sampleImages = [
+  const [images, setImages] = useState([
     { id: 1, url: '/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png', title: 'Sample Image 1' },
     { id: 2, url: '/lovable-uploads/a40bf5f4-14e7-48e5-9e6a-1363bb767db7.png', title: 'Sample Image 2' },
-  ];
+  ]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        // Create a local URL for preview
+        const imageUrl = URL.createObjectURL(file);
+        const newImage = {
+          id: Date.now(),
+          url: imageUrl,
+          title: file.name
+        };
+        setImages(prev => [...prev, newImage]);
+        toast.success('Image uploaded successfully!');
+      } else {
+        toast.error('Please select an image file');
+      }
+    }
+  };
+
+  const handleDelete = (imageId: number) => {
+    setImages(prev => prev.filter(img => img.id !== imageId));
+    toast.success('Image deleted successfully!');
+  };
+
+  const handleEdit = (imageId: number) => {
+    const newTitle = prompt('Enter new title:');
+    if (newTitle) {
+      setImages(prev => prev.map(img => 
+        img.id === imageId ? { ...img, title: newTitle } : img
+      ));
+      toast.success('Image title updated!');
+    }
+  };
 
   if (view === 'private' && !isVerified) {
     return <OTPVerification onVerified={() => setIsVerified(true)} />;
   }
 
-  const renderImageGrid = (images: typeof sampleImages, isPrivate = false) => (
+  const renderImageGrid = (imagesToRender: typeof images, isPrivate = false) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {images.map((image) => (
+      {imagesToRender.map((image) => (
         <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
           <div className="aspect-square overflow-hidden bg-muted">
             <img
@@ -39,23 +76,39 @@ const ImageGallery = () => {
                 View
               </Button>
               {isPrivate && (
-                <Button size="sm" variant="outline">
-                  <Upload className="h-4 w-4" />
-                </Button>
+                <>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleEdit(image.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleDelete(image.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
               )}
             </div>
           </CardContent>
         </Card>
       ))}
       {isPrivate && (
-        <Card className="group border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer">
+        <Card 
+          className="group border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
           <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
             <div className="p-4 bg-muted rounded-full mb-4">
               <Upload className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="font-medium mb-2">Upload New Image</h3>
             <p className="text-sm text-muted-foreground">
-              Click to upload images to Google Drive
+              Click to upload images from your device
             </p>
           </CardContent>
         </Card>
@@ -152,7 +205,16 @@ const ImageGallery = () => {
               </Button>
             </div>
 
-            {renderImageGrid(sampleImages, view === 'private')}
+            {renderImageGrid(images, view === 'private')}
+            
+            {/* Hidden file input for upload */}
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
           </div>
         )}
       </div>
