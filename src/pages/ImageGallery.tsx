@@ -7,22 +7,87 @@ import { Input } from '@/components/ui/input';
 import OTPVerification from '@/components/OTPVerification';
 import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2, LogOut, Download, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const ImageGallery = () => {
   const [view, setView] = useState<'menu' | 'public' | 'private'>('menu');
   const [isVerified, setIsVerified] = useState(false);
-  const [images, setImages] = useState([
-    { id: 1, url: '/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png', title: 'Sample Image 1' },
-    { id: 2, url: '/lovable-uploads/a40bf5f4-14e7-48e5-9e6a-1363bb767db7.png', title: 'Sample Image 2' },
-  ]);
-  const [viewingImage, setViewingImage] = useState<typeof images[0] | null>(null);
+  const [images, setImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [viewingImage, setViewingImage] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load images when view changes
+  useEffect(() => {
+    if (view === 'public') {
+      loadPublicImages();
+    } else if (view === 'private' && isVerified) {
+      loadPrivateImages();
+    }
+  }, [view, isVerified]);
+
+  const loadPublicImages = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('images')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const imagesWithUrls = await Promise.all(
+        data.map(async (img) => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(img.file_path);
+          return { ...img, url: publicUrl };
+        })
+      );
+      
+      setImages(imagesWithUrls);
+    } catch (error) {
+      console.error('Error loading public images:', error);
+      toast.error('Failed to load images');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPrivateImages = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('images')
+        .select('*')
+        .eq('is_public', false)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const imagesWithUrls = await Promise.all(
+        data.map(async (img) => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(img.file_path);
+          return { ...img, url: publicUrl };
+        })
+      );
+      
+      setImages(imagesWithUrls);
+    } catch (error) {
+      console.error('Error loading private images:', error);
+      toast.error('Failed to load images');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Screenshot protection for private gallery
   useEffect(() => {
     if (view === 'private' && isVerified) {
       const handleKeyDown = (e: KeyboardEvent) => {
-        // Block F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
         if (e.key === 'F12' || 
             (e.ctrlKey && e.shiftKey && e.key === 'I') ||
             (e.ctrlKey && e.key === 'u') ||
@@ -49,42 +114,113 @@ const ImageGallery = () => {
     }
   }, [view, isVerified]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const file = files[0];
       if (file.type.startsWith('image/')) {
-        // Create a local URL for preview
-        const imageUrl = URL.createObjectURL(file);
-        const newImage = {
-          id: Date.now(),
-          url: imageUrl,
-          title: file.name
-        };
-        setImages(prev => [...prev, newImage]);
-        toast.success('Image uploaded successfully!');
+        setLoading(true);
+        try {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          const filePath = `${view}/${fileName}`;
+
+          // Upload to Supabase storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          // Save metadata to database
+          const { error: dbError } = await supabase
+            .from('images')
+            .insert({
+              title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+              file_path: filePath,
+              is_public: view === 'public'
+            });
+
+          if (dbError) throw dbError;
+
+          toast.success('Image uploaded successfully!');
+          
+          // Reload images
+          if (view === 'public') {
+            loadPublicImages();
+          } else {
+            loadPrivateImages();
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          toast.error('Failed to upload image');
+        } finally {
+          setLoading(false);
+        }
       } else {
         toast.error('Please select an image file');
       }
     }
   };
 
-  const handleDelete = (imageId: number) => {
-    setImages(prev => prev.filter(img => img.id !== imageId));
-    toast.success('Image deleted successfully!');
-  };
+  const handleDelete = async (image: any) => {
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('images')
+        .remove([image.file_path]);
 
-  const handleEdit = (imageId: number) => {
-    const newTitle = prompt('Enter new title:');
-    if (newTitle) {
-      setImages(prev => prev.map(img => 
-        img.id === imageId ? { ...img, title: newTitle } : img
-      ));
-      toast.success('Image title updated!');
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('images')
+        .delete()
+        .eq('id', image.id);
+
+      if (dbError) throw dbError;
+
+      toast.success('Image deleted successfully!');
+      
+      // Reload images
+      if (view === 'public') {
+        loadPublicImages();
+      } else {
+        loadPrivateImages();
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Failed to delete image');
     }
   };
 
-  const handleDownload = async (image: typeof images[0]) => {
+  const handleEdit = async (image: any) => {
+    const newTitle = prompt('Enter new title:', image.title);
+    if (newTitle && newTitle !== image.title) {
+      try {
+        const { error } = await supabase
+          .from('images')
+          .update({ title: newTitle })
+          .eq('id', image.id);
+
+        if (error) throw error;
+
+        toast.success('Image title updated!');
+        
+        // Reload images
+        if (view === 'public') {
+          loadPublicImages();
+        } else {
+          loadPrivateImages();
+        }
+      } catch (error) {
+        console.error('Error updating image:', error);
+        toast.error('Failed to update image');
+      }
+    }
+  };
+
+  const handleDownload = async (image: any) => {
     try {
       const response = await fetch(image.url);
       const blob = await response.blob();
@@ -98,6 +234,7 @@ const ImageGallery = () => {
       window.URL.revokeObjectURL(url);
       toast.success('Image downloaded successfully!');
     } catch (error) {
+      console.error('Error downloading image:', error);
       toast.error('Failed to download image');
     }
   };
@@ -108,102 +245,111 @@ const ImageGallery = () => {
 
   const renderImageGrid = (imagesToRender: typeof images, isPrivate = false) => (
     <div className="space-y-6">
-      {isPrivate && (
-        <Card 
-          className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-            <div className="p-4 bg-muted rounded-full mb-4">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="font-medium mb-2">Upload New Images</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Click here to upload images from your device. Supported formats: JPG, PNG, GIF
-            </p>
-            <Badge variant="secondary">Private Collection</Badge>
-          </CardContent>
-        </Card>
-      )}
+      {/* Upload section for both public and private */}
+      <Card 
+        className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <CardContent className="p-8 flex flex-col items-center justify-center text-center">
+          <div className="p-4 bg-muted rounded-full mb-4">
+            <Upload className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="font-medium mb-2">
+            {isPrivate ? 'Upload Private Images' : 'Upload Public Images'}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Click here to upload images from your device. Images will be stored in the cloud and accessible from any device.
+          </p>
+          <Badge variant={isPrivate ? "destructive" : "default"}>
+            {isPrivate ? 'Private Collection' : 'Public Collection'}
+          </Badge>
+        </CardContent>
+      </Card>
       
-      <div className={`grid ${isPrivate ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-        {imagesToRender.map((image) => (
-          <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
-            <div className={`${isPrivate ? 'aspect-square' : 'aspect-square'} overflow-hidden bg-muted`}>
-              <img
-                src={image.url}
-                alt={image.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <CardContent className={`${isPrivate ? 'p-3' : 'p-4'}`}>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className={`font-medium truncate ${isPrivate ? 'text-sm' : ''}`}>{image.title}</h3>
-                {isPrivate && <Badge variant="secondary" className="text-xs">Private</Badge>}
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="text-muted-foreground">Loading images...</div>
+        </div>
+      ) : (
+        <div className={`grid ${isPrivate ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+          {imagesToRender.map((image) => (
+            <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
+              <div className={`${isPrivate ? 'aspect-square' : 'aspect-square'} overflow-hidden bg-muted`}>
+                <img
+                  src={image.url}
+                  alt={image.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
-              <div className="flex gap-1">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="flex-1 text-xs"
-                      onClick={() => setViewingImage(image)}
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      View
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl w-full p-0">
-                    <div className="relative">
-                      <img
-                        src={image.url}
-                        alt={image.title}
-                        className="w-full max-h-[80vh] object-contain"
-                        style={{ userSelect: 'none', pointerEvents: 'none' }}
-                      />
-                      <div className="absolute top-4 right-4 flex gap-2">
-                        {isPrivate && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleDownload(image)}
-                            className="bg-background/80 hover:bg-background"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
+              <CardContent className={`${isPrivate ? 'p-3' : 'p-4'}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className={`font-medium truncate ${isPrivate ? 'text-sm' : ''}`}>{image.title}</h3>
+                  {isPrivate && <Badge variant="secondary" className="text-xs">Private</Badge>}
+                </div>
+                <div className="flex gap-1">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 text-xs"
+                        onClick={() => setViewingImage(image)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl w-full p-0">
+                      <div className="relative">
+                        <img
+                          src={image.url}
+                          alt={image.title}
+                          className="w-full max-h-[80vh] object-contain"
+                          style={{ userSelect: 'none', pointerEvents: 'none' }}
+                        />
+                        <div className="absolute top-4 right-4 flex gap-2">
+                          {isPrivate && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleDownload(image)}
+                              className="bg-background/80 hover:bg-background"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                          <h3 className="text-white font-medium">{image.title}</h3>
+                        </div>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                        <h3 className="text-white font-medium">{image.title}</h3>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                {isPrivate && (
-                  <>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleEdit(image.id)}
-                      className="px-2"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleDelete(image.id)}
-                      className="px-2"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                    </DialogContent>
+                  </Dialog>
+                  {isPrivate && (
+                    <>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleEdit(image)}
+                        className="px-2"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDelete(image)}
+                        className="px-2"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 

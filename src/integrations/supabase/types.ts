@@ -156,6 +156,36 @@ export type Database = {
         }
         Relationships: []
       }
+      images: {
+        Row: {
+          created_at: string
+          file_path: string
+          id: string
+          is_public: boolean
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          id?: string
+          is_public?: boolean
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          id?: string
+          is_public?: boolean
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
