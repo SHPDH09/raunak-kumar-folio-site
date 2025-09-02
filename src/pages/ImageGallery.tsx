@@ -56,63 +56,69 @@ const ImageGallery = () => {
   }
 
   const renderImageGrid = (imagesToRender: typeof images, isPrivate = false) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {imagesToRender.map((image) => (
-        <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
-          <div className="aspect-square overflow-hidden bg-muted">
-            <img
-              src={image.url}
-              alt={image.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium truncate">{image.title}</h3>
-              {isPrivate && <Badge variant="secondary">Private</Badge>}
-            </div>
-            <div className="flex gap-2 mt-2">
-              <Button size="sm" variant="outline" className="flex-1">
-                View
-              </Button>
-              {isPrivate && (
-                <>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleEdit(image.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleDelete(image.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-6">
       {isPrivate && (
         <Card 
-          className="group border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
+          className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
         >
-          <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+          <CardContent className="p-8 flex flex-col items-center justify-center text-center">
             <div className="p-4 bg-muted rounded-full mb-4">
               <Upload className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="font-medium mb-2">Upload New Image</h3>
-            <p className="text-sm text-muted-foreground">
-              Click to upload images from your device
+            <h3 className="font-medium mb-2">Upload New Images</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click here to upload images from your device. Supported formats: JPG, PNG, GIF
             </p>
+            <Badge variant="secondary">Private Collection</Badge>
           </CardContent>
         </Card>
       )}
+      
+      <div className={`grid ${isPrivate ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+        {imagesToRender.map((image) => (
+          <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
+            <div className={`${isPrivate ? 'aspect-square' : 'aspect-square'} overflow-hidden bg-muted`}>
+              <img
+                src={image.url}
+                alt={image.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <CardContent className={`${isPrivate ? 'p-3' : 'p-4'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className={`font-medium truncate ${isPrivate ? 'text-sm' : ''}`}>{image.title}</h3>
+                {isPrivate && <Badge variant="secondary" className="text-xs">Private</Badge>}
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="flex-1 text-xs">
+                  View
+                </Button>
+                {isPrivate && (
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleEdit(image.id)}
+                      className="px-2"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleDelete(image.id)}
+                      className="px-2"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 
