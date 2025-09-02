@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import OTPVerification from '@/components/OTPVerification';
-import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2, LogOut } from 'lucide-react';
+import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2, LogOut, Download, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ImageGallery = () => {
@@ -14,7 +15,39 @@ const ImageGallery = () => {
     { id: 1, url: '/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png', title: 'Sample Image 1' },
     { id: 2, url: '/lovable-uploads/a40bf5f4-14e7-48e5-9e6a-1363bb767db7.png', title: 'Sample Image 2' },
   ]);
+  const [viewingImage, setViewingImage] = useState<typeof images[0] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Screenshot protection for private gallery
+  useEffect(() => {
+    if (view === 'private' && isVerified) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Block F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.key === 'u') ||
+            (e.ctrlKey && e.key === 's')) {
+          e.preventDefault();
+          toast.error('Screenshot and developer tools are disabled for security!');
+        }
+      };
+
+      const handleContextMenu = (e: MouseEvent) => {
+        e.preventDefault();
+        toast.error('Right-click is disabled for security!');
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('contextmenu', handleContextMenu);
+      document.body.style.userSelect = 'none';
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('contextmenu', handleContextMenu);
+        document.body.style.userSelect = 'auto';
+      };
+    }
+  }, [view, isVerified]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -48,6 +81,24 @@ const ImageGallery = () => {
         img.id === imageId ? { ...img, title: newTitle } : img
       ));
       toast.success('Image title updated!');
+    }
+  };
+
+  const handleDownload = async (image: typeof images[0]) => {
+    try {
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = image.title || 'image';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Image downloaded successfully!');
+    } catch (error) {
+      toast.error('Failed to download image');
     }
   };
 
@@ -91,9 +142,43 @@ const ImageGallery = () => {
                 {isPrivate && <Badge variant="secondary" className="text-xs">Private</Badge>}
               </div>
               <div className="flex gap-1">
-                <Button size="sm" variant="outline" className="flex-1 text-xs">
-                  View
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1 text-xs"
+                      onClick={() => setViewingImage(image)}
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl w-full p-0">
+                    <div className="relative">
+                      <img
+                        src={image.url}
+                        alt={image.title}
+                        className="w-full max-h-[80vh] object-contain"
+                        style={{ userSelect: 'none', pointerEvents: 'none' }}
+                      />
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        {isPrivate && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleDownload(image)}
+                            className="bg-background/80 hover:bg-background"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <h3 className="text-white font-medium">{image.title}</h3>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 {isPrivate && (
                   <>
                     <Button 
