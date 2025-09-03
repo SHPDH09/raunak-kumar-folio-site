@@ -22,17 +22,18 @@ const ImageGallery = () => {
     if (view === 'public') {
       loadPublicImages();
     } else if (view === 'private' && isVerified) {
-      loadPrivateImages();
+      loadAllImages();
     }
   }, [view, isVerified]);
 
   const loadPublicImages = async () => {
     setLoading(true);
     try {
+      // Show only private images in public view
       const { data, error } = await supabase
         .from('images')
         .select('*')
-        .eq('is_public', true)
+        .eq('is_public', false)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -55,13 +56,13 @@ const ImageGallery = () => {
     }
   };
 
-  const loadPrivateImages = async () => {
+  const loadAllImages = async () => {
     setLoading(true);
     try {
+      // Show all images in private view
       const { data, error } = await supabase
         .from('images')
         .select('*')
-        .eq('is_public', false)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -77,7 +78,7 @@ const ImageGallery = () => {
       
       setImages(imagesWithUrls);
     } catch (error) {
-      console.error('Error loading private images:', error);
+      console.error('Error loading images:', error);
       toast.error('Failed to load images');
     } finally {
       setLoading(false);
@@ -149,7 +150,7 @@ const ImageGallery = () => {
           if (view === 'public') {
             loadPublicImages();
           } else {
-            loadPrivateImages();
+            loadAllImages();
           }
         } catch (error) {
           console.error('Error uploading image:', error);
@@ -186,7 +187,7 @@ const ImageGallery = () => {
       if (view === 'public') {
         loadPublicImages();
       } else {
-        loadPrivateImages();
+        loadAllImages();
       }
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -211,7 +212,7 @@ const ImageGallery = () => {
         if (view === 'public') {
           loadPublicImages();
         } else {
-          loadPrivateImages();
+          loadAllImages();
         }
       } catch (error) {
         console.error('Error updating image:', error);
@@ -243,28 +244,47 @@ const ImageGallery = () => {
     return <OTPVerification onVerified={() => setIsVerified(true)} />;
   }
 
+  const toggleVisibility = async (image: any) => {
+    try {
+      const { error } = await supabase
+        .from('images')
+        .update({ is_public: !image.is_public })
+        .eq('id', image.id);
+
+      if (error) throw error;
+
+      toast.success(`Image set to ${!image.is_public ? 'public' : 'private'}!`);
+      loadAllImages();
+    } catch (error) {
+      console.error('Error updating visibility:', error);
+      toast.error('Failed to update visibility');
+    }
+  };
+
   const renderImageGrid = (imagesToRender: typeof images, isPrivate = false) => (
     <div className="space-y-6">
-      {/* Upload section for both public and private */}
-      <Card 
-        className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-          <div className="p-4 bg-muted rounded-full mb-4">
-            <Upload className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="font-medium mb-2">
-            {isPrivate ? 'Upload Private Images' : 'Upload Public Images'}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Click here to upload images from your device. Images will be stored in the cloud and accessible from any device.
-          </p>
-          <Badge variant={isPrivate ? "destructive" : "default"}>
-            {isPrivate ? 'Private Collection' : 'Public Collection'}
-          </Badge>
-        </CardContent>
-      </Card>
+      {/* Upload section only for private */}
+      {isPrivate && (
+        <Card 
+          className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <CardContent className="p-8 flex flex-col items-center justify-center text-center">
+            <div className="p-4 bg-muted rounded-full mb-4">
+              <Upload className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="font-medium mb-2">
+              Upload Images
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click here to upload images from your device. Images will be stored in the cloud and accessible from any device.
+            </p>
+            <Badge variant="destructive">
+              Private Upload
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
       
       {loading ? (
         <div className="flex justify-center py-8">
@@ -284,7 +304,9 @@ const ImageGallery = () => {
               <CardContent className={`${isPrivate ? 'p-3' : 'p-4'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className={`font-medium truncate ${isPrivate ? 'text-sm' : ''}`}>{image.title}</h3>
-                  {isPrivate && <Badge variant="secondary" className="text-xs">Private</Badge>}
+                  <Badge variant={image.is_public ? "default" : "secondary"} className="text-xs">
+                    {image.is_public ? "Public" : "Private"}
+                  </Badge>
                 </div>
                 <div className="flex gap-1">
                   <Dialog>
@@ -331,14 +353,25 @@ const ImageGallery = () => {
                         variant="outline"
                         onClick={() => handleEdit(image)}
                         className="px-2"
+                        title="Edit"
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
+                        onClick={() => toggleVisibility(image)}
+                        className="px-2"
+                        title={image.is_public ? "Make Private" : "Make Public"}
+                      >
+                        {image.is_public ? <Lock className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
                         onClick={() => handleDelete(image)}
                         className="px-2"
+                        title="Delete"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -432,8 +465,8 @@ const ImageGallery = () => {
                 </h1>
                 <p className="text-muted-foreground">
                   {view === 'public' 
-                    ? 'Publicly available images' 
-                    : 'Private collection with upload capabilities'
+                    ? 'Viewing private images that have been uploaded' 
+                    : 'Manage all your images with upload, edit, delete and visibility controls'
                   }
                 </p>
               </div>
