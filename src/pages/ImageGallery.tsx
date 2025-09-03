@@ -35,11 +35,10 @@ const ImageGallery = () => {
   const loadPublicImages = async () => {
     setLoading(true);
     try {
-      // Show only private images in public view
+      // Show all images in public gallery
       const { data, error } = await supabase
         .from('images')
         .select('*')
-        .eq('is_public', false)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -154,27 +153,31 @@ const ImageGallery = () => {
 
       if (uploadError) throw uploadError;
 
-      // Save metadata to database
+      // Save metadata to database - make it public so it shows in both galleries
       const { error: dbError } = await supabase
         .from('images')
         .insert({
           title: uploadTitle,
           file_path: filePath,
-          is_public: false // Always upload as private initially
+          is_public: true // Make images public so they show in both galleries
         });
 
       if (dbError) throw dbError;
 
       toast.success('Image uploaded successfully!');
       
-      // Reset form
+      // Reset form and reload both galleries
       setUploadDialog(false);
       setUploadTitle('');
       setUploadDescription('');
       setUploadFile(null);
       
-      // Show public gallery
-      setView('public');
+      // Reload current gallery
+      if (view === 'private') {
+        loadAllImages();
+      } else {
+        loadPublicImages();
+      }
       
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -576,7 +579,7 @@ const ImageGallery = () => {
                   </div>
                   <CardTitle className="text-xl">Public Gallery</CardTitle>
                   <CardDescription>
-                    View publicly available images
+                    View all uploaded images
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -585,7 +588,7 @@ const ImageGallery = () => {
                     onClick={() => setView('public')}
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    Visit Public Gallery
+                    View Gallery
                   </Button>
                 </CardContent>
               </Card>
@@ -595,9 +598,9 @@ const ImageGallery = () => {
                   <div className="mx-auto p-3 bg-red-100 rounded-full w-fit mb-2">
                     <Lock className="h-6 w-6 text-red-600" />
                   </div>
-                  <CardTitle className="text-xl">Private Gallery</CardTitle>
+                  <CardTitle className="text-xl">Admin Panel</CardTitle>
                   <CardDescription>
-                    Access with 5-digit OTP verification
+                    Manage images with full admin access - upload, edit, delete, and control visibility
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -607,7 +610,7 @@ const ImageGallery = () => {
                     onClick={() => setView('private')}
                   >
                     <Lock className="mr-2 h-4 w-4" />
-                    Enter Passcode
+                    Admin Access
                   </Button>
                 </CardContent>
               </Card>
@@ -626,14 +629,14 @@ const ImageGallery = () => {
                   ) : (
                     <>
                       <Lock className="h-6 w-6 text-red-600" />
-                      Private Gallery
+                      Admin Panel
                     </>
                   )}
                 </h1>
                 <p className="text-muted-foreground">
                   {view === 'public' 
-                    ? 'Viewing private images that have been uploaded' 
-                    : 'Manage all your images with upload, edit, delete and visibility controls'
+                    ? 'View all uploaded images from the gallery' 
+                    : 'Admin panel - manage all images with upload, edit, delete and visibility controls'
                   }
                 </p>
               </div>
