@@ -557,7 +557,8 @@ const ImageGallery = () => {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  {isPrivate && (
+                  {/* Show admin controls in both galleries when verified */}
+                  {(isPrivate || (view === 'public' && isVerified)) && (
                     <>
                       <Button 
                         size="sm" 
@@ -577,7 +578,7 @@ const ImageGallery = () => {
                       >
                         {image.is_public ? <Lock className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       </Button>
-                      <Button 
+                      <Button
                         size="sm" 
                         variant="outline"
                         onClick={() => handleDelete(image)}
