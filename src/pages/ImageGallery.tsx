@@ -196,18 +196,15 @@ const ImageGallery = () => {
     try {
       console.log('Deleting image:', image.id, 'File path:', image.file_path);
       
+      // First, immediately remove from local state for instant UI feedback
+      setImages(prevImages => prevImages.filter(img => img.id !== image.id));
+      
       // Delete from storage first
       const { data: storageData, error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
       console.log('Storage deletion result:', { data: storageData, error: storageError });
-
-      if (storageError) {
-        console.error('Storage deletion error:', storageError);
-        // Continue with database deletion even if storage fails
-        toast.error('Warning: Failed to delete file from storage, but will remove from database');
-      }
 
       // Delete from database
       const { data: dbData, error: dbError } = await supabase
@@ -219,22 +216,24 @@ const ImageGallery = () => {
 
       if (dbError) {
         console.error('Database deletion error:', dbError);
+        // If database deletion fails, restore the image to the list
+        setImages(prevImages => [...prevImages, image]);
         throw new Error('Failed to delete image from database: ' + dbError.message);
       }
 
       toast.success('Image deleted successfully!');
-      
-      // Force reload images with a small delay to ensure database sync
-      setTimeout(() => {
-        if (view === 'private') {
-          loadAllImages();
-        } else {
-          loadPublicImages();
-        }
-      }, 500);
+      console.log('Image deleted successfully from both storage and database');
       
     } catch (error) {
       console.error('Error deleting image:', error);
+      // Restore the image to the list if there was an error
+      setImages(prevImages => {
+        const exists = prevImages.some(img => img.id === image.id);
+        if (!exists) {
+          return [...prevImages, image];
+        }
+        return prevImages;
+      });
       toast.error(error instanceof Error ? error.message : 'Failed to delete image');
     } finally {
       setLoading(false);
