@@ -194,35 +194,45 @@ const ImageGallery = () => {
 
     setLoading(true);
     try {
+      console.log('Deleting image:', image.id, 'File path:', image.file_path);
+      
       // Delete from storage first
-      const { error: storageError } = await supabase.storage
+      const { data: storageData, error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
+      console.log('Storage deletion result:', { data: storageData, error: storageError });
+
       if (storageError) {
         console.error('Storage deletion error:', storageError);
-        throw new Error('Failed to delete image from storage');
+        // Continue with database deletion even if storage fails
+        toast.error('Warning: Failed to delete file from storage, but will remove from database');
       }
 
       // Delete from database
-      const { error: dbError } = await supabase
+      const { data: dbData, error: dbError } = await supabase
         .from('images')
         .delete()
         .eq('id', image.id);
 
+      console.log('Database deletion result:', { data: dbData, error: dbError });
+
       if (dbError) {
         console.error('Database deletion error:', dbError);
-        throw new Error('Failed to delete image from database');
+        throw new Error('Failed to delete image from database: ' + dbError.message);
       }
 
       toast.success('Image deleted successfully!');
       
-      // Reload images
-      if (view === 'private') {
-        loadAllImages();
-      } else {
-        loadPublicImages();
-      }
+      // Force reload images with a small delay to ensure database sync
+      setTimeout(() => {
+        if (view === 'private') {
+          loadAllImages();
+        } else {
+          loadPublicImages();
+        }
+      }, 500);
+      
     } catch (error) {
       console.error('Error deleting image:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to delete image');
