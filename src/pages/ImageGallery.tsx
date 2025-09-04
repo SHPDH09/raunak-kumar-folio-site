@@ -196,17 +196,17 @@ const ImageGallery = () => {
     try {
       console.log('Deleting image:', image.id, 'File path:', image.file_path);
       
-      // First, immediately remove from local state for instant UI feedback
+      // Immediately remove from local state for instant UI feedback
       setImages(prevImages => prevImages.filter(img => img.id !== image.id));
       
-      // Delete from storage first
+      // Delete from storage
       const { data: storageData, error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
       console.log('Storage deletion result:', { data: storageData, error: storageError });
 
-      // Delete from database
+      // Delete from database - this removes it from both galleries since they share the same data
       const { data: dbData, error: dbError } = await supabase
         .from('images')
         .delete()
@@ -221,8 +221,13 @@ const ImageGallery = () => {
         throw new Error('Failed to delete image from database: ' + dbError.message);
       }
 
-      toast.success('Image deleted successfully!');
+      toast.success('Image deleted from both admin and public galleries!');
       console.log('Image deleted successfully from both storage and database');
+      
+      // Force refresh both galleries if they're loaded
+      setTimeout(() => {
+        loadAllImages(); // This will refresh both since they use same data
+      }, 100);
       
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -557,8 +562,7 @@ const ImageGallery = () => {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  {/* Show admin controls in both galleries when verified */}
-                  {(isPrivate || (view === 'public' && isVerified)) && (
+                  {isPrivate && (
                     <>
                       <Button 
                         size="sm" 
