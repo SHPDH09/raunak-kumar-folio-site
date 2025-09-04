@@ -188,13 +188,21 @@ const ImageGallery = () => {
   };
 
   const handleDelete = async (image: any) => {
+    if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Delete from storage
+      // Delete from storage first
       const { error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
-      if (storageError) throw storageError;
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+        throw new Error('Failed to delete image from storage');
+      }
 
       // Delete from database
       const { error: dbError } = await supabase
@@ -202,44 +210,55 @@ const ImageGallery = () => {
         .delete()
         .eq('id', image.id);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database deletion error:', dbError);
+        throw new Error('Failed to delete image from database');
+      }
 
       toast.success('Image deleted successfully!');
       
       // Reload images
-      if (view === 'public') {
-        loadPublicImages();
-      } else {
+      if (view === 'private') {
         loadAllImages();
+      } else {
+        loadPublicImages();
       }
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error('Failed to delete image');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete image');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEdit = async (image: any) => {
     const newTitle = prompt('Enter new title:', image.title);
-    if (newTitle && newTitle !== image.title) {
+    if (newTitle && newTitle.trim() !== '' && newTitle !== image.title) {
+      setLoading(true);
       try {
         const { error } = await supabase
           .from('images')
-          .update({ title: newTitle })
+          .update({ title: newTitle.trim() })
           .eq('id', image.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Database update error:', error);
+          throw new Error('Failed to update image title');
+        }
 
-        toast.success('Image title updated!');
+        toast.success('Image title updated successfully!');
         
         // Reload images
-        if (view === 'public') {
-          loadPublicImages();
-        } else {
+        if (view === 'private') {
           loadAllImages();
+        } else {
+          loadPublicImages();
         }
       } catch (error) {
         console.error('Error updating image:', error);
-        toast.error('Failed to update image');
+        toast.error(error instanceof Error ? error.message : 'Failed to update image');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -268,19 +287,32 @@ const ImageGallery = () => {
   }
 
   const toggleVisibility = async (image: any) => {
+    setLoading(true);
     try {
+      const newVisibility = !image.is_public;
       const { error } = await supabase
         .from('images')
-        .update({ is_public: !image.is_public })
+        .update({ is_public: newVisibility })
         .eq('id', image.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Visibility update error:', error);
+        throw new Error('Failed to update image visibility');
+      }
 
-      toast.success(`Image set to ${!image.is_public ? 'public' : 'private'}!`);
-      loadAllImages();
+      toast.success(`Image is now ${newVisibility ? 'public' : 'private'}!`);
+      
+      // Reload images
+      if (view === 'private') {
+        loadAllImages();
+      } else {
+        loadPublicImages();
+      }
     } catch (error) {
       console.error('Error updating visibility:', error);
-      toast.error('Failed to update visibility');
+      toast.error(error instanceof Error ? error.message : 'Failed to update visibility');
+    } finally {
+      setLoading(false);
     }
   };
 
