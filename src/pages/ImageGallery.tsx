@@ -23,6 +23,51 @@ const ImageGallery = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Set up real-time subscription for images table
+  useEffect(() => {
+    const channel = supabase
+      .channel('images-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'images'
+        },
+        (payload) => {
+          console.log('Real-time change detected:', payload);
+          
+          if (payload.eventType === 'DELETE') {
+            // Remove deleted image from local state
+            setImages(prevImages => {
+              const filtered = prevImages.filter(img => img.id !== payload.old?.id);
+              console.log('Real-time: Removed image', payload.old?.id, 'New count:', filtered.length);
+              return filtered;
+            });
+          } else if (payload.eventType === 'INSERT') {
+            // Reload images when new image is added
+            if (view === 'public') {
+              loadPublicImages();
+            } else if (view === 'private' && isVerified) {
+              loadAllImages();
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            // Update specific image in local state
+            setImages(prevImages => 
+              prevImages.map(img => 
+                img.id === payload.new?.id ? { ...img, ...payload.new } : img
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [view, isVerified]);
+
   // Load images when view changes
   useEffect(() => {
     if (view === 'public') {
