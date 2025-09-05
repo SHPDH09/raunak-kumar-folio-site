@@ -199,62 +199,48 @@ const ImageGallery = () => {
 
     setLoading(true);
     try {
-      console.log('Deleting image:', image.id, 'File path:', image.file_path);
-      
-      // Immediately remove from local state for instant UI feedback
-      setImages(prevImages => prevImages.filter(img => img.id !== image.id));
+      console.log('Starting deletion process for image:', image.id, 'File path:', image.file_path);
       
       // Delete from storage first
-      const { data: storageData, error: storageError } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
-      console.log('Storage deletion result:', { data: storageData, error: storageError });
+      console.log('Storage deletion result:', { error: storageError });
 
       if (storageError) {
-        console.error('Storage deletion error:', storageError);
-        // Restore the image to the list if storage deletion fails
-        setImages(prevImages => [...prevImages, image]);
+        console.error('Storage deletion failed:', storageError);
         throw new Error('Failed to delete image from storage: ' + storageError.message);
       }
 
-      // Delete from database - this removes it from both galleries permanently
-      const { data: dbData, error: dbError } = await supabase
+      // Delete from database
+      const { error: dbError } = await supabase
         .from('images')
         .delete()
         .eq('id', image.id);
 
-      console.log('Database deletion result:', { data: dbData, error: dbError });
+      console.log('Database deletion result:', { error: dbError });
 
       if (dbError) {
-        console.error('Database deletion error:', dbError);
-        // If database deletion fails, restore the image to the list
-        setImages(prevImages => [...prevImages, image]);
+        console.error('Database deletion failed:', dbError);
         throw new Error('Failed to delete image from database: ' + dbError.message);
       }
 
+      // Only remove from local state after both deletions are successful
+      setImages(prevImages => prevImages.filter(img => img.id !== image.id));
+
       toast.success('Image permanently deleted from both Public and Private galleries!');
-      console.log('Image permanently deleted from storage and database');
+      console.log('Image successfully deleted from both storage and database');
       
-      // Force refresh both galleries
-      setTimeout(() => {
-        if (view === 'private') {
-          loadAllImages();
-        } else {
-          loadPublicImages();
-        }
-      }, 100);
+      // Refresh the gallery to ensure consistency
+      if (view === 'private') {
+        await loadAllImages();
+      } else {
+        await loadPublicImages();
+      }
       
     } catch (error) {
       console.error('Error deleting image:', error);
-      // Restore the image to the list if there was an error
-      setImages(prevImages => {
-        const exists = prevImages.some(img => img.id === image.id);
-        if (!exists) {
-          return [...prevImages, image];
-        }
-        return prevImages;
-      });
       toast.error(error instanceof Error ? error.message : 'Failed to delete image');
     } finally {
       setLoading(false);
