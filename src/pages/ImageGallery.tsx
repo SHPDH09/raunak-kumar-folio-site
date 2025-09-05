@@ -188,7 +188,12 @@ const ImageGallery = () => {
   };
 
   const handleDelete = async (image: any) => {
-    if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete "${image.title}"?\n\nThis action will:\n• Remove the image from both Public and Private galleries\n• Delete the file from storage permanently\n• Cannot be undone\n\nClick OK to confirm deletion.`
+    );
+    
+    if (!confirmed) {
       return;
     }
 
@@ -199,14 +204,21 @@ const ImageGallery = () => {
       // Immediately remove from local state for instant UI feedback
       setImages(prevImages => prevImages.filter(img => img.id !== image.id));
       
-      // Delete from storage
+      // Delete from storage first
       const { data: storageData, error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
       console.log('Storage deletion result:', { data: storageData, error: storageError });
 
-      // Delete from database - this removes it from both galleries since they share the same data
+      if (storageError) {
+        console.error('Storage deletion error:', storageError);
+        // Restore the image to the list if storage deletion fails
+        setImages(prevImages => [...prevImages, image]);
+        throw new Error('Failed to delete image from storage: ' + storageError.message);
+      }
+
+      // Delete from database - this removes it from both galleries permanently
       const { data: dbData, error: dbError } = await supabase
         .from('images')
         .delete()
@@ -221,12 +233,16 @@ const ImageGallery = () => {
         throw new Error('Failed to delete image from database: ' + dbError.message);
       }
 
-      toast.success('Image deleted from both admin and public galleries!');
-      console.log('Image deleted successfully from both storage and database');
+      toast.success('Image permanently deleted from both Public and Private galleries!');
+      console.log('Image permanently deleted from storage and database');
       
-      // Force refresh both galleries if they're loaded
+      // Force refresh both galleries
       setTimeout(() => {
-        loadAllImages(); // This will refresh both since they use same data
+        if (view === 'private') {
+          loadAllImages();
+        } else {
+          loadPublicImages();
+        }
       }, 100);
       
     } catch (error) {
