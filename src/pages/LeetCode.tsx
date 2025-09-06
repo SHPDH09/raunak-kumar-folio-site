@@ -6,7 +6,7 @@ import { ArrowLeft, ExternalLink, Trophy, Calendar, Target } from "lucide-react"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const LeetCode = () => {
@@ -68,11 +68,6 @@ const LeetCode = () => {
   const fetchLeetCodeData = async () => {
     try {
       // Check if Supabase is configured
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        console.log('Supabase not configured, using static data');
-        setLoading(false);
-        return;
-      }
 
       const { data, error } = await supabase.functions.invoke('get-leetcode-stats', {
         body: { username: stats.username }
@@ -134,11 +129,6 @@ const LeetCode = () => {
 
   // Update LeetCode stats
   const updateStats = async () => {
-    // Check if Supabase is configured
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      toast.error('Supabase not configured. Please connect to Supabase to enable auto-updates.');
-      return;
-    }
 
     setUpdating(true);
     try {
