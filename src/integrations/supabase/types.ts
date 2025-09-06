@@ -186,6 +186,141 @@ export type Database = {
         }
         Relationships: []
       }
+      leetcode_monthly_progress: {
+        Row: {
+          created_at: string
+          id: string
+          month: string
+          problems_solved: number | null
+          username: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: string
+          problems_solved?: number | null
+          username: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: string
+          problems_solved?: number | null
+          username?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      leetcode_stats: {
+        Row: {
+          acceptance_rate: number | null
+          contest_rating: number | null
+          created_at: string
+          easy_solved: number | null
+          hard_solved: number | null
+          id: string
+          last_updated: string | null
+          medium_solved: number | null
+          ranking: number | null
+          streak: number | null
+          total_solved: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          acceptance_rate?: number | null
+          contest_rating?: number | null
+          created_at?: string
+          easy_solved?: number | null
+          hard_solved?: number | null
+          id?: string
+          last_updated?: string | null
+          medium_solved?: number | null
+          ranking?: number | null
+          streak?: number | null
+          total_solved?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          acceptance_rate?: number | null
+          contest_rating?: number | null
+          created_at?: string
+          easy_solved?: number | null
+          hard_solved?: number | null
+          id?: string
+          last_updated?: string | null
+          medium_solved?: number | null
+          ranking?: number | null
+          streak?: number | null
+          total_solved?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      leetcode_submissions: {
+        Row: {
+          created_at: string
+          difficulty: string
+          id: string
+          problem_name: string
+          status: string
+          submitted_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty: string
+          id?: string
+          problem_name: string
+          status: string
+          submitted_at: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: string
+          id?: string
+          problem_name?: string
+          status?: string
+          submitted_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      leetcode_topic_progress: {
+        Row: {
+          created_at: string
+          id: string
+          solved: number | null
+          topic_name: string
+          total_problems: number | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          solved?: number | null
+          topic_name: string
+          total_problems?: number | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          solved?: number | null
+          topic_name?: string
+          total_problems?: number | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
