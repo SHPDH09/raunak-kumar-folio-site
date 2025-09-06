@@ -45,7 +45,7 @@ serve(async (req) => {
         medium_solved: updatedStats.medium.solved,
         hard_solved: updatedStats.hard.solved,
         last_updated: new Date().toISOString()
-      })
+      }, { onConflict: 'username' })
 
     if (statsError) {
       throw statsError
@@ -89,7 +89,7 @@ serve(async (req) => {
         month: currentMonth,
         year: currentYear,
         problems_solved: updatedStats.monthlyProgress || 30
-      })
+      }, { onConflict: 'username,month,year' })
 
     if (monthlyError) {
       console.error('Error updating monthly progress:', monthlyError)

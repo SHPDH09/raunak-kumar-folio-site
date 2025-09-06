@@ -17,8 +17,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    const url = new URL(req.url)
-    const username = url.searchParams.get('username') || 'RAUNAK9025'
+    // Prefer JSON body, fallback to query string
+    let username = 'RAUNAK9025'
+    try {
+      const body = await req.json()
+      if (body?.username) username = body.username
+    } catch (_) {
+      const url = new URL(req.url)
+      username = url.searchParams.get('username') || username
+    }
 
     // Fetch main stats
     const { data: stats, error: statsError } = await supabase
