@@ -17,7 +17,7 @@ const Experience = () => {
         "Advertise By Mail",
         "Information Collact & Analysis"
       ],
-      skills: ["Information Collact & Analysis","Time Management"]
+      skills: ["Information Collact & Analysis","Time Management","Python(Pandas, Numpy, Power BI)"]
     },
     {
       type: "internship",
