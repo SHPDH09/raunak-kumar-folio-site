@@ -9,7 +9,7 @@ const Experience = () => {
       title: "E-Mail Cordination",
       company: "NexGen Digital PVT.LTD. (Remote)",
       duration: "SEP 2025 - Continue",
-      description: "Collact Information By Mail And Analys and Find Inshight for Information & Development Business",
+      description: "Collact Information By Mail And Analys and Find Inshightful Information & Development Business",
       achievements: [
         "Team Management",
         "Time Management",
