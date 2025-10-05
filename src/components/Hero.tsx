@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Github, Linkedin, Mail } from 'lucide-react';
-import heroBackground from '@/assets/hero-bg.jpg';
+import DataAnalytics3D from './DataAnalytics3D';
 
 const Hero = () => {
   const [typedText, setTypedText] = useState('');
@@ -27,16 +27,10 @@ const Hero = () => {
 
   return (
     <section 
-      className="min-h-screen flex items-center justify-center hero-gradient relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5"
     >
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-20 w-32 h-32 border-2 border-primary rounded-full animate-pulse floating"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 border-2 border-accent rounded-full animate-pulse floating" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-32 left-40 w-40 h-40 border-2 border-primary-glow rounded-full animate-pulse floating" style={{ animationDelay: '4s' }}></div>
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-accent/20 rounded-full animate-rotate-slow"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-20 h-20 bg-primary/20 rounded-full animate-rotate-slow" style={{ animationDelay: '10s' }}></div>
-      </div>
+      {/* 3D Animated Data Analytics Background */}
+      <DataAnalytics3D />
       
       <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
         <div className="animate-fade-in">
