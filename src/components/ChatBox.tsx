@@ -1,7 +1,12 @@
-<script type="text/javascript">
-  (function(d, t) {
-      var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
-      v.onload = function() {
+import { useEffect } from 'react';
+
+const ChatBox = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.async = true;
+    script.onload = () => {
+      if (window.voiceflow) {
         window.voiceflow.chat.load({
           verify: { projectID: '68e2037a17c0f1488fd5e049' },
           url: 'https://general-runtime.voiceflow.com',
@@ -11,6 +16,33 @@
           }
         });
       }
-      v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
-  })(document, 'script');
-</script>
+    };
+    script.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
+    document.body.appendChild(script);
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
+  return null;
+};
+
+export default ChatBox;
+
+declare global {
+  interface Window {
+    voiceflow: {
+      chat: {
+        load: (config: {
+          verify: { projectID: string };
+          url: string;
+          versionID: string;
+          voice: { url: string };
+        }) => void;
+      };
+    };
+  }
+}
