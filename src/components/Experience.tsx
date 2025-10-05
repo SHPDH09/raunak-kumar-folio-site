@@ -4,21 +4,7 @@ import { Briefcase, GraduationCap, Award, Users } from 'lucide-react';
 
 const Experience = () => {
   const experiences = [
-     {
-      type: "Job",
-      title: "E-Mail Cordination",
-      company: "NexGen Digital PVT.LTD. (Remote)",
-      duration: "SEP 2025 - Continue",
-      description: "Collact Information By Mail And Analys and Find Inshightful Information & Development Business",
-      achievements: [
-        "Team Management",
-        "Time Management",
-        "Employee Notifying ",
-        "Advertise By Mail",
-        "Information Collact & Analysis"
-      ],
-      skills: ["Information Collact & Analysis","Time Management","Python(Pandas, Numpy, Power BI)"]
-    },
+   
     {
       type: "internship",
       title: "Python Development",
