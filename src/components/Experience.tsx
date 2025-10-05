@@ -40,6 +40,32 @@ const Experience = () => {
         { semester: 5, cgpa: 0, sgpa: 0, date: "DEC 2025", status: "ongoing" },
         { semester: 6, cgpa: 0, sgpa: 0, date: "JUNE 2026", status: "upcoming" }
       ]
+    },
+    {
+      type: "education",
+      title: "Intermediate (12th Grade)",
+      company: "BSEB PATNA",
+      duration: "2019 - 2021",
+      description: "Completed higher secondary education with focus on Science stream.",
+      achievements: [
+        "Secured 62% marks",
+        "Strong foundation in core subjects",
+        "Prepared for competitive examinations"
+      ],
+      skills: ["Hindi", "English", "Mathematics", "Physics", "Chemistry"]
+    },
+    {
+      type: "education",
+      title: "Matriculation (10th Grade)",
+      company: "BSEB PATNA",
+      duration: "2018 - 2019",
+      description: "Completed secondary education with comprehensive learning across multiple subjects.",
+      achievements: [
+        "Secured 60% marks",
+        "Well-rounded education",
+        "Built strong academic foundation"
+      ],
+      skills: ["Hindi", "English", "Science", "Mathematics", "Social Science", "Sanskrit"]
     }
   ];
 
