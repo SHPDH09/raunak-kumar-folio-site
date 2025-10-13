@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      images: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          is_public: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          is_public?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          is_public?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leetcode_monthly_progress: {
         Row: {
           created_at: string | null
