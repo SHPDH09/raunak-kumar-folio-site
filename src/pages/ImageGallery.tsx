@@ -81,7 +81,7 @@ const ImageGallery = () => {
     setLoading(true);
     try {
       // Show all images in public gallery
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('images')
         .select('*')
         .order('created_at', { ascending: false });
@@ -110,7 +110,7 @@ const ImageGallery = () => {
     setLoading(true);
     try {
       // Show all images in private view
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('images')
         .select('*')
         .order('created_at', { ascending: false });
@@ -199,7 +199,7 @@ const ImageGallery = () => {
       if (uploadError) throw uploadError;
 
       // Save metadata to database - make it public so it shows in both galleries
-      const { error: dbError } = await supabase
+      const { error: dbError } = await (supabase as any)
         .from('images')
         .insert({
           title: uploadTitle,
@@ -247,7 +247,7 @@ const ImageGallery = () => {
       console.log('Starting deletion process for image:', image.id, 'File path:', image.file_path);
       
       // First delete from database to ensure it's removed from both galleries
-      const { error: dbError } = await supabase
+      const { error: dbError } = await (supabase as any)
         .from('images')
         .delete()
         .eq('id', image.id);
@@ -311,7 +311,7 @@ const ImageGallery = () => {
     if (newTitle && newTitle.trim() !== '' && newTitle !== image.title) {
       setLoading(true);
       try {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('images')
           .update({ title: newTitle.trim() })
           .eq('id', image.id);
@@ -365,7 +365,7 @@ const ImageGallery = () => {
     setLoading(true);
     try {
       const newVisibility = !image.is_public;
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('images')
         .update({ is_public: newVisibility })
         .eq('id', image.id);

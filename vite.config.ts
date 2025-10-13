@@ -18,9 +18,10 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+    // Disable componentTagger by default to avoid passing 'lov-*' props to react-three-fiber (causes runtime errors)
+    // Enable locally by setting VITE_ENABLE_TAGGER=true
+    ...(process.env.VITE_ENABLE_TAGGER === 'true' ? [componentTagger()] : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
