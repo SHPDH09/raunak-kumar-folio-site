@@ -1,14 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const RATE_LIMIT_MAX_ATTEMPTS = 3;
+const RATE_LIMIT_WINDOW_MINUTES = 60;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
   try {
     const body = await req.json();
@@ -36,6 +45,52 @@ serve(async (req) => {
     // 🔹 SEND OTP
     // -----------------------------
     if (action === "send") {
+      // Check rate limiting
+      const { data: existingLimit } = await supabaseClient
+        .from('otp_rate_limits')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      const now = new Date();
+      
+      if (existingLimit) {
+        const lastAttempt = new Date(existingLimit.last_attempt);
+        const minutesSinceLastAttempt = (now.getTime() - lastAttempt.getTime()) / (1000 * 60);
+        
+        if (minutesSinceLastAttempt < RATE_LIMIT_WINDOW_MINUTES) {
+          if (existingLimit.attempts >= RATE_LIMIT_MAX_ATTEMPTS) {
+            return new Response(
+              JSON.stringify({ error: "Too many requests. Please try again later." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          // Update attempts
+          await supabaseClient
+            .from('otp_rate_limits')
+            .update({ 
+              attempts: existingLimit.attempts + 1,
+              last_attempt: now.toISOString()
+            })
+            .eq('email', email);
+        } else {
+          // Reset if outside window
+          await supabaseClient
+            .from('otp_rate_limits')
+            .update({ 
+              attempts: 1,
+              last_attempt: now.toISOString()
+            })
+            .eq('email', email);
+        }
+      } else {
+        // Create new rate limit record
+        await supabaseClient
+          .from('otp_rate_limits')
+          .insert({ email, attempts: 1, last_attempt: now.toISOString() });
+      }
+
       const otp = Math.floor(10000 + Math.random() * 90000).toString();
       const timestamp = Math.floor(Date.now() / 1000);
       const message = `${email}:${otp}:${timestamp}`;
@@ -76,12 +131,9 @@ serve(async (req) => {
 
       if (!emailResponse.ok) {
         const errJson = await emailResponse.json().catch(() => ({} as any));
-        console.error("Resend send error:", emailResponse.status, errJson);
+        console.error("[Internal] Email service error:", emailResponse.status, errJson);
         return new Response(
-          JSON.stringify({
-            error: errJson?.error?.message || errJson?.message || errJson?.error || "Failed to send email",
-            status: emailResponse.status,
-          }),
+          JSON.stringify({ error: "Failed to send email. Please try again later." }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -149,8 +201,9 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
+    console.error("[Internal] OTP function error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred. Please try again later." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

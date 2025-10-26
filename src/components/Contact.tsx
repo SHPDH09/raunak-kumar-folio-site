@@ -6,6 +6,27 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+
+const contactSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters")
+    .regex(/^[a-zA-Z\s'-]+$/, "Name contains invalid characters"),
+  email: z.string()
+    .trim()
+    .email("Invalid email address")
+    .max(255, "Email too long"),
+  subject: z.string()
+    .trim()
+    .min(3, "Subject must be at least 3 characters")
+    .max(200, "Subject must be less than 200 characters"),
+  message: z.string()
+    .trim()
+    .min(10, "Message must be at least 10 characters")
+    .max(2000, "Message must be less than 2000 characters")
+});
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -26,29 +47,44 @@ const Contact = () => {
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+  
+  // Validate input
+  const result = contactSchema.safeParse(formData);
+  if (!result.success) {
+    toast({
+      title: "Validation Error",
+      description: result.error.errors[0].message,
+      variant: "destructive"
+    });
+    return;
+  }
+
   setIsSubmitting(true);
 
   try {
+    const validatedData = result.data;
+    
     await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
       method: "POST",
-      mode: "no-cors", // <-- Add this line
+      mode: "no-cors",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(validatedData),
     });
 
-    // Since no-cors doesn't return a real response, we assume it's successful
     toast({
       title: "Message Sent!",
-      description: "Thank you for reaching out 📧 . Your message has been sent.",
+      description: "Thank you for reaching out 📧. Your message has been sent.",
     });
 
     setFormData({ name: '', email: '', subject: '', message: '' });
   } catch (error) {
+    console.error("[Internal] Contact form error:", error);
     toast({
       title: "Error!",
-      description: "Could not send data. Check your internet or script URL.",
+      description: "Could not send message. Please try again later.",
+      variant: "destructive"
     });
   }
 

@@ -161,8 +161,8 @@ const ImageGallery = () => {
       
       setImages(imagesWithUrls);
     } catch (error) {
-      console.error('Error loading public images:', error);
-      toast.error('Failed to load images');
+      console.error('[Internal] Error loading public images:', error);
+      toast.error('Failed to load images. Please try again.');
     }
   };
 
@@ -192,8 +192,8 @@ const ImageGallery = () => {
       
       setImages(imagesWithUrls);
     } catch (error) {
-      console.error('Error loading my images:', error);
-      toast.error('Failed to load your images');
+      console.error('[Internal] Error loading my images:', error);
+      toast.error('Failed to load your images. Please try again.');
     }
   };
 
@@ -239,8 +239,8 @@ const ImageGallery = () => {
         loadPublicImages();
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
+      console.error('[Internal] Error uploading image:', error);
+      toast.error('Failed to upload image. Please try again.');
     } finally {
       setLoading(false);
     }
