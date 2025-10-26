@@ -8,6 +8,8 @@ import NotFound from "./pages/NotFound";
 import ImageGallery from "./pages/ImageGallery";
 import Tools from "./pages/Tools";
 import LeetCode from "./pages/LeetCode";
+import Auth from "./pages/Auth";
+import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -20,8 +22,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/tools" element={<Tools />} />
-          <Route path="/gallery" element={<ImageGallery />} />
+          <Route path="/image-gallery" element={<ImageGallery />} />
           <Route path="/leetcode" element={<LeetCode />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<AdminPanel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

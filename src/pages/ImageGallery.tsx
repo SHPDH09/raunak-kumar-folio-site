@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,25 +7,112 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import OTPVerification from '@/components/OTPVerification';
-import { Eye, Lock, Upload, Image as ImageIcon, Edit, Trash2, LogOut, Download, X, Globe, User } from 'lucide-react';
+import { Eye, Upload, Image as ImageIcon, Edit, Trash2, LogOut, Download, X, Globe, User as UserIcon, Shield, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
+
+interface Profile {
+  id: string;
+  username: string;
+  full_name: string | null;
+  is_verified: boolean;
+}
+
+interface ImageData {
+  id: string;
+  title: string;
+  description: string | null;
+  file_path: string;
+  is_public: boolean;
+  user_id: string;
+  created_at: string;
+  url?: string;
+  profile?: Profile;
+}
 
 const ImageGallery = () => {
-  const [view, setView] = useState<'menu' | 'public' | 'private'>('menu');
-  const [isVerified, setIsVerified] = useState(false);
-  const [images, setImages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [viewingImage, setViewingImage] = useState<any>(null);
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [view, setView] = useState<'public' | 'my-images'>('public');
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewingImage, setViewingImage] = useState<ImageData | null>(null);
   const [uploadDialog, setUploadDialog] = useState(false);
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadDescription, setUploadDescription] = useState('');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadIsPublic, setUploadIsPublic] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Set up real-time subscription for images table
   useEffect(() => {
+    // Check auth status
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
+
+      // Load user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profile) {
+        setUserProfile(profile);
+      }
+
+      // Check if admin
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      setIsAdmin(!!roles);
+      setLoading(false);
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (!session) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  // Load images when view changes
+  useEffect(() => {
+    if (user) {
+      if (view === 'public') {
+        loadPublicImages();
+      } else {
+        loadMyImages();
+      }
+    }
+  }, [view, user]);
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!user) return;
+
     const channel = supabase
       .channel('images-changes')
       .on(
@@ -34,30 +122,11 @@ const ImageGallery = () => {
           schema: 'public',
           table: 'images'
         },
-        (payload) => {
-          console.log('Real-time change detected:', payload);
-          
-          if (payload.eventType === 'DELETE') {
-            // Remove deleted image from local state
-            setImages(prevImages => {
-              const filtered = prevImages.filter(img => img.id !== payload.old?.id);
-              console.log('Real-time: Removed image', payload.old?.id, 'New count:', filtered.length);
-              return filtered;
-            });
-          } else if (payload.eventType === 'INSERT') {
-            // Reload images when new image is added
-            if (view === 'public') {
-              loadPublicImages();
-            } else if (view === 'private' && isVerified) {
-              loadAllImages();
-            }
-          } else if (payload.eventType === 'UPDATE') {
-            // Update specific image in local state
-            setImages(prevImages => 
-              prevImages.map(img => 
-                img.id === payload.new?.id ? { ...img, ...payload.new } : img
-              )
-            );
+        () => {
+          if (view === 'public') {
+            loadPublicImages();
+          } else {
+            loadMyImages();
           }
         }
       )
@@ -66,30 +135,23 @@ const ImageGallery = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [view, isVerified]);
-
-  // Load images when view changes
-  useEffect(() => {
-    if (view === 'public') {
-      loadPublicImages();
-    } else if (view === 'private' && isVerified) {
-      loadAllImages();
-    }
-  }, [view, isVerified]);
+  }, [view, user]);
 
   const loadPublicImages = async () => {
-    setLoading(true);
     try {
-      // Show all images in public gallery
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('images')
-        .select('*')
+        .select(`
+          *,
+          profile:profiles(id, username, full_name, is_verified)
+        `)
+        .eq('is_public', true)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
       const imagesWithUrls = await Promise.all(
-        data.map(async (img) => {
+        (data || []).map(async (img: any) => {
           const { data: { publicUrl } } = supabase.storage
             .from('images')
             .getPublicUrl(img.file_path);
@@ -101,24 +163,26 @@ const ImageGallery = () => {
     } catch (error) {
       console.error('Error loading public images:', error);
       toast.error('Failed to load images');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const loadAllImages = async () => {
-    setLoading(true);
+  const loadMyImages = async () => {
+    if (!user) return;
+
     try {
-      // Show all images in private view
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('images')
-        .select('*')
+        .select(`
+          *,
+          profile:profiles(id, username, full_name, is_verified)
+        `)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
       const imagesWithUrls = await Promise.all(
-        data.map(async (img) => {
+        (data || []).map(async (img: any) => {
           const { data: { publicUrl } } = supabase.storage
             .from('images')
             .getPublicUrl(img.file_path);
@@ -128,102 +192,52 @@ const ImageGallery = () => {
       
       setImages(imagesWithUrls);
     } catch (error) {
-      console.error('Error loading images:', error);
-      toast.error('Failed to load images');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Screenshot protection for private gallery
-  useEffect(() => {
-    if (view === 'private' && isVerified) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-            (e.ctrlKey && e.key === 'u') ||
-            (e.ctrlKey && e.key === 's')) {
-          e.preventDefault();
-          toast.error('Screenshot and developer tools are disabled for security!');
-        }
-      };
-
-      const handleContextMenu = (e: MouseEvent) => {
-        e.preventDefault();
-        toast.error('Right-click is disabled for security!');
-      };
-
-      document.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('contextmenu', handleContextMenu);
-      document.body.style.userSelect = 'none';
-
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('contextmenu', handleContextMenu);
-        document.body.style.userSelect = 'auto';
-      };
-    }
-  }, [view, isVerified]);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith('image/')) {
-        setUploadFile(file);
-        setUploadTitle(file.name.replace(/\.[^/.]+$/, "")); // Remove extension
-        setUploadDialog(true);
-      } else {
-        toast.error('Please select an image file');
-      }
+      console.error('Error loading my images:', error);
+      toast.error('Failed to load your images');
     }
   };
 
   const handleUpload = async () => {
-    if (!uploadFile || !uploadTitle) {
-      toast.error('Please fill in all required fields');
+    if (!uploadFile || !uploadTitle.trim() || !user) {
+      toast.error('Please provide both title and image');
       return;
     }
 
     setLoading(true);
     try {
       const fileExt = uploadFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `private/${fileName}`;
-
-      // Upload to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
         .from('images')
-        .upload(filePath, uploadFile);
+        .upload(fileName, uploadFile);
 
       if (uploadError) throw uploadError;
 
-      // Save metadata to database - make it public so it shows in both galleries
-      const { error: dbError } = await (supabase as any)
+      const { error: dbError } = await supabase
         .from('images')
         .insert({
-          title: uploadTitle,
-          file_path: filePath,
-          is_public: true // Make images public so they show in both galleries
+          title: uploadTitle.trim(),
+          description: uploadDescription.trim() || null,
+          file_path: fileName,
+          is_public: uploadIsPublic,
+          user_id: user.id,
         });
 
       if (dbError) throw dbError;
 
       toast.success('Image uploaded successfully!');
-      
-      // Reset form and reload both galleries
       setUploadDialog(false);
       setUploadTitle('');
       setUploadDescription('');
       setUploadFile(null);
+      setUploadIsPublic(false);
       
-      // Reload current gallery
-      if (view === 'private') {
-        loadAllImages();
-      } else {
+      if (view === 'my-images') {
+        loadMyImages();
+      } else if (uploadIsPublic) {
         loadPublicImages();
       }
-      
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');
@@ -232,199 +246,162 @@ const ImageGallery = () => {
     }
   };
 
-  const handleDelete = async (image: any) => {
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to permanently delete "${image.title}"?\n\nThis action will:\n• Remove the image from both Public and Private galleries\n• Delete the file from storage permanently\n• Cannot be undone\n\nClick OK to confirm deletion.`
-    );
-    
-    if (!confirmed) {
+  const handleDelete = async (image: ImageData) => {
+    if (!user || (image.user_id !== user.id && !isAdmin)) {
+      toast.error('You can only delete your own images');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this image?')) {
       return;
     }
 
     setLoading(true);
     try {
-      console.log('Starting deletion process for image:', image.id, 'File path:', image.file_path);
-      
-      // First delete from database to ensure it's removed from both galleries
-      const { error: dbError } = await (supabase as any)
+      const { error: dbError } = await supabase
         .from('images')
         .delete()
         .eq('id', image.id);
 
-      console.log('Database deletion result:', { error: dbError });
+      if (dbError) throw dbError;
 
-      if (dbError) {
-        console.error('Database deletion failed:', dbError);
-        throw new Error('Failed to delete image from database: ' + dbError.message);
-      }
-
-      // Then delete from storage
       const { error: storageError } = await supabase.storage
         .from('images')
         .remove([image.file_path]);
 
-      console.log('Storage deletion result:', { error: storageError });
+      if (storageError) console.error('Storage deletion error:', storageError);
 
-      if (storageError) {
-        console.error('Storage deletion failed, but database already cleaned:', storageError);
-        // Continue since database is already cleaned
+      toast.success('Image deleted successfully');
+      setViewingImage(null);
+      
+      if (view === 'public') {
+        loadPublicImages();
+      } else {
+        loadMyImages();
       }
-
-      // Immediately update local state
-      setImages(prevImages => {
-        const filtered = prevImages.filter(img => img.id !== image.id);
-        console.log('Updated images list, removed image:', image.id, 'New count:', filtered.length);
-        return filtered;
-      });
-
-      toast.success('Image permanently deleted!');
-      console.log('Image successfully deleted and UI updated');
-      
-      // Force a complete reload after a short delay to ensure consistency
-      setTimeout(async () => {
-        console.log('Reloading gallery to ensure consistency...');
-        if (view === 'private') {
-          await loadAllImages();
-        } else {
-          await loadPublicImages();
-        }
-      }, 500);
-      
     } catch (error) {
       console.error('Error deleting image:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete image');
-      
-      // Reload on error to show current state
-      if (view === 'private') {
-        await loadAllImages();
-      } else {
-        await loadPublicImages();
-      }
+      toast.error('Failed to delete image');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = async (image: any) => {
-    const newTitle = prompt('Enter new title:', image.title);
-    if (newTitle && newTitle.trim() !== '' && newTitle !== image.title) {
-      setLoading(true);
-      try {
-        const { error } = await (supabase as any)
-          .from('images')
-          .update({ title: newTitle.trim() })
-          .eq('id', image.id);
-
-        if (error) {
-          console.error('Database update error:', error);
-          throw new Error('Failed to update image title');
-        }
-
-        toast.success('Image title updated successfully!');
-        
-        // Reload images
-        if (view === 'private') {
-          loadAllImages();
-        } else {
-          loadPublicImages();
-        }
-      } catch (error) {
-        console.error('Error updating image:', error);
-        toast.error(error instanceof Error ? error.message : 'Failed to update image');
-      } finally {
-        setLoading(false);
-      }
+  const toggleVisibility = async (image: ImageData) => {
+    if (!user || (image.user_id !== user.id && !isAdmin)) {
+      toast.error('You can only modify your own images');
+      return;
     }
-  };
 
-  const handleDownload = async (image: any) => {
-    try {
-      const response = await fetch(image.url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = image.title || 'image';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success('Image downloaded successfully!');
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      toast.error('Failed to download image');
-    }
-  };
-
-  if (view === 'private' && !isVerified) {
-    return <OTPVerification onVerified={() => setIsVerified(true)} />;
-  }
-
-  const toggleVisibility = async (image: any) => {
     setLoading(true);
     try {
       const newVisibility = !image.is_public;
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('images')
         .update({ is_public: newVisibility })
         .eq('id', image.id);
 
-      if (error) {
-        console.error('Visibility update error:', error);
-        throw new Error('Failed to update image visibility');
-      }
+      if (error) throw error;
 
-      toast.success(`Image is now ${newVisibility ? 'public' : 'private'}!`);
+      toast.success(`Image is now ${newVisibility ? 'public' : 'private'}`);
       
-      // Reload images
-      if (view === 'private') {
-        loadAllImages();
-      } else {
+      if (view === 'public') {
         loadPublicImages();
+      } else {
+        loadMyImages();
       }
     } catch (error) {
       console.error('Error updating visibility:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update visibility');
+      toast.error('Failed to update visibility');
     } finally {
       setLoading(false);
     }
   };
 
-  const renderImageGrid = (imagesToRender: typeof images, isPrivate = false) => (
-    <div className="space-y-6">
-      {/* Upload section only for private */}
-      {isPrivate && (
-        <>
-          <Card 
-            className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-              <div className="p-4 bg-muted rounded-full mb-4">
-                <Upload className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="font-medium mb-2">
-                Upload Images
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click here to upload images from your device. Images will be stored in the cloud and accessible from any device.
-              </p>
-              <Badge variant="destructive">
-                Private Upload
-              </Badge>
-            </CardContent>
-          </Card>
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
 
-          {/* Upload Dialog */}
+  if (loading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <ImageIcon className="w-12 h-12 animate-pulse mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/20 to-background p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold flex items-center gap-2">
+              <ImageIcon className="w-10 h-10" />
+              Image Gallery
+            </h1>
+            {userProfile && (
+              <p className="text-muted-foreground mt-2 flex items-center gap-2">
+                Welcome, {userProfile.username}
+                {userProfile.is_verified && (
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                )}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {isAdmin && (
+              <Button variant="outline" onClick={() => navigate('/admin')}>
+                <Shield className="w-4 h-4 mr-2" />
+                Admin Panel
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+
+        {/* View Selector */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={view === 'public' ? 'default' : 'outline'}
+            onClick={() => setView('public')}
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Public Gallery
+          </Button>
+          <Button
+            variant={view === 'my-images' ? 'default' : 'outline'}
+            onClick={() => setView('my-images')}
+          >
+            <UserIcon className="w-4 h-4 mr-2" />
+            My Images ({images.length})
+          </Button>
+        </div>
+
+        {/* Upload Button */}
+        <div className="mb-6">
           <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
-            <DialogContent className="max-w-md">
+            <DialogTrigger asChild>
+              <Button>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Image
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
               <DialogHeader>
-                <DialogTitle>Upload Image</DialogTitle>
+                <DialogTitle>Upload New Image</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
                     value={uploadTitle}
@@ -433,350 +410,183 @@ const ImageGallery = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description (optional)</Label>
                   <Textarea
                     id="description"
                     value={uploadDescription}
                     onChange={(e) => setUploadDescription(e.target.value)}
-                    placeholder="Enter image description (optional)"
-                    className="min-h-[80px]"
+                    placeholder="Enter image description"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setUploadDialog(false);
-                      setUploadTitle('');
-                      setUploadDescription('');
-                      setUploadFile(null);
-                    }}
+                <div>
+                  <Label htmlFor="file">Image File</Label>
+                  <Input
+                    id="file"
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="is-public"
+                    checked={uploadIsPublic}
+                    onChange={(e) => setUploadIsPublic(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="is-public">Make this image public</Label>
+                </div>
+                <Button onClick={handleUpload} disabled={loading} className="w-full">
+                  {loading ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Images Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {images.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <ImageIcon className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">
+                {view === 'public' ? 'No public images yet' : 'You haven\'t uploaded any images yet'}
+              </p>
+            </div>
+          ) : (
+            images.map((image) => (
+              <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div 
+                  className="relative h-48 bg-muted cursor-pointer"
+                  onClick={() => setViewingImage(image)}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {!image.is_public && (
+                    <Badge className="absolute top-2 right-2" variant="secondary">
+                      Private
+                    </Badge>
+                  )}
+                </div>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="truncate">{image.title}</span>
+                    {image.profile?.is_verified && (
+                      <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    )}
+                  </CardTitle>
+                  {image.description && (
+                    <CardDescription className="line-clamp-2">
+                      {image.description}
+                    </CardDescription>
+                  )}
+                  {view === 'public' && image.profile && (
+                    <CardDescription className="text-xs">
+                      By: {image.profile.username}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setViewingImage(image)}
                   >
-                    Cancel
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
                   </Button>
-                  <Button onClick={handleUpload} disabled={loading}>
-                    {loading ? 'Uploading...' : 'Upload'}
-                  </Button>
+                  {(image.user_id === user?.id || isAdmin) && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleVisibility(image)}
+                      >
+                        <Globe className="w-4 h-4 mr-1" />
+                        {image.is_public ? 'Hide' : 'Publish'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(image)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* View Image Dialog */}
+        {viewingImage && (
+          <Dialog open={!!viewingImage} onOpenChange={() => setViewingImage(null)}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {viewingImage.title}
+                  {viewingImage.profile?.is_verified && (
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                  )}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <img
+                  src={viewingImage.url}
+                  alt={viewingImage.title}
+                  className="w-full h-auto rounded-lg"
+                />
+                {viewingImage.description && (
+                  <p className="text-muted-foreground">{viewingImage.description}</p>
+                )}
+                {viewingImage.profile && (
+                  <p className="text-sm text-muted-foreground">
+                    Uploaded by: {viewingImage.profile.username}
+                    {viewingImage.profile.full_name && ` (${viewingImage.profile.full_name})`}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <a
+                    href={viewingImage.url}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </a>
+                  {(viewingImage.user_id === user?.id || isAdmin) && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => toggleVisibility(viewingImage)}
+                      >
+                        <Globe className="w-4 h-4 mr-2" />
+                        {viewingImage.is_public ? 'Make Private' : 'Make Public'}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(viewingImage)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </DialogContent>
           </Dialog>
-        </>
-      )}
-      
-      {loading ? (
-        <div className="flex justify-center py-8">
-          <div className="text-muted-foreground">Loading images...</div>
-        </div>
-      ) : isPrivate ? (
-        // List view for private gallery
-        <div className="space-y-3">
-          {imagesToRender.map((image) => (
-            <Card key={image.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    <img
-                      src={image.url}
-                      alt={image.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium truncate">{image.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(image.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={image.is_public ? "default" : "secondary"} className="text-xs">
-                      {image.is_public ? (
-                        <>
-                          <Globe className="h-3 w-3 mr-1" />
-                          Public
-                        </>
-                      ) : (
-                        <>
-                          <User className="h-3 w-3 mr-1" />
-                          Private
-                        </>
-                      )}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-1">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" className="px-2" title="View">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl w-full p-0">
-                        <div className="relative">
-                          <img
-                            src={image.url}
-                            alt={image.title}
-                            className="w-full max-h-[80vh] object-contain"
-                            style={{ userSelect: 'none', pointerEvents: 'none' }}
-                          />
-                          <div className="absolute top-4 right-4 flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleDownload(image)}
-                              className="bg-background/80 hover:bg-background"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                            <h3 className="text-white font-medium">{image.title}</h3>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleEdit(image)}
-                      className="px-2"
-                      title="Edit"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => toggleVisibility(image)}
-                      className="px-2"
-                      title={image.is_public ? "Make Private" : "Make Public"}
-                    >
-                      {image.is_public ? <Lock className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleDelete(image)}
-                      className="px-2"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        // Grid view for public gallery
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {imagesToRender.map((image) => (
-            <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square overflow-hidden bg-muted">
-                <img
-                  src={image.url}
-                  alt={image.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardContent className={`${isPrivate ? 'p-3' : 'p-4'}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className={`font-medium truncate ${isPrivate ? 'text-sm' : ''}`}>{image.title}</h3>
-                  <Badge variant={image.is_public ? "default" : "secondary"} className="text-xs">
-                    {image.is_public ? "Public" : "Private"}
-                  </Badge>
-                </div>
-                <div className="flex gap-1">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex-1 text-xs"
-                        onClick={() => setViewingImage(image)}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl w-full p-0">
-                      <div className="relative">
-                        <img
-                          src={image.url}
-                          alt={image.title}
-                          className="w-full max-h-[80vh] object-contain"
-                          style={{ userSelect: 'none', pointerEvents: 'none' }}
-                        />
-                        <div className="absolute top-4 right-4 flex gap-2">
-                          {isPrivate && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleDownload(image)}
-                              className="bg-background/80 hover:bg-background"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                          <h3 className="text-white font-medium">{image.title}</h3>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  {isPrivate && (
-                    <>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleEdit(image)}
-                        className="px-2"
-                        title="Edit"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => toggleVisibility(image)}
-                        className="px-2"
-                        title={image.is_public ? "Make Private" : "Make Public"}
-                      >
-                        {image.is_public ? <Lock className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </Button>
-                      <Button
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDelete(image)}
-                        className="px-2"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
-        {view === 'menu' ? (
-          <div className="max-w-2xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <div className="mx-auto p-4 bg-primary/10 rounded-full w-fit">
-                <ImageIcon className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold">Image Gallery</h1>
-              <p className="text-muted-foreground">
-                Choose between public or private image collections
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                <CardHeader className="text-center">
-                  <div className="mx-auto p-3 bg-green-100 rounded-full w-fit mb-2">
-                    <Eye className="h-6 w-6 text-green-600" />
-                  </div>
-                  <CardTitle className="text-xl">Public Gallery</CardTitle>
-                  <CardDescription>
-                    View all uploaded images
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    className="w-full group-hover:bg-primary/90" 
-                    onClick={() => setView('public')}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Gallery
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                <CardHeader className="text-center">
-                  <div className="mx-auto p-3 bg-red-100 rounded-full w-fit mb-2">
-                    <Lock className="h-6 w-6 text-red-600" />
-                  </div>
-                  <CardTitle className="text-xl">Admin Panel</CardTitle>
-                  <CardDescription>
-                    Manage images with full admin access - upload, edit, delete, and control visibility
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full group-hover:bg-muted" 
-                    onClick={() => setView('private')}
-                  >
-                    <Lock className="mr-2 h-4 w-4" />
-                    Admin Access
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                  {view === 'public' ? (
-                    <>
-                      <Eye className="h-6 w-6 text-green-600" />
-                      Public Gallery
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="h-6 w-6 text-red-600" />
-                      Admin Panel
-                    </>
-                  )}
-                </h1>
-                <p className="text-muted-foreground">
-                  {view === 'public' 
-                    ? 'View all uploaded images from the gallery' 
-                    : 'Admin panel - manage all images with upload, edit, delete and visibility controls'
-                  }
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {view === 'private' && (
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => {
-                      setIsVerified(false);
-                      toast.success('Logged out successfully!');
-                    }}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => setView('menu')}>
-                  Back to Menu
-                </Button>
-              </div>
-            </div>
-
-            {renderImageGrid(images, view === 'private')}
-            
-            {/* Hidden file input for upload */}
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
         )}
       </div>
     </div>
