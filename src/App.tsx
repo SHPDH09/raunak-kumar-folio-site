@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ImageGallery from "./pages/ImageGallery";
+import SocialFeed from "./pages/SocialFeed";
 import Tools from "./pages/Tools";
 import LeetCode from "./pages/LeetCode";
 import Auth from "./pages/Auth";
@@ -23,7 +24,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/image-gallery" element={<ImageGallery />} />
-          <Route path="/gallery" element={<ImageGallery />} />
+          <Route path="/gallery" element={<SocialFeed />} />
+          <Route path="/feed" element={<SocialFeed />} />
           <Route path="/leetcode" element={<LeetCode />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminPanel />} />

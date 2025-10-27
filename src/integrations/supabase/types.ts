@@ -14,33 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       images: {
         Row: {
+          caption: string | null
           created_at: string
           description: string | null
           file_path: string
           id: string
           is_public: boolean
+          share_count: number | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          caption?: string | null
           created_at?: string
           description?: string | null
           file_path: string
           id?: string
           is_public?: boolean
+          share_count?: number | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          caption?: string | null
           created_at?: string
           description?: string | null
           file_path?: string
           id?: string
           is_public?: boolean
+          share_count?: number | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -175,6 +216,35 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      likes: {
+        Row: {
+          created_at: string
+          id: string
+          image_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       otp_rate_limits: {
         Row: {

@@ -121,18 +121,20 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome</CardTitle>
+          <CardTitle className="text-2xl text-center">Welcome to Social Media App</CardTitle>
           <CardDescription className="text-center">
-            Login or create an account to manage your images
+            Login, create account, view public posts, or access admin panel
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="login">User Login</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="view">View Posts</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -213,6 +215,52 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating account..." : "Sign Up"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="view">
+              <div className="text-center py-8 space-y-4">
+                <p className="text-muted-foreground">
+                  View all public posts without logging in
+                </p>
+                <Button onClick={() => navigate("/gallery")} className="w-full">
+                  Browse Public Feed
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="admin">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ Admin access only. Regular users should use the "User Login" tab.
+                </p>
+              </div>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="admin-email">Admin Email</Label>
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-password">Admin Password</Label>
+                  <Input
+                    id="admin-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Logging in..." : "Admin Login"}
                 </Button>
               </form>
             </TabsContent>
