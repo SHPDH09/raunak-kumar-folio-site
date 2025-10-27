@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/image-gallery" element={<ImageGallery />} />
+          <Route path="/gallery" element={<ImageGallery />} />
           <Route path="/leetcode" element={<LeetCode />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminPanel />} />
