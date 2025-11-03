@@ -15,8 +15,7 @@ const loginSchema = z.object({
 });
 
 const signupSchema = loginSchema.extend({
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }).max(20),
-  fullName: z.string().min(2, { message: "Full name must be at least 2 characters" }).max(100),
+  fullName: z.string().trim().min(2, { message: "Full name must be at least 2 characters" }).max(100),
 });
 
 const Auth = () => {
@@ -32,6 +31,17 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+
+  // Auto-generate username from full name or email
+  useEffect(() => {
+    const base = (fullName || signupEmail.split("@")[0] || "user")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .slice(0, 20);
+    if (base && username !== base) {
+      setUsername(base);
+    }
+  }, [fullName, signupEmail]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -102,7 +112,6 @@ const Auth = () => {
       const validated = signupSchema.parse({
         email: signupEmail,
         password: signupPassword,
-        username,
         fullName,
       });
 
@@ -114,7 +123,7 @@ const Auth = () => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            username: validated.username,
+            username,
             full_name: validated.fullName,
           },
         },
@@ -131,7 +140,7 @@ const Auth = () => {
 
       if (data.user) {
         // Ensure profile is created with proper data
-        await ensureProfile(data.user.id, validated.username, validated.fullName);
+        await ensureProfile(data.user.id, username, validated.fullName);
         toast.success("Account created successfully! Redirecting...");
         navigate("/image-gallery");
       }
@@ -197,14 +206,13 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-username">Username</Label>
+                  <Label htmlFor="signup-username">Username (auto-generated)</Label>
                   <Input
                     id="signup-username"
                     type="text"
-                    placeholder="johndoe"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
+                    disabled
+                    readOnly
                   />
                 </div>
                 <div className="space-y-2">
