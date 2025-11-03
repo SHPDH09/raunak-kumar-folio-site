@@ -4,12 +4,15 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string
+const FALLBACK_URL = 'https://eewotqwrtxcndvoehkrr.supabase.co'
+const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVld290cXdydHhjbmR2b2Voa3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTExOTgsImV4cCI6MjA3NTE2NzE5OH0.yN_CnUft3YlGheXsvYsNRnl1F6FzJCv7CYIjjW9p_Hs'
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) || FALLBACK_URL
+const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) || FALLBACK_KEY
+
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
   // Soft guard to help diagnose env misconfigurations during build/runtime
-  console.error('Supabase env vars missing: VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY')
+  console.warn('[Auth] Using fallback Lovable Cloud backend URL for Supabase client:', SUPABASE_URL)
 }
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
