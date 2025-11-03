@@ -121,11 +121,7 @@ const Auth = () => {
         email: validated.email,
         password: validated.password,
         options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            username,
-            full_name: validated.fullName,
-          },
+            emailRedirectTo: redirectUrl,
         },
       });
 
