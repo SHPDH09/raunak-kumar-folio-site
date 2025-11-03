@@ -47,6 +47,17 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const ensureProfile = async (userId: string, username: string, fullName: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: userId, username, full_name: fullName }, { onConflict: 'id' });
+      if (error) console.error('Profile upsert error:', error);
+    } catch (err) {
+      console.error('Profile upsert exception:', err);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -119,6 +130,8 @@ const Auth = () => {
       }
 
       if (data.user) {
+        // Ensure profile is created with proper data
+        await ensureProfile(data.user.id, validated.username, validated.fullName);
         toast.success("Account created successfully! Redirecting...");
         navigate("/image-gallery");
       }
