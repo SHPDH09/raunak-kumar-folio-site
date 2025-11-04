@@ -7,10 +7,17 @@ import type { Database } from './types'
 const FALLBACK_URL = 'https://eewotqwrtxcndvoehkrr.supabase.co'
 const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVld290cXdydHhjbmR2b2Voa3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1OTExOTgsImV4cCI6MjA3NTE2NzE5OH0.yN_CnUft3YlGheXsvYsNRnl1F6FzJCv7CYIjjW9p_Hs'
 
-const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) || FALLBACK_URL
-const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) || FALLBACK_KEY
+const PROJECT_ID = 'eewotqwrtxcndvoehkrr'
 
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+const envUrl = (import.meta.env.VITE_SUPABASE_URL as string) || undefined
+const envKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) || undefined
+
+const useEnv = !!envUrl && envUrl.includes(PROJECT_ID) && !!envKey
+
+const SUPABASE_URL = useEnv ? envUrl! : FALLBACK_URL
+const SUPABASE_PUBLISHABLE_KEY = useEnv ? envKey! : FALLBACK_KEY
+
+if (!useEnv) {
   // Soft guard to help diagnose env misconfigurations during build/runtime
   console.warn('[Auth] Using fallback Lovable Cloud backend URL for Supabase client:', SUPABASE_URL)
 }

@@ -96,6 +96,8 @@ const Auth = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
+      } else if ((error as any)?.message?.includes("Failed to fetch")) {
+        toast.error("Network error: unable to reach backend. Please try again.");
       } else {
         toast.error("An error occurred during login");
       }
@@ -121,7 +123,11 @@ const Auth = () => {
         email: validated.email,
         password: validated.password,
         options: {
-            emailRedirectTo: redirectUrl,
+          emailRedirectTo: redirectUrl,
+          data: {
+            username,
+            full_name: validated.fullName,
+          },
         },
       });
 
@@ -143,6 +149,8 @@ const Auth = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
+      } else if ((error as any)?.message?.includes("Failed to fetch")) {
+        toast.error("Network error: unable to reach backend. Please try again.");
       } else {
         toast.error("An error occurred during signup");
       }
