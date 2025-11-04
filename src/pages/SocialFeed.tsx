@@ -2,15 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Upload, LogOut, Home, User as UserIcon } from "lucide-react";
+import { Home } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
-import type { User, Session } from "@supabase/supabase-js";
 
 interface Profile {
   id: string;
@@ -37,20 +33,11 @@ interface PostData {
 
 const SocialFeed = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState<PostData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
-  const [uploadDialog, setUploadDialog] = useState(false);
-  const [uploadTitle, setUploadTitle] = useState("");
-  const [uploadCaption, setUploadCaption] = useState("");
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   useEffect(() => {
-    checkAuth();
     loadPosts();
 
     // Subscribe to realtime updates for images
@@ -69,35 +56,8 @@ const SocialFeed = () => {
     };
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setSession(session);
-    setUser(session?.user ?? null);
-
-    if (session) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profile) {
-        setUserProfile(profile);
-      }
-
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      setIsAdmin(!!roles);
-    }
-    setLoading(false);
-  };
-
   const loadPosts = async () => {
+    setLoading(true);
     // Get public images
     const { data: imagesData, error: imagesError } = await supabase
       .from('images')
@@ -137,17 +97,6 @@ const SocialFeed = () => {
           .select('*', { count: 'exact', head: true })
           .eq('image_id', image.id);
 
-        let userLiked = false;
-        if (user) {
-          const { data: likeData } = await supabase
-            .from('likes')
-            .select('id')
-            .eq('image_id', image.id)
-            .eq('user_id', user.id)
-            .maybeSingle();
-          userLiked = !!likeData;
-        }
-
         const { data: { publicUrl } } = supabase.storage
           .from('images')
           .getPublicUrl(image.file_path);
@@ -158,76 +107,17 @@ const SocialFeed = () => {
           profile: profilesMap.get(image.user_id),
           likes_count: likesCount || 0,
           comments_count: commentsCount || 0,
-          user_liked: userLiked,
+          user_liked: false,
         };
       })
     );
 
     setPosts(postsWithData);
+    setLoading(false);
   };
 
-  const handleUpload = async () => {
-    if (!uploadFile || !uploadTitle || !user) {
-      toast.error("Please fill all fields");
-      return;
-    }
-
-    const fileExt = uploadFile.name.split('.').pop();
-    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('images')
-      .upload(fileName, uploadFile);
-
-    if (uploadError) {
-      toast.error("Failed to upload image");
-      console.error(uploadError);
-      return;
-    }
-
-    const { error: dbError } = await supabase
-      .from('images')
-      .insert({
-        user_id: user.id,
-        title: uploadTitle,
-        caption: uploadCaption || null,
-        file_path: fileName,
-        is_public: true,
-      });
-
-    if (dbError) {
-      toast.error("Failed to create post");
-      console.error(dbError);
-      return;
-    }
-
-    toast.success("Post created!");
-    setUploadDialog(false);
-    setUploadTitle("");
-    setUploadCaption("");
-    setUploadFile(null);
-    loadPosts();
-  };
-
-  const handleLike = async (postId: string, currentlyLiked: boolean) => {
-    if (!user) {
-      toast.error("Please login to like posts");
-      return;
-    }
-
-    if (currentlyLiked) {
-      await supabase
-        .from('likes')
-        .delete()
-        .eq('image_id', postId)
-        .eq('user_id', user.id);
-    } else {
-      await supabase
-        .from('likes')
-        .insert({ image_id: postId, user_id: user.id });
-    }
-
-    loadPosts();
+  const handleLike = async () => {
+    toast.info("Like feature disabled - authentication removed");
   };
 
   const handleShare = async (postId: string) => {
@@ -251,37 +141,8 @@ const SocialFeed = () => {
     }
   };
 
-  const handleDelete = async (postId: string) => {
-    const post = posts.find(p => p.id === postId);
-    if (!post) return;
-
-    const { error: storageError } = await supabase.storage
-      .from('images')
-      .remove([post.file_path]);
-
-    if (storageError) {
-      toast.error("Failed to delete image file");
-      return;
-    }
-
-    const { error: dbError } = await supabase
-      .from('images')
-      .delete()
-      .eq('id', postId);
-
-    if (dbError) {
-      toast.error("Failed to delete post");
-      return;
-    }
-
-    toast.success("Post deleted");
-    setSelectedPost(null);
-    loadPosts();
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+  const handleDelete = async () => {
+    toast.info("Delete feature disabled - authentication removed");
   };
 
   if (loading) {
@@ -306,65 +167,7 @@ const SocialFeed = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {user && (
-              <>
-                <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Create Post
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New Post</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="title">Title</Label>
-                        <Input
-                          id="title"
-                          value={uploadTitle}
-                          onChange={(e) => setUploadTitle(e.target.value)}
-                          placeholder="Enter post title"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="caption">Caption (optional)</Label>
-                        <Textarea
-                          id="caption"
-                          value={uploadCaption}
-                          onChange={(e) => setUploadCaption(e.target.value)}
-                          placeholder="Write a caption..."
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="image">Image</Label>
-                        <Input
-                          id="image"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                        />
-                      </div>
-                      <Button onClick={handleUpload} className="w-full">
-                        Upload Post
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="icon">
-                  <UserIcon className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </>
-            )}
-            {!user && (
-              <Button onClick={() => navigate('/auth')}>Login</Button>
-            )}
+            {/* Authentication removed - public viewing only */}
           </div>
         </div>
       </header>
@@ -385,13 +188,13 @@ const SocialFeed = () => {
               likesCount={post.likes_count}
               commentsCount={post.comments_count}
               shareCount={post.share_count}
-              isLiked={post.user_liked}
-              canEdit={user?.id === post.user_id || isAdmin}
-              canDelete={user?.id === post.user_id || isAdmin}
-              onLike={() => handleLike(post.id, post.user_liked)}
+              isLiked={false}
+              canEdit={false}
+              canDelete={false}
+              onLike={handleLike}
               onComment={() => setSelectedPost(post)}
               onShare={() => handleShare(post.id)}
-              onDelete={() => handleDelete(post.id)}
+              onDelete={handleDelete}
               onClick={() => setSelectedPost(post)}
             />
           ))}
@@ -422,8 +225,8 @@ const SocialFeed = () => {
               </div>
               <CommentSection
                 imageId={selectedPost.id}
-                currentUserId={user?.id}
-                isAdmin={isAdmin}
+                currentUserId={undefined}
+                isAdmin={false}
               />
             </div>
           )}

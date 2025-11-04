@@ -9,8 +9,6 @@ import ImageGallery from "./pages/ImageGallery";
 import SocialFeed from "./pages/SocialFeed";
 import Tools from "./pages/Tools";
 import LeetCode from "./pages/LeetCode";
-import Auth from "./pages/Auth";
-import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -27,8 +25,6 @@ const App = () => (
           <Route path="/gallery" element={<SocialFeed />} />
           <Route path="/feed" element={<SocialFeed />} />
           <Route path="/leetcode" element={<LeetCode />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<AdminPanel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
