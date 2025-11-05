@@ -204,6 +204,14 @@ const Auth = () => {
                   {loading ? "Logging in..." : "Login"}
                 </Button>
               </form>
+              <div className="text-center mt-4">
+                <p className="text-sm text-muted-foreground">
+                  Don't have an account?{" "}
+                  <TabsTrigger value="signup" className="inline-flex p-0 h-auto text-primary hover:underline cursor-pointer">
+                    Create account
+                  </TabsTrigger>
+                </p>
+              </div>
             </TabsContent>
             
             <TabsContent value="signup">
