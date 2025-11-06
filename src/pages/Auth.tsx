@@ -46,12 +46,12 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        navigate("/image-gallery");
+        navigate("/dashboard");
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) navigate("/image-gallery");
+      if (session?.user) navigate("/dashboard");
     });
 
     return () => subscription.unsubscribe();
@@ -91,7 +91,7 @@ const Auth = () => {
 
       if (data.user) {
         toast.success("Login successful!");
-        navigate("/image-gallery");
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -117,7 +117,7 @@ const Auth = () => {
         fullName,
       });
 
-      const redirectUrl = `${window.location.origin}/image-gallery`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
 
       const { data, error } = await supabase.auth.signUp({
         email: validated.email,
@@ -143,7 +143,7 @@ const Auth = () => {
       if (data.user) {
         await ensureProfile(data.user.id, username, validated.fullName);
         toast.success("Account created successfully! Redirecting...");
-        navigate("/image-gallery");
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

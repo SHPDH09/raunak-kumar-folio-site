@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle2, Shield, Users, Image as ImageIcon, LogOut } from "lucide-react";
+import { CheckCircle2, Shield, Users, Image as ImageIcon, LogOut, FileCheck } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Profile {
   id: string;
@@ -20,11 +21,24 @@ interface UserWithImages extends Profile {
   image_count: number;
 }
 
+interface PendingPost {
+  id: string;
+  title: string;
+  caption: string | null;
+  file_path: string;
+  created_at: string;
+  user_id: string;
+  profile?: Profile;
+  url?: string;
+}
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState<UserWithImages[]>([]);
+  const [pendingPosts, setPendingPosts] = useState<PendingPost[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   useEffect(() => {
     checkAdminStatus();
@@ -39,6 +53,8 @@ const AdminPanel = () => {
         return;
       }
 
+      setCurrentUserId(user.id);
+
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
@@ -48,12 +64,13 @@ const AdminPanel = () => {
 
       if (!roles) {
         toast.error("Access denied. Admin privileges required.");
-        navigate("/image-gallery");
+        navigate("/dashboard");
         return;
       }
 
       setIsAdmin(true);
       await loadUsers();
+      await loadPendingPosts();
     } catch (error) {
       console.error("Error checking admin status:", error);
       navigate("/auth");
@@ -89,6 +106,82 @@ const AdminPanel = () => {
     } catch (error) {
       console.error("Error loading users:", error);
       toast.error("Failed to load users");
+    }
+  };
+
+  const loadPendingPosts = async () => {
+    try {
+      const { data: images } = await supabase
+        .from("images")
+        .select("*")
+        .eq("is_approved", false)
+        .order("created_at", { ascending: false });
+
+      if (images) {
+        const userIds = [...new Set(images.map(img => img.user_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("*")
+          .in("id", userIds);
+
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+
+        const postsWithData = images.map((image) => {
+          const { data: { publicUrl } } = supabase.storage
+            .from("images")
+            .getPublicUrl(image.file_path);
+
+          return {
+            ...image,
+            url: publicUrl,
+            profile: profilesMap.get(image.user_id),
+          };
+        });
+
+        setPendingPosts(postsWithData);
+      }
+    } catch (error) {
+      console.error("Error loading pending posts:", error);
+      toast.error("Failed to load pending posts");
+    }
+  };
+
+  const approvePost = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from("images")
+        .update({ 
+          is_approved: true,
+          approved_by: currentUserId,
+          approved_at: new Date().toISOString()
+        })
+        .eq("id", postId);
+
+      if (error) throw error;
+
+      toast.success("Post approved successfully!");
+      await loadPendingPosts();
+    } catch (error) {
+      console.error("Error approving post:", error);
+      toast.error("Failed to approve post");
+    }
+  };
+
+  const rejectPost = async (postId: string) => {
+    if (!confirm("Are you sure you want to reject and delete this post?")) return;
+
+    try {
+      const post = pendingPosts.find(p => p.id === postId);
+      if (!post) return;
+
+      await supabase.storage.from("images").remove([post.file_path]);
+      await supabase.from("images").delete().eq("id", postId);
+
+      toast.success("Post rejected and deleted");
+      await loadPendingPosts();
+    } catch (error) {
+      console.error("Error rejecting post:", error);
+      toast.error("Failed to reject post");
     }
   };
 
@@ -138,12 +231,12 @@ const AdminPanel = () => {
               <Shield className="w-8 h-8" />
               Admin Panel
             </h1>
-            <p className="text-muted-foreground mt-2">Manage users and verify accounts</p>
+            <p className="text-muted-foreground mt-2">Manage users, verify accounts, and approve posts</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/image-gallery")}>
+            <Button variant="outline" onClick={() => navigate("/dashboard")}>
               <ImageIcon className="w-4 h-4 mr-2" />
-              Gallery
+              Dashboard
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
@@ -152,7 +245,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -177,6 +270,16 @@ const AdminPanel = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Posts</CardTitle>
+              <FileCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{pendingPosts.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Images</CardTitle>
               <ImageIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -188,61 +291,132 @@ const AdminPanel = () => {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription>View and manage all registered users</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Full Name</TableHead>
-                  <TableHead>Images</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {user.username}
-                        {user.is_verified && (
-                          <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.full_name || "—"}</TableCell>
-                    <TableCell>{user.image_count}</TableCell>
-                    <TableCell>
-                      {user.is_verified ? (
-                        <Badge variant="default">Verified</Badge>
-                      ) : (
-                        <Badge variant="secondary">Unverified</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant={user.is_verified ? "outline" : "default"}
-                        size="sm"
-                        onClick={() => toggleVerification(user.id, user.is_verified)}
-                      >
-                        {user.is_verified ? "Remove Blue Tick" : "Add Blue Tick"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="posts">Pending Posts</TabsTrigger>
+            <TabsTrigger value="users">User Management</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="posts">
+            <Card>
+              <CardHeader>
+                <CardTitle>Post Approval</CardTitle>
+                <CardDescription>Review and approve user posts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pendingPosts.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    No pending posts to review
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pendingPosts.map((post) => (
+                      <Card key={post.id} className="overflow-hidden">
+                        <img 
+                          src={post.url} 
+                          alt={post.title}
+                          className="w-full h-48 object-cover"
+                        />
+                        <CardContent className="p-4">
+                          <h3 className="font-bold text-lg">{post.title}</h3>
+                          {post.caption && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              {post.caption}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-4 text-sm">
+                            <span className="font-medium">{post.profile?.username}</span>
+                            {post.profile?.is_verified && (
+                              <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(post.created_at).toLocaleDateString()}
+                          </p>
+                          <div className="flex gap-2 mt-4">
+                            <Button 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => approvePost(post.id)}
+                            >
+                              Approve
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              className="flex-1"
+                              onClick={() => rejectPost(post.id)}
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>View and manage all registered users</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Full Name</TableHead>
+                      <TableHead>Images</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {user.username}
+                            {user.is_verified && (
+                              <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{user.full_name || "—"}</TableCell>
+                        <TableCell>{user.image_count}</TableCell>
+                        <TableCell>
+                          {user.is_verified ? (
+                            <Badge variant="default">Verified</Badge>
+                          ) : (
+                            <Badge variant="secondary">Unverified</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant={user.is_verified ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => toggleVerification(user.id, user.is_verified)}
+                          >
+                            {user.is_verified ? "Remove Blue Tick" : "Add Blue Tick"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

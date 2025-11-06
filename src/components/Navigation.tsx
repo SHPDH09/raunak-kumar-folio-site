@@ -89,6 +89,13 @@ const Navigation = () => {
               >
                 Resume
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.location.href = '/auth'}
+              >
+                Login
+              </Button>
             </div>
           </div>
 
@@ -128,13 +135,21 @@ const Navigation = () => {
                   </button>
                 )
               ))}
-              <div className="px-4 sm:px-6 py-2">
+              <div className="px-4 sm:px-6 py-2 space-y-2">
                 <Button
                   size="sm"
                   onClick={handleResumeClick}
                   className="w-full bg-primary hover:bg-primary/90 transition-smooth"
                 >
                   Resume
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.location.href = '/auth'}
+                  className="w-full"
+                >
+                  Login
                 </Button>
               </div>
             </div>

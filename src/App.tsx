@@ -11,6 +11,7 @@ import Tools from "./pages/Tools";
 import LeetCode from "./pages/LeetCode";
 import Auth from "./pages/Auth";
 import AdminPanel from "./pages/AdminPanel";
+import UserDashboard from "./pages/UserDashboard";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/feed" element={<SocialFeed />} />
           <Route path="/leetcode" element={<LeetCode />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/admin" element={<AdminPanel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
