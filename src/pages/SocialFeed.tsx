@@ -58,62 +58,71 @@ const SocialFeed = () => {
 
   const loadPosts = async () => {
     setLoading(true);
-    // Get public images
-    const { data: imagesData, error: imagesError } = await supabase
-      .from('images')
-      .select('*')
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+    try {
+      // Get public images
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('images')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
 
-    if (imagesError) {
-      console.error('Error loading posts:', imagesError);
-      return;
-    }
+      if (imagesError) {
+        console.error('Error loading posts:', imagesError);
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
 
-    if (!imagesData || imagesData.length === 0) {
+      if (!imagesData || imagesData.length === 0) {
+        setPosts([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get profiles for all post authors
+      const userIds = [...new Set(imagesData.map(img => img.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+
+      // Get likes count and user likes for each post
+      const postsWithData = await Promise.all(
+        imagesData.map(async (image) => {
+          const { count: likesCount } = await supabase
+            .from('likes')
+            .select('*', { count: 'exact', head: true })
+            .eq('image_id', image.id);
+
+          const { count: commentsCount } = await supabase
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('image_id', image.id);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(image.file_path);
+
+          return {
+            ...image,
+            url: publicUrl,
+            profile: profilesMap.get(image.user_id),
+            likes_count: likesCount || 0,
+            comments_count: commentsCount || 0,
+            user_liked: false,
+          };
+        })
+      );
+
+      setPosts(postsWithData);
+    } catch (error) {
+      console.error('Error in loadPosts:', error);
       setPosts([]);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    // Get profiles for all post authors
-    const userIds = [...new Set(imagesData.map(img => img.user_id))];
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('id', userIds);
-
-    const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-
-    // Get likes count and user likes for each post
-    const postsWithData = await Promise.all(
-      imagesData.map(async (image) => {
-        const { count: likesCount } = await supabase
-          .from('likes')
-          .select('*', { count: 'exact', head: true })
-          .eq('image_id', image.id);
-
-        const { count: commentsCount } = await supabase
-          .from('comments')
-          .select('*', { count: 'exact', head: true })
-          .eq('image_id', image.id);
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(image.file_path);
-
-        return {
-          ...image,
-          url: publicUrl,
-          profile: profilesMap.get(image.user_id),
-          likes_count: likesCount || 0,
-          comments_count: commentsCount || 0,
-          user_liked: false,
-        };
-      })
-    );
-
-    setPosts(postsWithData);
-    setLoading(false);
   };
 
   const handleLike = async () => {
