@@ -51,13 +51,14 @@ const ImageGallery = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
       
       if (!session) {
         navigate('/auth');
         return;
       }
+
+      setSession(session);
+      setUser(session?.user ?? null);
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -83,12 +84,13 @@ const ImageGallery = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
       if (!session) {
         navigate('/auth');
+        return;
       }
+      
+      setSession(session);
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -317,15 +319,8 @@ const ImageGallery = () => {
     navigate('/auth');
   };
 
-  if (loading && !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <ImageIcon className="w-12 h-12 animate-pulse mx-auto mb-4" />
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
