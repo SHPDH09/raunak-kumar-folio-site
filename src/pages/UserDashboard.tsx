@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Home, Upload, User, LogOut, Users } from "lucide-react";
+import { Home, Upload, User, LogOut, Users, Shield } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +50,7 @@ const UserDashboard = () => {
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newPost, setNewPost] = useState({
     title: "",
     caption: "",
@@ -72,6 +73,16 @@ const UserDashboard = () => {
     await loadProfile(session.user.id);
     await loadUserPosts(session.user.id);
     await loadFeed();
+    
+    // Check if user is admin
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    
+    setIsAdmin(!!roles);
     setLoading(false);
   };
 
@@ -322,6 +333,12 @@ const UserDashboard = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button variant="secondary" onClick={() => navigate('/admin')}>
+                <Shield className="h-5 w-5 mr-2" />
+                Admin Panel
+              </Button>
+            )}
             <Button onClick={() => setUploadDialogOpen(true)}>
               <Upload className="h-5 w-5 mr-2" />
               New Post
