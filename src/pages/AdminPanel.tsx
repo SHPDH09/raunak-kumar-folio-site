@@ -126,17 +126,19 @@ const AdminPanel = () => {
 
         const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
 
-        const postsWithData = images.map((image) => {
-          const { data: { publicUrl } } = supabase.storage
-            .from("images")
-            .getPublicUrl(image.file_path);
+        const postsWithData = await Promise.all(
+          images.map(async (image) => {
+            const { data: signedUrlData, error } = await supabase.storage
+              .from("images")
+              .createSignedUrl(image.file_path, 3600); // 1 hour expiry
 
-          return {
-            ...image,
-            url: publicUrl,
-            profile: profilesMap.get(image.user_id),
-          };
-        });
+            return {
+              ...image,
+              url: signedUrlData?.signedUrl || '',
+              profile: profilesMap.get(image.user_id),
+            };
+          })
+        );
 
         setPendingPosts(postsWithData);
       }
