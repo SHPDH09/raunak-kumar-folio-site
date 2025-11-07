@@ -176,7 +176,9 @@ const SocialFeed = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Authentication removed - public viewing only */}
+            <Button variant="outline" onClick={() => navigate('/auth')}>
+              Login
+            </Button>
           </div>
         </div>
       </header>
