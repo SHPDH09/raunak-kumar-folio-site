@@ -207,9 +207,16 @@ const Auth = () => {
               <div className="text-center mt-4">
                 <p className="text-sm text-muted-foreground">
                   Don't have an account?{" "}
-                  <TabsTrigger value="signup" className="inline-flex p-0 h-auto text-primary hover:underline cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const signupTab = document.querySelector('[value="signup"]') as HTMLElement;
+                      signupTab?.click();
+                    }}
+                    className="text-primary hover:underline cursor-pointer"
+                  >
                     Create account
-                  </TabsTrigger>
+                  </button>
                 </p>
               </div>
             </TabsContent>
