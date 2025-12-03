@@ -27,5 +27,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
       "@/integrations/supabase/client": path.resolve(__dirname, "./src/integrations/supabase/cloudClientFix.ts"),
     },
+    dedupe: ['react', 'react-dom'],
   },
 }));
