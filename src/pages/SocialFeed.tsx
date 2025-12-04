@@ -2,19 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Home, LogIn } from "lucide-react";
+import { Home, LogIn, Plus } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { PollCard } from "@/components/PollCard";
 import { CreatePoll } from "@/components/CreatePoll";
 import { CommentSection } from "@/components/CommentSection";
 import { Stories } from "@/components/Stories";
+import { CreatePost } from "@/components/CreatePost";
 
 interface Profile {
   id: string;
   username: string;
   full_name: string | null;
+  avatar_url: string | null;
   is_verified: boolean;
 }
 
@@ -22,17 +24,20 @@ interface PostData {
   id: string;
   title: string;
   caption: string | null;
-  file_path: string;
+  file_path: string | null;
   is_public: boolean;
   user_id: string;
   created_at: string;
   share_count: number;
+  repost_of: string | null;
   url?: string;
   profile?: Profile;
   likes_count: number;
   comments_count: number;
+  repost_count: number;
   user_liked: boolean;
   is_following: boolean;
+  original_username?: string;
 }
 
 interface PollData {
@@ -60,6 +65,7 @@ const SocialFeed = () => {
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  const [createPostOpen, setCreatePostOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -122,12 +128,38 @@ const SocialFeed = () => {
       // Process posts
       if (imagesData && !imagesError) {
         const userIds = [...new Set(imagesData.map(img => img.user_id))];
+        const repostIds = imagesData.filter(img => img.repost_of).map(img => img.repost_of);
+        
         const { data: profilesData } = await supabase
           .from('profiles')
           .select('*')
           .in('id', userIds);
 
         const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+
+        // Get original post usernames for reposts
+        let originalPostsMap = new Map<string, string>();
+        if (repostIds.length > 0) {
+          const { data: originalPosts } = await supabase
+            .from('images')
+            .select('id, user_id')
+            .in('id', repostIds.filter(Boolean));
+          
+          if (originalPosts) {
+            const originalUserIds = originalPosts.map(p => p.user_id);
+            const { data: originalProfiles } = await supabase
+              .from('profiles')
+              .select('id, username')
+              .in('id', originalUserIds);
+            
+            if (originalProfiles) {
+              const originalProfilesMap = new Map(originalProfiles.map(p => [p.id, p.username]));
+              originalPosts.forEach(p => {
+                originalPostsMap.set(p.id, originalProfilesMap.get(p.user_id) || 'Unknown');
+              });
+            }
+          }
+        }
 
         const postsWithData = await Promise.all(
           imagesData.map(async (image) => {
@@ -141,24 +173,34 @@ const SocialFeed = () => {
               .select('*', { count: 'exact', head: true })
               .eq('image_id', image.id);
 
-            // Get signed URL for private bucket - strip any leading slashes
-            const cleanPath = image.file_path.replace(/^\/+/, '');
-            const { data: signedUrlData, error: urlError } = await supabase.storage
+            // Count reposts
+            const { count: repostCount } = await supabase
               .from('images')
-              .createSignedUrl(cleanPath, 3600);
+              .select('*', { count: 'exact', head: true })
+              .eq('repost_of', image.id);
 
-            if (urlError) {
-              console.error('Error creating signed URL:', urlError, 'for path:', cleanPath);
+            // Get signed URL for private bucket only if file_path exists
+            let signedUrl = '';
+            if (image.file_path) {
+              const cleanPath = image.file_path.replace(/^\/+/, '');
+              const { data: signedUrlData } = await supabase.storage
+                .from('images')
+                .createSignedUrl(cleanPath, 3600);
+              signedUrl = signedUrlData?.signedUrl || '';
             }
+
+            const profile = profilesMap.get(image.user_id);
 
             return {
               ...image,
-              url: signedUrlData?.signedUrl || '',
-              profile: profilesMap.get(image.user_id),
+              url: signedUrl,
+              profile,
               likes_count: likesCount || 0,
               comments_count: commentsCount || 0,
+              repost_count: repostCount || 0,
               user_liked: false,
               is_following: followingIds.has(image.user_id),
+              original_username: image.repost_of ? originalPostsMap.get(image.repost_of) : undefined,
             };
           })
         );
@@ -217,9 +259,6 @@ const SocialFeed = () => {
       return;
     }
 
-    const post = feedItems.find(item => item.type === 'post' && item.data.id === postId);
-    if (!post || post.type !== 'post') return;
-
     try {
       const { data: existingLike } = await supabase
         .from('likes')
@@ -241,6 +280,38 @@ const SocialFeed = () => {
     }
   };
 
+  const handleRepost = async (postId: string) => {
+    if (!currentUserId) {
+      toast.info("Please login to repost");
+      return;
+    }
+
+    const post = feedItems.find(item => item.type === 'post' && item.data.id === postId);
+    if (!post || post.type !== 'post') return;
+
+    try {
+      const { error } = await supabase
+        .from('images')
+        .insert({
+          title: post.data.title,
+          caption: post.data.caption,
+          file_path: post.data.file_path,
+          user_id: currentUserId,
+          is_public: true,
+          is_approved: true, // Auto-approve reposts
+          repost_of: postId,
+        });
+
+      if (error) throw error;
+
+      toast.success("Reposted!");
+      loadFeed();
+    } catch (error) {
+      console.error('Repost error:', error);
+      toast.error("Failed to repost");
+    }
+  };
+
   const handleShare = async (postId: string) => {
     const post = feedItems.find(item => item.type === 'post' && item.data.id === postId);
     if (!post || post.type !== 'post') return;
@@ -248,7 +319,6 @@ const SocialFeed = () => {
     const shareUrl = `${window.location.origin}/feed?post=${postId}`;
     
     try {
-      // Try native share first
       if (navigator.share) {
         await navigator.share({
           title: post.data.title,
@@ -267,7 +337,6 @@ const SocialFeed = () => {
 
       loadFeed();
     } catch (error) {
-      // User cancelled share or error
       if ((error as Error).name !== 'AbortError') {
         try {
           await navigator.clipboard.writeText(shareUrl);
@@ -302,7 +371,13 @@ const SocialFeed = () => {
           
           <div className="flex items-center gap-2">
             {currentUserId && (
-              <CreatePoll userId={currentUserId} onPollCreated={loadFeed} />
+              <>
+                <Button size="sm" onClick={() => setCreatePostOpen(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Post
+                </Button>
+                <CreatePoll userId={currentUserId} onPollCreated={loadFeed} />
+              </>
             )}
             {currentUserId ? (
               <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
@@ -331,24 +406,29 @@ const SocialFeed = () => {
                 id={item.data.id}
                 title={item.data.title}
                 caption={item.data.caption || undefined}
-                imageUrl={item.data.url || ""}
+                imageUrl={item.data.url || undefined}
                 username={item.data.profile?.username || "Unknown"}
+                avatarUrl={item.data.profile?.avatar_url || undefined}
                 isVerified={item.data.profile?.is_verified || false}
                 createdAt={item.data.created_at}
                 likesCount={item.data.likes_count}
                 commentsCount={item.data.comments_count}
                 shareCount={item.data.share_count}
+                repostCount={item.data.repost_count}
                 isLiked={item.data.user_liked}
                 canEdit={false}
                 canDelete={false}
                 onLike={() => handleLike(item.data.id)}
                 onComment={() => setSelectedPost(item.data)}
                 onShare={() => handleShare(item.data.id)}
-                onClick={() => setSelectedPost(item.data)}
+                onRepost={() => handleRepost(item.data.id)}
+                onClick={() => item.data.url && setSelectedPost(item.data)}
                 userId={item.data.user_id}
                 currentUserId={currentUserId || undefined}
                 isFollowing={followingIds.has(item.data.user_id)}
                 onFollowToggle={() => currentUserId && loadFollowing(currentUserId)}
+                isRepost={!!item.data.repost_of}
+                originalUsername={item.data.original_username}
               />
             ) : (
               <PollCard
@@ -383,19 +463,21 @@ const SocialFeed = () => {
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
           {selectedPost && (
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="bg-black flex items-center justify-center min-h-[300px]">
-                <img
-                  src={selectedPost.url}
-                  alt={selectedPost.title}
-                  className="w-full h-full object-contain max-h-[70vh]"
-                />
-              </div>
+            <div className={`grid ${selectedPost.url ? 'md:grid-cols-2' : ''} gap-0`}>
+              {selectedPost.url && (
+                <div className="bg-black flex items-center justify-center min-h-[300px]">
+                  <img
+                    src={selectedPost.url}
+                    alt={selectedPost.title}
+                    className="w-full h-full object-contain max-h-[70vh]"
+                  />
+                </div>
+              )}
               <div className="p-4 flex flex-col max-h-[70vh]">
                 <div className="mb-4">
                   <h2 className="text-xl font-bold">{selectedPost.title}</h2>
                   {selectedPost.caption && (
-                    <p className="text-muted-foreground mt-2">{selectedPost.caption}</p>
+                    <p className="text-muted-foreground mt-2 whitespace-pre-wrap">{selectedPost.caption}</p>
                   )}
                 </div>
                 <div className="flex-1 overflow-y-auto">
@@ -410,6 +492,16 @@ const SocialFeed = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Create Post Dialog */}
+      {currentUserId && (
+        <CreatePost
+          userId={currentUserId}
+          open={createPostOpen}
+          onOpenChange={setCreatePostOpen}
+          onPostCreated={loadFeed}
+        />
+      )}
     </div>
   );
 };
