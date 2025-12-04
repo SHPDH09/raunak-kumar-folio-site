@@ -2,22 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Home, Upload, User, LogOut, Users, Shield } from "lucide-react";
+import { Home, Upload, LogOut, Shield, Plus } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ProfilePage } from "@/components/ProfilePage";
+import { CreatePost } from "@/components/CreatePost";
 
 interface Profile {
   id: string;
   username: string;
   full_name: string | null;
+  avatar_url: string | null;
   is_verified: boolean;
   followers_count: number;
   following_count: number;
@@ -27,12 +26,13 @@ interface PostData {
   id: string;
   title: string;
   caption: string | null;
-  file_path: string;
+  file_path: string | null;
   is_public: boolean;
   is_approved: boolean;
   user_id: string;
   created_at: string;
   share_count: number;
+  repost_of: string | null;
   url?: string;
   profile?: Profile;
   likes_count: number;
@@ -49,13 +49,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [newPost, setNewPost] = useState({
-    title: "",
-    caption: "",
-    file: null as File | null,
-  });
 
   useEffect(() => {
     checkAuth();
@@ -72,7 +66,7 @@ const UserDashboard = () => {
     setCurrentUser(session.user);
     await loadProfile(session.user.id);
     await loadUserPosts(session.user.id);
-    await loadFeed();
+    await loadFeed(session.user.id);
     
     // Check if user is admin
     const { data: roles } = await supabase
@@ -125,9 +119,14 @@ const UserDashboard = () => {
           .select('*', { count: 'exact', head: true })
           .eq('image_id', image.id);
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(image.file_path);
+        // Get signed URL only if file_path exists
+        let signedUrl = '';
+        if (image.file_path) {
+          const { data: signedUrlData } = await supabase.storage
+            .from('images')
+            .createSignedUrl(image.file_path, 3600);
+          signedUrl = signedUrlData?.signedUrl || '';
+        }
 
         const { data: likeData } = await supabase
           .from('likes')
@@ -138,7 +137,7 @@ const UserDashboard = () => {
 
         return {
           ...image,
-          url: publicUrl,
+          url: signedUrl,
           profile,
           likes_count: likesCount || 0,
           comments_count: commentsCount || 0,
@@ -150,7 +149,7 @@ const UserDashboard = () => {
     setPosts(postsWithData);
   };
 
-  const loadFeed = async () => {
+  const loadFeed = async (userId: string) => {
     const { data: imagesData, error } = await supabase
       .from('images')
       .select('*')
@@ -183,20 +182,25 @@ const UserDashboard = () => {
           .select('*', { count: 'exact', head: true })
           .eq('image_id', image.id);
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(image.file_path);
+        // Get signed URL only if file_path exists
+        let signedUrl = '';
+        if (image.file_path) {
+          const { data: signedUrlData } = await supabase.storage
+            .from('images')
+            .createSignedUrl(image.file_path, 3600);
+          signedUrl = signedUrlData?.signedUrl || '';
+        }
 
         const { data: likeData } = await supabase
           .from('likes')
           .select('id')
           .eq('image_id', image.id)
-          .eq('user_id', currentUser?.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         return {
           ...image,
-          url: publicUrl,
+          url: signedUrl,
           profile: profilesMap.get(image.user_id),
           likes_count: likesCount || 0,
           comments_count: commentsCount || 0,
@@ -206,48 +210,6 @@ const UserDashboard = () => {
     );
 
     setFeedPosts(postsWithData);
-  };
-
-  const handleUpload = async () => {
-    if (!newPost.file || !newPost.title || !currentUser) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      const fileExt = newPost.file.name.split('.').pop();
-      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(fileName, newPost.file);
-
-      if (uploadError) throw uploadError;
-
-      const { error: insertError } = await supabase
-        .from('images')
-        .insert({
-          title: newPost.title,
-          caption: newPost.caption,
-          file_path: fileName,
-          user_id: currentUser.id,
-          is_public: true,
-          is_approved: false,
-        });
-
-      if (insertError) throw insertError;
-
-      toast.success("Post submitted for approval!");
-      setUploadDialogOpen(false);
-      setNewPost({ title: "", caption: "", file: null });
-      loadUserPosts(currentUser.id);
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setUploading(false);
-    }
   };
 
   const handleLike = async (postId: string) => {
@@ -269,7 +231,7 @@ const UserDashboard = () => {
     }
 
     loadUserPosts(currentUser.id);
-    loadFeed();
+    loadFeed(currentUser.id);
   };
 
   const handleShare = async (postId: string) => {
@@ -299,7 +261,9 @@ const UserDashboard = () => {
     const post = posts.find(p => p.id === postId);
     if (!post) return;
 
-    await supabase.storage.from('images').remove([post.file_path]);
+    if (post.file_path) {
+      await supabase.storage.from('images').remove([post.file_path]);
+    }
     await supabase.from('images').delete().eq('id', postId);
 
     toast.success("Post deleted");
@@ -309,6 +273,13 @@ const UserDashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
+  };
+
+  const handlePostCreated = () => {
+    if (currentUser) {
+      loadUserPosts(currentUser.id);
+      loadFeed(currentUser.id);
+    }
   };
 
   if (loading) {
@@ -340,7 +311,7 @@ const UserDashboard = () => {
               </Button>
             )}
             <Button onClick={() => setUploadDialogOpen(true)}>
-              <Upload className="h-5 w-5 mr-2" />
+              <Plus className="h-5 w-5 mr-2" />
               New Post
             </Button>
             <Button variant="outline" onClick={handleLogout}>
@@ -353,41 +324,21 @@ const UserDashboard = () => {
       {/* Main Content */}
       <main className="container py-8">
         <div className="max-w-4xl mx-auto">
-          <Tabs defaultValue="feed" className="w-full">
+          <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="feed">Feed</TabsTrigger>
-              <TabsTrigger value="my-posts">My Posts</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+              <TabsTrigger value="feed">Feed</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="feed" className="space-y-6 mt-6">
-              {feedPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  id={post.id}
-                  title={post.title}
-                  caption={post.caption || undefined}
-                  imageUrl={post.url || ""}
-                  username={post.profile?.username || "Unknown"}
-                  isVerified={post.profile?.is_verified || false}
-                  createdAt={post.created_at}
-                  likesCount={post.likes_count}
-                  commentsCount={post.comments_count}
-                  shareCount={post.share_count}
-                  isLiked={post.user_liked}
-                  canEdit={false}
-                  canDelete={false}
-                  onLike={() => handleLike(post.id)}
-                  onComment={() => setSelectedPost(post)}
-                  onShare={() => handleShare(post.id)}
-                  onClick={() => setSelectedPost(post)}
+            <TabsContent value="profile" className="mt-6">
+              {currentUser && (
+                <ProfilePage
+                  userId={currentUser.id}
+                  currentUserId={currentUser.id}
+                  isOwnProfile={true}
+                  postsCount={posts.length}
                 />
-              ))}
-
-              {feedPosts.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No approved posts yet</p>
-                </div>
               )}
             </TabsContent>
 
@@ -403,8 +354,9 @@ const UserDashboard = () => {
                     id={post.id}
                     title={post.title}
                     caption={post.caption || undefined}
-                    imageUrl={post.url || ""}
+                    imageUrl={post.url || undefined}
                     username={profile?.username || "You"}
+                    avatarUrl={profile?.avatar_url || undefined}
                     isVerified={profile?.is_verified || false}
                     createdAt={post.created_at}
                     likesCount={post.likes_count}
@@ -417,7 +369,9 @@ const UserDashboard = () => {
                     onComment={() => setSelectedPost(post)}
                     onShare={() => handleShare(post.id)}
                     onDelete={() => handleDelete(post.id)}
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => post.url && setSelectedPost(post)}
+                    userId={post.user_id}
+                    currentUserId={currentUser?.id}
                   />
                 </div>
               ))}
@@ -433,105 +387,69 @@ const UserDashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="profile" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Avatar className="h-16 w-16">
-                      <AvatarFallback>
-                        {profile?.username?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{profile?.username}</span>
-                        {profile?.is_verified && (
-                          <Badge variant="secondary" className="gap-1">
-                            ✓ Verified
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{profile?.full_name}</p>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">{posts.length}</p>
-                      <p className="text-sm text-muted-foreground">Posts</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">{profile?.followers_count || 0}</p>
-                      <p className="text-sm text-muted-foreground">Followers</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">{profile?.following_count || 0}</p>
-                      <p className="text-sm text-muted-foreground">Following</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="feed" className="space-y-6 mt-6">
+              {feedPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  id={post.id}
+                  title={post.title}
+                  caption={post.caption || undefined}
+                  imageUrl={post.url || undefined}
+                  username={post.profile?.username || "Unknown"}
+                  avatarUrl={post.profile?.avatar_url || undefined}
+                  isVerified={post.profile?.is_verified || false}
+                  createdAt={post.created_at}
+                  likesCount={post.likes_count}
+                  commentsCount={post.comments_count}
+                  shareCount={post.share_count}
+                  isLiked={post.user_liked}
+                  canEdit={false}
+                  canDelete={false}
+                  onLike={() => handleLike(post.id)}
+                  onComment={() => setSelectedPost(post)}
+                  onShare={() => handleShare(post.id)}
+                  onClick={() => post.url && setSelectedPost(post)}
+                  userId={post.user_id}
+                  currentUserId={currentUser?.id}
+                />
+              ))}
+
+              {feedPosts.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No approved posts yet</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
       </main>
 
-      {/* Upload Dialog */}
-      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Post</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Title</label>
-              <Input
-                value={newPost.title}
-                onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                placeholder="Enter post title"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Caption</label>
-              <Textarea
-                value={newPost.caption}
-                onChange={(e) => setNewPost({ ...newPost, caption: e.target.value })}
-                placeholder="Write a caption..."
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Image</label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setNewPost({ ...newPost, file: e.target.files?.[0] || null })}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Your post will be submitted for admin approval before going public.
-            </p>
-            <Button onClick={handleUpload} disabled={uploading} className="w-full">
-              {uploading ? "Uploading..." : "Submit for Approval"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Create Post Dialog */}
+      {currentUser && (
+        <CreatePost
+          userId={currentUser.id}
+          open={uploadDialogOpen}
+          onOpenChange={setUploadDialogOpen}
+          onPostCreated={handlePostCreated}
+        />
+      )}
 
       {/* Post Detail Dialog */}
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedPost && (
             <div className="space-y-4">
-              <img
-                src={selectedPost.url}
-                alt={selectedPost.title}
-                className="w-full rounded-lg"
-              />
+              {selectedPost.url && (
+                <img
+                  src={selectedPost.url}
+                  alt={selectedPost.title}
+                  className="w-full rounded-lg"
+                />
+              )}
               <div>
                 <h2 className="text-2xl font-bold">{selectedPost.title}</h2>
                 {selectedPost.caption && (
-                  <p className="text-muted-foreground mt-2">{selectedPost.caption}</p>
+                  <p className="text-muted-foreground mt-2 whitespace-pre-wrap">{selectedPost.caption}</p>
                 )}
               </div>
               <CommentSection

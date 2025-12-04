@@ -92,10 +92,11 @@ export type Database = {
           caption: string | null
           created_at: string
           description: string | null
-          file_path: string
+          file_path: string | null
           id: string
           is_approved: boolean | null
           is_public: boolean
+          repost_of: string | null
           share_count: number | null
           title: string
           updated_at: string
@@ -107,10 +108,11 @@ export type Database = {
           caption?: string | null
           created_at?: string
           description?: string | null
-          file_path: string
+          file_path?: string | null
           id?: string
           is_approved?: boolean | null
           is_public?: boolean
+          repost_of?: string | null
           share_count?: number | null
           title: string
           updated_at?: string
@@ -122,16 +124,25 @@ export type Database = {
           caption?: string | null
           created_at?: string
           description?: string | null
-          file_path?: string
+          file_path?: string | null
           id?: string
           is_approved?: boolean | null
           is_public?: boolean
+          repost_of?: string | null
           share_count?: number | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "images_repost_of_fkey"
+            columns: ["repost_of"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leetcode_monthly_progress: {
         Row: {
