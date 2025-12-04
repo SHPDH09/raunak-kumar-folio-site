@@ -9,6 +9,7 @@ import { PostCard } from "@/components/PostCard";
 import { PollCard } from "@/components/PollCard";
 import { CreatePoll } from "@/components/CreatePoll";
 import { CommentSection } from "@/components/CommentSection";
+import { Stories } from "@/components/Stories";
 
 interface Profile {
   id: string;
@@ -140,10 +141,15 @@ const SocialFeed = () => {
               .select('*', { count: 'exact', head: true })
               .eq('image_id', image.id);
 
-            // Get signed URL for private bucket
-            const { data: signedUrlData } = await supabase.storage
+            // Get signed URL for private bucket - strip any leading slashes
+            const cleanPath = image.file_path.replace(/^\/+/, '');
+            const { data: signedUrlData, error: urlError } = await supabase.storage
               .from('images')
-              .createSignedUrl(image.file_path, 3600);
+              .createSignedUrl(cleanPath, 3600);
+
+            if (urlError) {
+              console.error('Error creating signed URL:', urlError, 'for path:', cleanPath);
+            }
 
             return {
               ...image,
@@ -311,6 +317,9 @@ const SocialFeed = () => {
           </div>
         </div>
       </header>
+
+      {/* Stories */}
+      <Stories currentUserId={currentUserId} onRefresh={loadFeed} />
 
       {/* Main Content */}
       <main className="container py-6">
