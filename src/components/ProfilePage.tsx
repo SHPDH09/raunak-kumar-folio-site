@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, Edit, X, Check, UserPlus, UserCheck } from "lucide-react";
+import { Camera, Edit, X, Check, UserPlus, UserCheck, MessageCircle } from "lucide-react";
+import { FollowersList } from "@/components/FollowersList";
 
 interface Profile {
   id: string;
@@ -26,6 +27,7 @@ interface ProfilePageProps {
   isOwnProfile?: boolean;
   onClose?: () => void;
   postsCount?: number;
+  onMessageUser?: (userId: string) => void;
 }
 
 export const ProfilePage = ({ 
@@ -33,7 +35,8 @@ export const ProfilePage = ({
   currentUserId, 
   isOwnProfile = false, 
   onClose,
-  postsCount = 0 
+  postsCount = 0,
+  onMessageUser,
 }: ProfilePageProps) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +44,8 @@ export const ProfilePage = ({
   const [uploading, setUploading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [followersListOpen, setFollowersListOpen] = useState(false);
+  const [followersTab, setFollowersTab] = useState<"followers" | "following">("followers");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [editForm, setEditForm] = useState({
@@ -320,24 +325,36 @@ export const ProfilePage = ({
                       Edit Profile
                     </Button>
                   ) : currentUserId && currentUserId !== userId ? (
-                    <Button
-                      size="sm"
-                      variant={isFollowing ? "secondary" : "default"}
-                      onClick={handleFollow}
-                      disabled={followLoading}
-                    >
-                      {isFollowing ? (
-                        <>
-                          <UserCheck className="h-4 w-4 mr-1" />
-                          Following
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="h-4 w-4 mr-1" />
-                          Follow
-                        </>
+                    <>
+                      <Button
+                        size="sm"
+                        variant={isFollowing ? "secondary" : "default"}
+                        onClick={handleFollow}
+                        disabled={followLoading}
+                      >
+                        {isFollowing ? (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Following
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            Follow
+                          </>
+                        )}
+                      </Button>
+                      {onMessageUser && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onMessageUser(userId)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
                       )}
-                    </Button>
+                    </>
                   ) : null}
                 </div>
               </>
@@ -353,16 +370,38 @@ export const ProfilePage = ({
             <p className="text-2xl font-bold">{postsCount}</p>
             <p className="text-sm text-muted-foreground">Posts</p>
           </div>
-          <div className="text-center">
+          <button
+            className="text-center hover:bg-muted/50 rounded-lg px-3 py-1 -m-1 transition-colors"
+            onClick={() => {
+              setFollowersTab("followers");
+              setFollowersListOpen(true);
+            }}
+          >
             <p className="text-2xl font-bold">{profile.followers_count || 0}</p>
             <p className="text-sm text-muted-foreground">Followers</p>
-          </div>
-          <div className="text-center">
+          </button>
+          <button
+            className="text-center hover:bg-muted/50 rounded-lg px-3 py-1 -m-1 transition-colors"
+            onClick={() => {
+              setFollowersTab("following");
+              setFollowersListOpen(true);
+            }}
+          >
             <p className="text-2xl font-bold">{profile.following_count || 0}</p>
             <p className="text-sm text-muted-foreground">Following</p>
-          </div>
+          </button>
         </div>
       </CardContent>
+
+      {/* Followers List Dialog */}
+      <FollowersList
+        userId={userId}
+        currentUserId={currentUserId}
+        open={followersListOpen}
+        onOpenChange={setFollowersListOpen}
+        initialTab={followersTab}
+        onMessageUser={onMessageUser}
+      />
     </Card>
   );
 };

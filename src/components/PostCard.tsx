@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProfileDialog } from "@/components/ProfilePage";
+import { LikesViewer } from "@/components/LikesViewer";
 
 interface PostCardProps {
   id: string;
@@ -40,6 +41,7 @@ interface PostCardProps {
 }
 
 export const PostCard = ({
+  id,
   title,
   caption,
   imageUrl,
@@ -74,6 +76,7 @@ export const PostCard = ({
   const [followLoading, setFollowLoading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [likesViewerOpen, setLikesViewerOpen] = useState(false);
 
   const MAX_TEXT_LENGTH = 150;
   const fullText = caption || '';
@@ -273,10 +276,16 @@ export const PostCard = ({
 
         {/* Engagement Stats */}
         <div className="px-4 py-2 flex items-center gap-4 text-xs text-muted-foreground border-y">
-          <span className="flex items-center gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLikesViewerOpen(true);
+            }}
+            className="flex items-center gap-1 hover:text-foreground transition-colors"
+          >
             <Heart className="h-3.5 w-3.5 text-red-500 fill-red-500" />
             {likesCount} likes
-          </span>
+          </button>
           <span>{commentsCount} comments</span>
           <span>{shareCount} shares</span>
           {repostCount > 0 && <span>{repostCount} reposts</span>}
@@ -334,6 +343,13 @@ export const PostCard = ({
           onOpenChange={setProfileOpen}
         />
       )}
+
+      {/* Likes Viewer */}
+      <LikesViewer
+        imageId={id}
+        open={likesViewerOpen}
+        onOpenChange={setLikesViewerOpen}
+      />
     </>
   );
 };

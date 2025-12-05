@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Home, Upload, LogOut, Shield, Plus } from "lucide-react";
+import { Home, Upload, LogOut, Shield, Plus, MessageCircle } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ProfilePage } from "@/components/ProfilePage";
 import { CreatePost } from "@/components/CreatePost";
+import { Messenger } from "@/components/Messenger";
 
 interface Profile {
   id: string;
@@ -50,6 +51,8 @@ const UserDashboard = () => {
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [messengerOpen, setMessengerOpen] = useState(false);
+  const [chatUserId, setChatUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -282,6 +285,11 @@ const UserDashboard = () => {
     }
   };
 
+  const handleMessageUser = (userId: string) => {
+    setChatUserId(userId);
+    setMessengerOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -304,6 +312,9 @@ const UserDashboard = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => setMessengerOpen(true)}>
+              <MessageCircle className="h-5 w-5" />
+            </Button>
             {isAdmin && (
               <Button variant="secondary" onClick={() => navigate('/admin')}>
                 <Shield className="h-5 w-5 mr-2" />
@@ -338,6 +349,7 @@ const UserDashboard = () => {
                   currentUserId={currentUser.id}
                   isOwnProfile={true}
                   postsCount={posts.length}
+                  onMessageUser={handleMessageUser}
                 />
               )}
             </TabsContent>
@@ -461,6 +473,19 @@ const UserDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Messenger */}
+      {currentUser && (
+        <Messenger
+          currentUserId={currentUser.id}
+          open={messengerOpen}
+          onOpenChange={(open) => {
+            setMessengerOpen(open);
+            if (!open) setChatUserId(null);
+          }}
+          initialChatUserId={chatUserId}
+        />
+      )}
     </div>
   );
 };
