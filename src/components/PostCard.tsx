@@ -73,6 +73,12 @@ export const PostCard = ({
   const [following, setFollowing] = useState(isFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const MAX_TEXT_LENGTH = 150;
+  const fullText = caption || '';
+  const shouldTruncate = fullText.length > MAX_TEXT_LENGTH;
+  const displayText = expanded || !shouldTruncate ? fullText : fullText.slice(0, MAX_TEXT_LENGTH) + '...';
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -215,9 +221,22 @@ export const PostCard = ({
           <div className="px-4 pb-3">
             <h3 className="font-semibold text-base text-foreground mb-1">{title}</h3>
             {caption && (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {caption}
-              </p>
+              <div>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {displayText}
+                </p>
+                {shouldTruncate && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpanded(!expanded);
+                    }}
+                    className="text-sm text-primary font-medium hover:underline mt-1"
+                  >
+                    {expanded ? 'See less' : 'See more'}
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
