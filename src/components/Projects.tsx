@@ -15,7 +15,17 @@ import clusteringImg from '@/assets/clustering-project.jpg';
 
 const Projects = () => {
   const projects = [
-   
+    {
+      title: "Data Navigator AI",
+      description: "GenAI-based SQL assistant that connects to databases, performs analysis, and generates human-like insights using LLMs.",
+      tech: ["Python", "LangChain", "OpenAI", "SQL", "Pandas"],
+      icon: <Brain className="w-5 h-5" />,
+      category: "GenAI/LLM",
+      image: analyticsImg,
+      color: "from-purple-500 to-indigo-500",
+      githubLink: "https://github.com/SHPDH09",
+      demoLink: "https://data-navigator-ai.vercel.app/"
+    },
    
     {
       title: "Objective & Coding Quiz App",
