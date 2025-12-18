@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
@@ -12,30 +12,153 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   file?: { name: string; type: string };
+  status?: 'sending' | 'sent' | 'read';
+}
+
+// Speech Recognition types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  onend: (() => void) | null;
+  onstart: (() => void) | null;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
 }
 
 const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingText, setTypingText] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       text: "Hello! 👋 I'm Raunak's AI Assistant powered by advanced AI. I can tell you about his projects, skills, education, experience, and more. Feel free to ask anything about Raunak!",
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      status: 'read'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionAPI) {
+        recognitionRef.current = new SpeechRecognitionAPI();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'en-US';
+
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+          let finalTranscript = '';
+          let interimTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          if (finalTranscript) {
+            setInputMessage(prev => prev + finalTranscript);
+          } else if (interimTranscript) {
+            // Show interim results in input
+            setInputMessage(interimTranscript);
+          }
+        };
+
+        recognitionRef.current.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isTyping]);
+
+  // Mark messages as read when chat is opened
+  useEffect(() => {
+    if (isOpen) {
+      setMessages(prev => 
+        prev.map(msg => ({ ...msg, status: 'read' as const }))
+      );
+    }
+  }, [isOpen]);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert('Voice input is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInputMessage('');
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,8 +174,32 @@ const ChatBox = () => {
     }
   };
 
+  // Simulate typing effect
+  const simulateTyping = async (fullText: string) => {
+    setIsTyping(true);
+    setTypingText('');
+    
+    const words = fullText.split(' ');
+    let currentText = '';
+    
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i === 0 ? '' : ' ') + words[i];
+      setTypingText(currentText);
+      await new Promise(resolve => setTimeout(resolve, 30 + Math.random() * 20));
+    }
+    
+    setIsTyping(false);
+    return fullText;
+  };
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && !attachedFile) return;
+
+    // Stop listening if voice input is active
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
 
     const userMessageText = attachedFile 
       ? `${inputMessage.trim() || 'Attached file:'} [File: ${attachedFile.name}]`
@@ -63,7 +210,8 @@ const ChatBox = () => {
       text: userMessageText,
       isUser: true,
       timestamp: new Date(),
-      file: attachedFile ? { name: attachedFile.name, type: attachedFile.type } : undefined
+      file: attachedFile ? { name: attachedFile.name, type: attachedFile.type } : undefined,
+      status: 'sending'
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -73,6 +221,25 @@ const ChatBox = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    // Update message status to sent
+    setTimeout(() => {
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === userMessage.id ? { ...msg, status: 'sent' as const } : msg
+        )
+      );
+    }, 300);
+
+    // Update message status to read
+    setTimeout(() => {
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === userMessage.id ? { ...msg, status: 'read' as const } : msg
+        )
+      );
+    }, 800);
+
     setIsLoading(true);
 
     try {
@@ -94,6 +261,8 @@ const ChatBox = () => {
         body: { messages: conversationHistory }
       });
 
+      setIsLoading(false);
+
       if (error) {
         throw error;
       }
@@ -102,29 +271,37 @@ const ChatBox = () => {
         throw new Error(data.error);
       }
 
+      const responseText = data.message || "I'm sorry, I couldn't generate a response. Please try again.";
+      
+      // Simulate typing effect
+      await simulateTyping(responseText);
+
       const aiResponse: Message = {
         id: messages.length + 2,
-        text: data.message || "I'm sorry, I couldn't generate a response. Please try again.",
+        text: responseText,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        status: 'read'
       };
       setMessages(prev => [...prev, aiResponse]);
 
     } catch (error) {
       console.error('Chat error:', error);
+      setIsLoading(false);
       
       // Fallback to local response if API fails
       const fallbackResponse = getLocalResponse(currentInput);
       
+      await simulateTyping(fallbackResponse);
+
       const aiResponse: Message = {
         id: messages.length + 2,
         text: fallbackResponse,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        status: 'read'
       };
       setMessages(prev => [...prev, aiResponse]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -169,6 +346,19 @@ const ChatBox = () => {
     "How can I contact him?"
   ];
 
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'sending':
+        return <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />;
+      case 'sent':
+        return <Check className="w-3 h-3" />;
+      case 'read':
+        return <CheckCheck className="w-3 h-3 text-blue-400" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       {/* Chat Toggle Button */}
@@ -192,7 +382,16 @@ const ChatBox = () => {
               </div>
               <div>
                 <CardTitle className="text-sm font-semibold">Raunak's AI Assistant</CardTitle>
-                <p className="text-xs text-muted-foreground">Powered by AI ✨</p>
+                <p className="text-xs text-muted-foreground">
+                  {isLoading || isTyping ? (
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                      Typing...
+                    </span>
+                  ) : (
+                    'Powered by AI ✨'
+                  )}
+                </p>
               </div>
             </div>
             <Button
@@ -218,20 +417,28 @@ const ChatBox = () => {
                         <Bot className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
-                    <div
-                      className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
-                        message.isUser
-                          ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
-                          : 'bg-card text-card-foreground border border-border rounded-bl-md'
-                      }`}
-                    >
-                      {message.file && (
-                        <div className="flex items-center gap-1 text-xs mb-1 opacity-80">
-                          <FileText className="w-3 h-3" />
-                          {message.file.name}
+                    <div className="flex flex-col items-end gap-0.5">
+                      <div
+                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+                          message.isUser
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
+                            : 'bg-card text-card-foreground border border-border rounded-bl-md'
+                        }`}
+                      >
+                        {message.file && (
+                          <div className="flex items-center gap-1 text-xs mb-1 opacity-80">
+                            <FileText className="w-3 h-3" />
+                            {message.file.name}
+                          </div>
+                        )}
+                        {message.text}
+                      </div>
+                      {message.isUser && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground pr-1">
+                          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {getStatusIcon(message.status)}
                         </div>
                       )}
-                      {message.text}
                     </div>
                     {message.isUser && (
                       <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
@@ -241,23 +448,34 @@ const ChatBox = () => {
                   </div>
                 ))}
                 
-                {isLoading && (
+                {/* Typing indicator */}
+                {(isLoading || isTyping) && (
                   <div className="flex justify-start items-start gap-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot className="w-3 h-3 text-primary-foreground animate-pulse" />
+                      <Bot className="w-3 h-3 text-primary-foreground" />
                     </div>
-                    <div className="bg-card text-card-foreground border border-border rounded-2xl rounded-bl-md p-3">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
+                    <div className="bg-card text-card-foreground border border-border rounded-2xl rounded-bl-md p-3 max-w-[85%]">
+                      {isTyping && typingText ? (
+                        <div className="text-sm leading-relaxed whitespace-pre-line">
+                          {typingText}
+                          <span className="inline-block w-1 h-4 bg-primary ml-0.5 animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                          <span className="text-xs text-muted-foreground">AI is thinking...</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
                 
                 {/* Quick question buttons - only show at start */}
-                {messages.length === 1 && (
+                {messages.length === 1 && !isLoading && !isTyping && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {quickQuestions.map((q, i) => (
                       <Button
@@ -297,6 +515,16 @@ const ChatBox = () => {
               </div>
             )}
             
+            {/* Voice input indicator */}
+            {isListening && (
+              <div className="px-3 py-2 bg-red-500/10 border-t border-red-500/20">
+                <div className="flex items-center gap-2 text-xs text-red-500">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span>Listening... Speak now</span>
+                </div>
+              </div>
+            )}
+            
             <div className="p-3 border-t border-border">
               <div className="flex space-x-2">
                 <input
@@ -311,22 +539,32 @@ const ChatBox = () => {
                   size="sm"
                   className="px-2"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || isTyping}
                 >
                   <Paperclip className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={isListening ? "destructive" : "ghost"}
+                  size="sm"
+                  className={`px-2 ${isListening ? 'animate-pulse' : ''}`}
+                  onClick={toggleVoiceInput}
+                  disabled={isLoading || isTyping}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </Button>
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask about Raunak..."
+                  placeholder={isListening ? "Listening..." : "Ask about Raunak..."}
                   className="flex-1 text-sm"
-                  disabled={isLoading}
+                  disabled={isLoading || isTyping}
                 />
                 <Button
                   onClick={handleSendMessage}
                   size="sm"
                   className="px-3 bg-gradient-to-r from-primary to-accent"
-                  disabled={isLoading || (!inputMessage.trim() && !attachedFile)}
+                  disabled={isLoading || isTyping || (!inputMessage.trim() && !attachedFile)}
                 >
                   <Send className="w-4 h-4" />
                 </Button>
