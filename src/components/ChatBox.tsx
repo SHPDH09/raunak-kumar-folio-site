@@ -1,194 +1,173 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User, Key, Settings } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: number;
   text: string;
   isUser: boolean;
   timestamp: Date;
+  file?: { name: string; type: string };
 }
 
 const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('openai-api-key') || '');
-  const [apiKeyInput, setApiKeyInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hello! I'm Raunak's AI Assistant. I can help you learn about his technical skills, projects, education, and professional experience. What would you like to know about Raunak?",
+      text: "Hello! 👋 I'm Raunak's AI Assistant powered by advanced AI. I can tell you about his projects, skills, education, experience, and more. Feel free to ask anything about Raunak!",
       isUser: false,
       timestamp: new Date()
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-const saveApiKey = () => {
-  localStorage.setItem('openai-api-key', apiKeyInput);
-  setApiKey(apiKeyInput);
-  setShowSettings(false);
-  setApiKeyInput('');
-};
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
+  const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachedFile(file);
+    }
+  };
+
+  const removeAttachment = () => {
+    setAttachedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() && !attachedFile) return;
+
+    const userMessageText = attachedFile 
+      ? `${inputMessage.trim() || 'Attached file:'} [File: ${attachedFile.name}]`
+      : inputMessage.trim();
 
     const userMessage: Message = {
       id: messages.length + 1,
-      text: inputMessage,
+      text: userMessageText,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
+      file: attachedFile ? { name: attachedFile.name, type: attachedFile.type } : undefined
     };
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = inputMessage;
     setInputMessage('');
+    setAttachedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setIsLoading(true);
 
     try {
-      let response;
-      if (apiKey) {
-        response = await getOpenAIResponse(currentInput);
-      } else {
-        response = getLocalResponse(currentInput);
+      // Build conversation history for context
+      const conversationHistory = messages
+        .filter(m => m.id !== 1) // Exclude initial greeting
+        .map(m => ({
+          role: m.isUser ? 'user' : 'assistant',
+          content: m.text
+        }));
+
+      // Add current message
+      conversationHistory.push({
+        role: 'user',
+        content: currentInput || `User attached a file: ${attachedFile?.name}`
+      });
+
+      const { data, error } = await supabase.functions.invoke('raunak-assistant', {
+        body: { messages: conversationHistory }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
       }
 
       const aiResponse: Message = {
         id: messages.length + 2,
-        text: response,
+        text: data.message || "I'm sorry, I couldn't generate a response. Please try again.",
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
+
     } catch (error) {
-      const errorResponse: Message = {
+      console.error('Chat error:', error);
+      
+      // Fallback to local response if API fails
+      const fallbackResponse = getLocalResponse(currentInput);
+      
+      const aiResponse: Message = {
         id: messages.length + 2,
-        text: error instanceof Error ? error.message : "Sorry, I encountered an error. Please try again later.",
+        text: fallbackResponse,
         isUser: false,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorResponse]);
+      setMessages(prev => [...prev, aiResponse]);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getOpenAIResponse = async (input: string): Promise<string> => {
-    const raunakInfo = `
-    You are Raunak Kumar's AI assistant. Here's information about Raunak:
-    
-    PERSONAL INFO:
-    - Name: Raunak Kumar
-    - Date of Birth: 21-05-2003
-    - Location: India
-    - Course: BCA in Artificial Intelligence & Data Analytics (AIDA)
-    - University: LNCT University
-    
-    TECHNICAL SKILLS:
-    - Programming Languages: Python, Java, C, C++, SQL, HTML, CSS, JavaScript, R Programming, Flask
-    - Frameworks & Libraries: Scikit-learn, Pandas, NumPy, Matplotlib, Seaborn, TensorFlow, NLTK, Selenium, OpenCV, Tkinter, Streamlit
-    - Tools & Technologies: Power BI, SAS, Alteryx
-    
-    INTERESTS & SPECIALIZATIONS:
-    - Data Analytics & Visualization
-    - Machine Learning & AI
-    - Java OOPs Concepts
-    - Competitive Programming (DSA)
-    - Automation
-    - Data Engineering
-    
-    PROJECTS:
-    - Medical Prediction System
-    - Banking Management System
-    - Railway Reservation System
-    - Data Analytics dashboards
-    - Quiz Application
-    - Expense Tracker
-    - Clustering Analysis projects
-    
-    EXPERIENCE:
-    - AI/ML model development
-    - Data analytics and visualization
-    - Web development with Flask
-    - Automation projects
-    - Competitive programming with strong DSA knowledge
-    
-    INSTRUCTIONS:
-    - Only answer questions about Raunak Kumar
-    - Be helpful and conversational
-    - If asked about other topics, politely redirect to Raunak's information
-    - Provide detailed and relevant information based on the user's query
-    `;
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: raunakInfo },
-          { role: 'user', content: input }
-        ],
-        max_tokens: 200,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.log('API Error:', response.status, errorData);
-      
-      if (response.status === 429) {
-        throw new Error('🚫 API quota exceeded! Your OpenAI API key has reached its usage limit. Please check your billing at platform.openai.com');
-      } else if (response.status === 401) {
-        throw new Error('🔑 Invalid API key! Please check your OpenAI API key in settings.');
-      } else if (response.status === 400) {
-        throw new Error('❌ Invalid request. Please try again with a different message.');
-      } else {
-        throw new Error(`⚠️ API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
-      }
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
   };
 
   const getLocalResponse = (input: string): string => {
     const lowerInput = input.toLowerCase();
     
     if (lowerInput.includes('project')) {
-      return "Raunak has worked on various AI/ML projects including Medical Prediction System, Banking Management System, Railway Reservation System, and Data Analytics dashboards. He specializes in Python, Machine Learning, and Data Visualization.";
-    } else if (lowerInput.includes('skill') || lowerInput.includes('technology')) {
-      return "Raunak's technical skills include: Programming Languages - Python, Java, C++, SQL, JavaScript, R; Frameworks - TensorFlow, Pandas, NumPy, Scikit-learn, Flask, Streamlit; Tools - Power BI, SAS, Alteryx, OpenCV.";
+      return "🚀 Raunak has built several impressive projects:\n\n• **AI Startup Idea Validator** - AI-powered app that evaluates startup ideas with market analysis\n• **Data Navigator AI** - GenAI-based SQL assistant using LangChain & OpenAI\n• **Medical Prediction System** - ML-based health predictions\n• **Banking & Railway Systems** - Full-stack Java applications\n• **Workforce Burnout Analyzer** - AI system for productivity analysis\n\nCheck out his live demos at ai-idea-check.vercel.app and data-navigator-ai.vercel.app!";
+    } else if (lowerInput.includes('skill') || lowerInput.includes('technology') || lowerInput.includes('tech')) {
+      return "💻 Raunak's Technical Arsenal:\n\n**Languages:** Python, Java, C++, SQL, JavaScript, R\n**ML/AI:** TensorFlow, Scikit-learn, LangChain, OpenAI APIs\n**Data:** Pandas, NumPy, Power BI, Matplotlib, Seaborn\n**Web:** Flask, Streamlit, Next.js, Node.js\n**Tools:** Git, VS Code, Jupyter, Selenium, OpenCV";
     } else if (lowerInput.includes('education') || lowerInput.includes('study') || lowerInput.includes('college') || lowerInput.includes('university')) {
-      return "Raunak is pursuing BCA in Artificial Intelligence & Data Analytics (AIDA) from LNCT University. Born on 21-05-2003, currently focused on AI/ML and Data Science.";
+      return "🎓 **Education:**\n\nRaunak is pursuing **BCA in Artificial Intelligence & Data Analytics (AIDA)** at **LNCT University, Bhopal**.\n\nHe was born on May 21, 2003, and is passionate about AI/ML, Data Science, and building real-world applications.";
     } else if (lowerInput.includes('experience') || lowerInput.includes('work')) {
-      return "Raunak has hands-on experience in AI/ML model development, data analytics, web development with Flask, automation projects, and competitive programming with strong DSA knowledge.";
-    } else if (lowerInput.includes('contact') || lowerInput.includes('reach') || lowerInput.includes('connect')) {
-      return "You can connect with Raunak through the contact section on this portfolio or reach out via LinkedIn for professional opportunities.";
-    } else if (lowerInput.includes('name') || lowerInput.includes('who')) {
-      return "I'm here to help you learn about Raunak Kumar - an AI & ML Developer and Data Analyst currently pursuing BCA in AIDA at LNCT University.";
+      return "💼 Raunak has hands-on experience in:\n\n• AI/ML model development & deployment\n• End-to-end data pipeline creation\n• GenAI/LLM application development\n• Full-stack web development\n• Automation & web scraping\n• Competitive programming (DSA)";
+    } else if (lowerInput.includes('contact') || lowerInput.includes('reach') || lowerInput.includes('connect') || lowerInput.includes('email')) {
+      return "📬 **Contact Raunak:**\n\n• 📧 Email: rk331159@gmail.com\n• 💼 LinkedIn: linkedin.com/in/raunak-kumar-766328248\n• 🐙 GitHub: github.com/SHPDH09\n• 🌐 Portfolio: portfolioraunakprasad.netlify.app";
+    } else if (lowerInput.includes('name') || lowerInput.includes('who') || lowerInput.includes('about')) {
+      return "👨‍💻 I'm here to help you learn about **Raunak Kumar** - an AI/ML Developer and Data Analyst from India!\n\nHe specializes in building GenAI applications, data analytics solutions, and ML models. Currently pursuing BCA in AIDA at LNCT University.";
     } else if (lowerInput.includes('location') || lowerInput.includes('where')) {
-      return "Raunak is based in India and available for remote opportunities in AI/ML and Data Analytics domains.";
+      return "📍 Raunak is based in **India** and is open to remote opportunities in AI/ML, Data Analytics, and Full-stack development.";
+    } else if (lowerInput.includes('github')) {
+      return "🐙 **GitHub:** github.com/SHPDH09\n\nCheck out Raunak's repositories including AI Startup Idea Validator, Data Navigator AI, and Workforce Burnout Analyzer!";
+    } else if (lowerInput.includes('linkedin')) {
+      return "💼 **LinkedIn:** linkedin.com/in/raunak-kumar-766328248\n\nConnect with Raunak for professional opportunities!";
+    } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('hey')) {
+      return "Hello! 👋 Great to meet you! I'm Raunak's AI assistant. How can I help you today? Feel free to ask about his projects, skills, education, or anything else!";
     } else {
-      return "I can only provide information about Raunak Kumar's professional details, projects, skills, education, and contact information. Please ask me something about Raunak's portfolio!";
+      return "I can help you with information about Raunak Kumar's:\n\n• 🚀 **Projects** - AI/ML applications, full-stack systems\n• 💻 **Skills** - Python, Java, ML frameworks, data tools\n• 🎓 **Education** - BCA in AIDA at LNCT University\n• 💼 **Experience** - AI/ML, Data Analytics, GenAI\n• 📬 **Contact** - Email, LinkedIn, GitHub\n\nWhat would you like to know?";
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
+
+  const quickQuestions = [
+    "What are Raunak's projects?",
+    "Tell me about his skills",
+    "How can I contact him?"
+  ];
 
   return (
     <>
@@ -196,84 +175,38 @@ const saveApiKey = () => {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-glow hover-lift"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-glow hover-lift bg-gradient-to-r from-primary to-accent"
           size="lg"
         >
-          <MessageCircle className="w-6 h-6" />
+          <Sparkles className="w-6 h-6" />
         </Button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-96 h-[500px] card-gradient shadow-card border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
+        <Card className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] card-gradient shadow-card border-primary/20 flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10">
             <div className="flex items-center space-x-2">
-              <Bot className="w-5 h-5 text-primary animate-pulse" />
-              <CardTitle className="text-sm font-semibold">Raunak's AI Assistant</CardTitle>
-              {apiKey && <Key className="w-4 h-4 text-green-500" />}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                <Bot className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-semibold">Raunak's AI Assistant</CardTitle>
+                <p className="text-xs text-muted-foreground">Powered by AI ✨</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSettings(!showSettings)}
-                className="h-6 w-6 p-0 hover:bg-accent/20"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="h-6 w-6 p-0 hover:bg-destructive/20"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="h-7 w-7 p-0 hover:bg-destructive/20"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </CardHeader>
           
-          <CardContent className="p-0 flex flex-col h-full">
-            {/* Settings Panel */}
-            {showSettings && (
-              <div className="p-4 border-b border-border bg-muted/50">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Key className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">OpenAI API Key</span>
-                  </div>
-                  <Input
-                    type="password"
-                    value={apiKeyInput}
-                    onChange={(e) => setApiKeyInput(e.target.value)}
-                    placeholder="Enter your OpenAI API key..."
-                    className="text-sm"
-                  />
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={saveApiKey}
-                      size="sm"
-                      className="text-xs"
-                      disabled={!apiKeyInput.trim()}
-                    >
-                      Save Key
-                    </Button>
-                    <Button
-                      onClick={() => setShowSettings(false)}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Your API key is stored locally and used to provide intelligent responses about Raunak's information.
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            <ScrollArea className="flex-1 p-4 max-h-[350px]">
+          <CardContent className="p-0 flex flex-col flex-1 overflow-hidden">
+            <ScrollArea className="flex-1 p-3">
               <div className="space-y-3">
                 {messages.map((message) => (
                   <div
@@ -281,17 +214,23 @@ const saveApiKey = () => {
                     className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} items-start gap-2`}
                   >
                     {!message.isUser && (
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                        <Bot className="w-3 h-3 text-primary" />
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
                     <div
-                      className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
+                      className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
                         message.isUser
-                          ? 'bg-primary text-primary-foreground rounded-br-md'
+                          ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
                           : 'bg-card text-card-foreground border border-border rounded-bl-md'
                       }`}
                     >
+                      {message.file && (
+                        <div className="flex items-center gap-1 text-xs mb-1 opacity-80">
+                          <FileText className="w-3 h-3" />
+                          {message.file.name}
+                        </div>
+                      )}
                       {message.text}
                     </div>
                     {message.isUser && (
@@ -301,10 +240,11 @@ const saveApiKey = () => {
                     )}
                   </div>
                 ))}
+                
                 {isLoading && (
                   <div className="flex justify-start items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot className="w-3 h-3 text-primary animate-pulse" />
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
+                      <Bot className="w-3 h-3 text-primary-foreground animate-pulse" />
                     </div>
                     <div className="bg-card text-card-foreground border border-border rounded-2xl rounded-bl-md p-3">
                       <div className="flex space-x-1">
@@ -315,22 +255,78 @@ const saveApiKey = () => {
                     </div>
                   </div>
                 )}
+                
+                {/* Quick question buttons - only show at start */}
+                {messages.length === 1 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {quickQuestions.map((q, i) => (
+                      <Button
+                        key={i}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 px-2"
+                        onClick={() => {
+                          setInputMessage(q);
+                        }}
+                      >
+                        {q}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+                
+                <div ref={scrollRef} />
               </div>
             </ScrollArea>
             
-            <div className="p-4 border-t border-border">
+            {/* File attachment preview */}
+            {attachedFile && (
+              <div className="px-3 py-2 bg-muted/50 border-t border-border">
+                <div className="flex items-center gap-2 text-xs">
+                  <FileText className="w-4 h-4 text-primary" />
+                  <span className="truncate flex-1">{attachedFile.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 w-5 p-0"
+                    onClick={removeAttachment}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            <div className="p-3 border-t border-border">
               <div className="flex space-x-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileAttach}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask about Raunak..."
                   className="flex-1 text-sm"
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleSendMessage}
                   size="sm"
-                  className="px-3"
+                  className="px-3 bg-gradient-to-r from-primary to-accent"
+                  disabled={isLoading || (!inputMessage.trim() && !attachedFile)}
                 >
                   <Send className="w-4 h-4" />
                 </Button>

@@ -2,3 +2,12 @@ project_id = "eewotqwrtxcndvoehkrr"
 
 [functions.send-otp]
 verify_jwt = false
+
+[functions.raunak-assistant]
+verify_jwt = false
+
+[functions.get-leetcode-stats]
+verify_jwt = false
+
+[functions.update-leetcode-stats]
+verify_jwt = false
