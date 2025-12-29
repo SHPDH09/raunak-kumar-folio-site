@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, X, Image, Wrench } from 'lucide-react';
+import { Menu, X, Image, Wrench, Download } from 'lucide-react';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,10 +35,13 @@ const Navigation = () => {
     { name: 'Gallery', href: '/gallery', icon: Image }
   ];
 
-  const handleResumeClick = () => {
-    console.log('Resume button clicked');
-    // Try opening PDF in new tab as fallback
-    window.open('/RAUNAK KUMAR.pdf', '_blank');
+  const handleDownloadPortfolio = () => {
+    const link = document.createElement('a');
+    link.href = '/RAUNAK KUMAR.pdf';
+    link.download = 'Raunak_Kumar_Portfolio.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -84,10 +87,11 @@ const Navigation = () => {
             <div className="flex items-center space-x-3 ml-4">
               <Button
                 size="sm"
-                onClick={handleResumeClick}
-                className="bg-primary hover:bg-primary/90 transition-smooth"
+                onClick={handleDownloadPortfolio}
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth"
               >
-                Resume
+                <Download className="h-4 w-4 mr-1" />
+                Portfolio
               </Button>
               <Button
                 size="sm"
@@ -138,10 +142,11 @@ const Navigation = () => {
               <div className="px-4 sm:px-6 py-2 space-y-2">
                 <Button
                   size="sm"
-                  onClick={handleResumeClick}
-                  className="w-full bg-primary hover:bg-primary/90 transition-smooth"
+                  onClick={handleDownloadPortfolio}
+                  className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth"
                 >
-                  Resume
+                  <Download className="h-4 w-4 mr-1" />
+                  Download Portfolio
                 </Button>
                 <Button
                   size="sm"
