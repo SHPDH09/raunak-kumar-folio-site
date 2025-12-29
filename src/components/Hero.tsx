@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Github, Linkedin, Mail, Download } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Mail } from 'lucide-react';
 import DataAnalytics3D from './DataAnalytics3D';
-
-const handleDownloadResume = () => {
-  const link = document.createElement('a');
-  link.href = '/RAUNAK KUMAR.pdf';
-  link.download = 'Raunak_Kumar_Portfolio.pdf';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
 
 const Hero = () => {
   const [typedText, setTypedText] = useState('');
@@ -75,15 +66,6 @@ const Hero = () => {
               onClick={() => scrollToSection('projects')}
             >
               View Projects
-            </Button>
-            <Button 
-              size="lg" 
-              variant="default"
-              className="px-8 py-6 text-lg font-semibold hover-neon bg-gradient-to-r from-primary to-accent hover:opacity-90"
-              onClick={handleDownloadResume}
-            >
-              <Download className="mr-2 h-5 w-5" />
-              Download CV
             </Button>
           </div>
           
