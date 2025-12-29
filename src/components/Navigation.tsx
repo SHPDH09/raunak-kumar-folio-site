@@ -37,7 +37,7 @@ const Navigation = () => {
 
   const handleDownloadPortfolio = () => {
     const link = document.createElement('a');
-    link.href = '/RAUNAK%20KUMAR.pdf';
+    link.href = '/Raunak_Kumar_Portfolio.pdf';
     link.download = 'Raunak_Kumar_Portfolio.pdf';
     document.body.appendChild(link);
     link.click();
