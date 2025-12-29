@@ -2,11 +2,15 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, X, Image, Wrench, Download } from 'lucide-react';
+import { Menu, X, Image, Wrench, Download, Loader2 } from 'lucide-react';
+import { generatePortfolioPDF } from '@/utils/generatePortfolioPDF';
+import { useToast } from '@/hooks/use-toast';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,13 +39,24 @@ const Navigation = () => {
     { name: 'Gallery', href: '/gallery', icon: Image }
   ];
 
-  const handleDownloadPortfolio = () => {
-    const link = document.createElement('a');
-    link.href = '/Raunak_Kumar_Portfolio.pdf';
-    link.download = 'Raunak_Kumar_Portfolio.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadPortfolio = async () => {
+    setIsGenerating(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay for UX
+      generatePortfolioPDF();
+      toast({
+        title: "Portfolio Downloaded!",
+        description: "Your portfolio PDF has been generated and downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -88,10 +103,15 @@ const Navigation = () => {
               <Button
                 size="sm"
                 onClick={handleDownloadPortfolio}
+                disabled={isGenerating}
                 className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth"
               >
-                <Download className="h-4 w-4 mr-1" />
-                Portfolio
+                {isGenerating ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-1" />
+                )}
+                {isGenerating ? 'Generating...' : 'Portfolio'}
               </Button>
               <Button
                 size="sm"
@@ -143,10 +163,15 @@ const Navigation = () => {
                 <Button
                   size="sm"
                   onClick={handleDownloadPortfolio}
+                  disabled={isGenerating}
                   className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth"
                 >
-                  <Download className="h-4 w-4 mr-1" />
-                  Download Portfolio
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-1" />
+                  )}
+                  {isGenerating ? 'Generating...' : 'Download Portfolio'}
                 </Button>
                 <Button
                   size="sm"
