@@ -12,6 +12,9 @@ import LeetCode from "./pages/LeetCode";
 import Auth from "./pages/Auth";
 import AdminPanel from "./pages/AdminPanel";
 import UserDashboard from "./pages/UserDashboard";
+import Greetings from "./pages/Greetings";
+import GreetingView from "./pages/GreetingView";
+import AdminGreetings from "./pages/AdminGreetings";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,9 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/greetings" element={<Greetings />} />
+          <Route path="/greeting/:code" element={<GreetingView />} />
+          <Route path="/admin/greetings" element={<AdminGreetings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

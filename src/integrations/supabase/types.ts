@@ -85,6 +85,54 @@ export type Database = {
           },
         ]
       }
+      greetings: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          custom_message: string | null
+          date_of_birth: string | null
+          email: string | null
+          expires_at: string
+          greeting_type: Database["public"]["Enums"]["greeting_type"]
+          id: string
+          phone: string | null
+          recipient_name: string
+          sender_name: string | null
+          views_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          custom_message?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          expires_at?: string
+          greeting_type: Database["public"]["Enums"]["greeting_type"]
+          id?: string
+          phone?: string | null
+          recipient_name: string
+          sender_name?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          custom_message?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          expires_at?: string
+          greeting_type?: Database["public"]["Enums"]["greeting_type"]
+          id?: string
+          phone?: string | null
+          recipient_name?: string
+          sender_name?: string | null
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       images: {
         Row: {
           approved_at: string | null
@@ -580,6 +628,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      greeting_type:
+        | "birthday"
+        | "new_year"
+        | "anniversary"
+        | "congratulations"
+        | "thank_you"
+        | "happiness"
+        | "get_well"
+        | "wedding"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -708,6 +765,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      greeting_type: [
+        "birthday",
+        "new_year",
+        "anniversary",
+        "congratulations",
+        "thank_you",
+        "happiness",
+        "get_well",
+        "wedding",
+      ],
     },
   },
 } as const

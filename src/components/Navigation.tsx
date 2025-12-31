@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Menu, X, Image, Wrench, Download, Loader2 } from 'lucide-react';
+import { Menu, X, Image, Wrench, Download, Loader2, Gift } from 'lucide-react';
 import { generatePortfolioPDF } from '@/utils/generatePortfolioPDF';
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,7 +36,8 @@ const Navigation = () => {
     { name: 'Applications', id: 'applications' },
     { name: 'Contact', id: 'contact' },
     { name: 'Tools', href: '/tools', icon: Wrench },
-    { name: 'Gallery', href: '/gallery', icon: Image }
+    { name: 'Gallery', href: '/gallery', icon: Image },
+    { name: 'Greetings', href: '/greetings', icon: Gift }
   ];
 
   const handleDownloadPortfolio = async () => {
