@@ -9,9 +9,10 @@ const certifications = [
     issuer: "Google",
     certificateId: "158243226",
     dateOfIssue: "15/08/2025",
-    link: "https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/158243226"
+    link: "https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/158243226",
+    isNew: true
   },
-       {
+  {
     title: "Python Development Internship Completion  Certificate",
     issuer: "CodeClouse PVT. LTD.",
     certificateId: "QR",
@@ -23,7 +24,8 @@ const certifications = [
     issuer: "GeeksforGeeks",
     certificateId: "Not mentioned",
     dateOfIssue: "05/07/2025",
-    link: "#"
+    link: "#",
+    isNew: true
   },
   {
     title: "R Programming for Data Science",
@@ -183,9 +185,16 @@ const Certifications = () => {
                 <CardHeader className="pb-2 space-y-2">
                   <div className="flex items-start justify-between">
                     <Award className="h-4 w-4 text-primary flex-shrink-0" />
-                    <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
-                      {cert.issuer}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      {(cert as any).isNew && (
+                        <Badge className="text-[10px] px-1.5 py-0 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 animate-pulse font-semibold">
+                          NEW
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
+                        {cert.issuer}
+                      </Badge>
+                    </div>
                   </div>
                   <CardTitle className="text-sm font-semibold leading-tight group-hover:text-primary transition-smooth line-clamp-2">
                     {cert.title}

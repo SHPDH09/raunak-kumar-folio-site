@@ -25,9 +25,9 @@ const Portfolio = () => {
         <About />
         <Projects />
         <Experience />
+        <Certifications />
         <SoftSkills />
         <Achievements />
-        <Certifications />
         <Publications />
         <LeetCodeStats />
         <Applications />
