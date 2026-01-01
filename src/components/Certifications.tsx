@@ -5,6 +5,54 @@ import { ExternalLink, Calendar, Award } from "lucide-react";
 
 const certifications = [
   {
+    title: "Data Visualization",
+    issuer: "Samatrix",
+    certificateId: "roy8JMnRlB",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy8JMnRlB",
+    isNew: true
+  },
+  {
+    title: "Deep Learning Practical with Python, TensorFlow and Keras",
+    issuer: "Samatrix",
+    certificateId: "roy85Dey4O",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy85Dey4O",
+    isNew: true
+  },
+  {
+    title: "Neural Networks and Deep Learning",
+    issuer: "Samatrix",
+    certificateId: "roy8G8FGUM",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy8G8FGUM",
+    isNew: true
+  },
+  {
+    title: "Machine Learning and Pattern Recognition",
+    issuer: "Samatrix",
+    certificateId: "roy8UTwgob",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy8UTwgob",
+    isNew: true
+  },
+  {
+    title: "R Programming",
+    issuer: "Samatrix",
+    certificateId: "roy8LGsLi3",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy8LGsLi3",
+    isNew: true
+  },
+  {
+    title: "Probabilistic Modelling and Reasoning with Python",
+    issuer: "Samatrix",
+    certificateId: "roy86ZOWf0",
+    dateOfIssue: "2025",
+    link: "https://verify.netcredential.com/roy86ZOWf0",
+    isNew: true
+  },
+  {
     title: "Google Analytics",
     issuer: "Google",
     certificateId: "158243226",
