@@ -1,7 +1,16 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Award } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExternalLink, Calendar, Award, Search, Filter, X } from "lucide-react";
 
 const certifications = [
   {
@@ -177,6 +186,37 @@ const certifications = [
 ];
 
 const Certifications = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIssuer, setSelectedIssuer] = useState<string>("all");
+
+  // Get unique issuers for filter dropdown
+  const issuers = useMemo(() => {
+    const uniqueIssuers = [...new Set(certifications.map((cert) => cert.issuer))];
+    return uniqueIssuers.sort();
+  }, []);
+
+  // Filter certifications based on search and issuer
+  const filteredCertifications = useMemo(() => {
+    return certifications.filter((cert) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        cert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cert.issuer.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesIssuer =
+        selectedIssuer === "all" || cert.issuer === selectedIssuer;
+
+      return matchesSearch && matchesIssuer;
+    });
+  }, [searchQuery, selectedIssuer]);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedIssuer("all");
+  };
+
+  const hasActiveFilters = searchQuery !== "" || selectedIssuer !== "all";
+
   return (
     <section id="certifications" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -189,8 +229,52 @@ const Certifications = () => {
           </p>
         </div>
 
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search certifications..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-background/80 backdrop-blur-sm border-border/50 focus:border-primary"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select value={selectedIssuer} onValueChange={setSelectedIssuer}>
+              <SelectTrigger className="w-[180px] bg-background/80 backdrop-blur-sm border-border/50">
+                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Filter by issuer" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border-border z-50">
+                <SelectItem value="all">All Issuers</SelectItem>
+                {issuers.map((issuer) => (
+                  <SelectItem key={issuer} value={issuer}>
+                    {issuer}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={clearFilters}
+                className="border-border/50 hover:border-destructive hover:text-destructive"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="text-center mb-6 text-sm text-muted-foreground">
+          Showing {filteredCertifications.length} of {certifications.length} certifications
+        </div>
+
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-          {certifications.map((cert, index) => (
+          {filteredCertifications.map((cert, index) => (
             <Card key={index} className="certification-card group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 opacity-60"></div>
               {/* Company Logo Background */}
@@ -275,6 +359,15 @@ const Certifications = () => {
               </div>
             </Card>
           ))}
+          {filteredCertifications.length === 0 && (
+            <div className="col-span-full text-center py-12">
+              <Award className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">No certifications found matching your criteria.</p>
+              <Button variant="link" onClick={clearFilters} className="mt-2">
+                Clear filters
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>
