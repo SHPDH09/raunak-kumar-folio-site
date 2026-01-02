@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   id: number;
@@ -309,27 +310,173 @@ const ChatBox = () => {
     const lowerInput = input.toLowerCase();
     
     if (lowerInput.includes('project')) {
-      return "🚀 Raunak has built several impressive projects:\n\n• **AI Startup Idea Validator** - AI-powered app that evaluates startup ideas with market analysis\n• **Data Navigator AI** - GenAI-based SQL assistant using LangChain & OpenAI\n• **Medical Prediction System** - ML-based health predictions\n• **Banking & Railway Systems** - Full-stack Java applications\n• **Workforce Burnout Analyzer** - AI system for productivity analysis\n\nCheck out his live demos at ai-idea-check.vercel.app and data-navigator-ai.vercel.app!";
+      return `## 🚀 Raunak's Projects
+
+### Featured Projects
+
+1. **AI Startup Idea Validator**
+   - AI-powered app that evaluates startup ideas with market analysis
+   - **Tech:** Next.js, Node.js, MongoDB, OpenAI
+   - **Demo:** [ai-idea-check.vercel.app](https://ai-idea-check.vercel.app/)
+
+2. **Data Navigator AI**
+   - GenAI-based SQL assistant using LangChain & OpenAI
+   - **Demo:** [data-navigator-ai.vercel.app](https://data-navigator-ai.vercel.app/)
+
+3. **Workforce Burnout Analyzer**
+   - AI system for productivity analysis and burnout detection
+   - **Demo:** [burnoutai.streamlit.app](https://burnoutai.streamlit.app/)
+
+4. **Medical Prediction System** - ML-based health predictions
+5. **Banking & Railway Systems** - Full-stack Java applications
+
+---
+💡 **You might also want to know:**
+• What technologies does Raunak use?
+• Tell me about his AI/ML experience
+• What are his live deployed applications?`;
     } else if (lowerInput.includes('skill') || lowerInput.includes('technology') || lowerInput.includes('tech')) {
-      return "💻 Raunak's Technical Arsenal:\n\n**Languages:** Python, Java, C++, SQL, JavaScript, R\n**ML/AI:** TensorFlow, Scikit-learn, LangChain, OpenAI APIs\n**Data:** Pandas, NumPy, Power BI, Matplotlib, Seaborn\n**Web:** Flask, Streamlit, Next.js, Node.js\n**Tools:** Git, VS Code, Jupyter, Selenium, OpenCV";
+      return `## 💻 Raunak's Technical Skills
+
+### Programming Languages
+- **Python** (Expert) - ML, AI, Data Analysis
+- **Java** (Advanced) - OOP, Enterprise Apps
+- **SQL** (Advanced) - Database Design & Optimization
+- **JavaScript** - Web Development
+- **C/C++** - DSA, Competitive Programming
+
+### Frameworks & Libraries
+| Category | Technologies |
+|----------|-------------|
+| **ML/AI** | TensorFlow, Scikit-learn, LangChain, OpenAI |
+| **Data** | Pandas, NumPy, Power BI, Matplotlib |
+| **Web** | Flask, Streamlit, Next.js, Node.js |
+| **Tools** | Git, Selenium, OpenCV, Jupyter |
+
+---
+💡 **You might also want to know:**
+• What projects has he built with these skills?
+• What certifications does he have?
+• What are his areas of expertise?`;
     } else if (lowerInput.includes('education') || lowerInput.includes('study') || lowerInput.includes('college') || lowerInput.includes('university')) {
-      return "🎓 **Education:**\n\nRaunak is pursuing **BCA in Artificial Intelligence & Data Analytics (AIDA)** at **LNCT University, Bhopal**.\n\nHe was born on May 21, 2003, and is passionate about AI/ML, Data Science, and building real-world applications.";
+      return `## 🎓 Education
+
+### Current Studies
+- **Degree:** BCA in Artificial Intelligence & Data Analytics (AIDA)
+- **University:** LNCT University, Bhopal
+- **Status:** Currently Pursuing
+
+### Personal Info
+- **Born:** May 21, 2003
+- **Location:** India
+
+Raunak is passionate about AI/ML, Data Science, and building real-world applications that solve problems.
+
+---
+💡 **You might also want to know:**
+• What are his technical skills?
+• What projects has he worked on?
+• What are his career goals?`;
     } else if (lowerInput.includes('experience') || lowerInput.includes('work')) {
-      return "💼 Raunak has hands-on experience in:\n\n• AI/ML model development & deployment\n• End-to-end data pipeline creation\n• GenAI/LLM application development\n• Full-stack web development\n• Automation & web scraping\n• Competitive programming (DSA)";
+      return `## 💼 Experience & Expertise
+
+### Core Competencies
+- ✅ AI/ML model development & deployment
+- ✅ End-to-end data pipeline creation
+- ✅ GenAI/LLM application development
+- ✅ Full-stack web development
+- ✅ Automation & web scraping
+- ✅ Competitive programming (DSA)
+
+### Key Achievements
+- Built multiple production-ready AI applications
+- Deployed GenAI tools used by real users
+- Strong problem-solving skills in competitive programming
+
+---
+💡 **You might also want to know:**
+• What specific projects demonstrate these skills?
+• What certifications has he earned?
+• How can I contact him for opportunities?`;
     } else if (lowerInput.includes('contact') || lowerInput.includes('reach') || lowerInput.includes('connect') || lowerInput.includes('email')) {
-      return "📬 **Contact Raunak:**\n\n• 📧 Email: rk331159@gmail.com\n• 💼 LinkedIn: linkedin.com/in/raunak-kumar-766328248\n• 🐙 GitHub: github.com/SHPDH09\n• 🌐 Portfolio: portfolioraunakprasad.netlify.app";
+      return `## 📬 Contact Raunak
+
+### Direct Contact
+- **📧 Email:** [rk331159@gmail.com](mailto:rk331159@gmail.com)
+
+### Professional Profiles
+- **💼 LinkedIn:** [linkedin.com/in/raunak-kumar-766328248](https://www.linkedin.com/in/raunak-kumar-766328248/)
+- **🐙 GitHub:** [github.com/SHPDH09](https://github.com/SHPDH09)
+- **🌐 Portfolio:** [portfolioraunakprasad.netlify.app](https://portfolioraunakprasad.netlify.app/)
+
+Feel free to reach out for collaborations, opportunities, or just to connect!
+
+---
+💡 **You might also want to know:**
+• What projects has he built?
+• What are his technical skills?
+• Is he available for freelance work?`;
     } else if (lowerInput.includes('name') || lowerInput.includes('who') || lowerInput.includes('about')) {
-      return "👨‍💻 I'm here to help you learn about **Raunak Kumar** - an AI/ML Developer and Data Analyst from India!\n\nHe specializes in building GenAI applications, data analytics solutions, and ML models. Currently pursuing BCA in AIDA at LNCT University.";
-    } else if (lowerInput.includes('location') || lowerInput.includes('where')) {
-      return "📍 Raunak is based in **India** and is open to remote opportunities in AI/ML, Data Analytics, and Full-stack development.";
-    } else if (lowerInput.includes('github')) {
-      return "🐙 **GitHub:** github.com/SHPDH09\n\nCheck out Raunak's repositories including AI Startup Idea Validator, Data Navigator AI, and Workforce Burnout Analyzer!";
-    } else if (lowerInput.includes('linkedin')) {
-      return "💼 **LinkedIn:** linkedin.com/in/raunak-kumar-766328248\n\nConnect with Raunak for professional opportunities!";
+      return `## 👨‍💻 About Raunak Kumar
+
+### Introduction
+Raunak Kumar is an **AI/ML Developer and Data Analyst** from India, currently pursuing **BCA in AIDA** at LNCT University.
+
+### What He Does
+- 🤖 Builds GenAI/LLM applications
+- 📊 Creates data analytics solutions
+- 🧠 Develops machine learning models
+- 🌐 Full-stack web development
+
+### Focus Areas
+- Artificial Intelligence & Machine Learning
+- Data Engineering & Analytics
+- LangChain & OpenAI integrations
+
+---
+💡 **You might also want to know:**
+• What projects has he built?
+• What are his technical skills?
+• How can I contact him?`;
     } else if (lowerInput.includes('hello') || lowerInput.includes('hi') || lowerInput.includes('hey')) {
-      return "Hello! 👋 Great to meet you! I'm Raunak's AI assistant. How can I help you today? Feel free to ask about his projects, skills, education, or anything else!";
+      return `## 👋 Hello there!
+
+Great to meet you! I'm **Raunak's AI assistant**.
+
+I can help you learn about:
+- 🚀 His **projects** and live demos
+- 💻 His **technical skills** and expertise
+- 🎓 His **education** and background
+- 💼 His **experience** and achievements
+- 📬 How to **contact** him
+
+**What would you like to know?**
+
+---
+💡 **Popular questions:**
+• What are Raunak's best projects?
+• What technologies does he work with?
+• How can I hire him?`;
     } else {
-      return "I can help you with information about Raunak Kumar's:\n\n• 🚀 **Projects** - AI/ML applications, full-stack systems\n• 💻 **Skills** - Python, Java, ML frameworks, data tools\n• 🎓 **Education** - BCA in AIDA at LNCT University\n• 💼 **Experience** - AI/ML, Data Analytics, GenAI\n• 📬 **Contact** - Email, LinkedIn, GitHub\n\nWhat would you like to know?";
+      return `## 🤔 How Can I Help?
+
+I can provide information about **Raunak Kumar's**:
+
+| Topic | What I Can Tell You |
+|-------|-------------------|
+| 🚀 **Projects** | AI/ML apps, full-stack systems, live demos |
+| 💻 **Skills** | Python, Java, ML frameworks, data tools |
+| 🎓 **Education** | BCA in AIDA at LNCT University |
+| 💼 **Experience** | AI/ML, Data Analytics, GenAI |
+| 📬 **Contact** | Email, LinkedIn, GitHub |
+
+**Just ask me anything about Raunak!**
+
+---
+💡 **Try asking:**
+• What are his best projects?
+• What technologies does he know?
+• How can I reach him?`;
     }
   };
 
@@ -419,7 +566,7 @@ const ChatBox = () => {
                     )}
                     <div className="flex flex-col items-end gap-0.5">
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
                           message.isUser
                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
                             : 'bg-card text-card-foreground border border-border rounded-bl-md'
@@ -431,7 +578,34 @@ const ChatBox = () => {
                             {message.file.name}
                           </div>
                         )}
-                        {message.text}
+                        {message.isUser ? (
+                          <span className="whitespace-pre-line">{message.text}</span>
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-2 prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-primary prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-hr:my-3 prose-hr:border-border">
+                            <ReactMarkdown
+                              components={{
+                                h2: ({ children }) => <h2 className="text-base font-bold text-foreground mt-3 mb-2">{children}</h2>,
+                                h3: ({ children }) => <h3 className="text-sm font-semibold text-foreground mt-2 mb-1">{children}</h3>,
+                                ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1.5">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 my-1.5">{children}</ol>,
+                                li: ({ children }) => <li className="text-sm">{children}</li>,
+                                p: ({ children }) => <p className="my-1.5">{children}</p>,
+                                strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                                a: ({ href, children }) => (
+                                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                                    {children}
+                                  </a>
+                                ),
+                                hr: () => <hr className="my-3 border-border" />,
+                                code: ({ children }) => (
+                                  <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
+                                ),
+                              }}
+                            >
+                              {message.text}
+                            </ReactMarkdown>
+                          </div>
+                        )}
                       </div>
                       {message.isUser && (
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground pr-1">
@@ -456,8 +630,19 @@ const ChatBox = () => {
                     </div>
                     <div className="bg-card text-card-foreground border border-border rounded-2xl rounded-bl-md p-3 max-w-[85%]">
                       {isTyping && typingText ? (
-                        <div className="text-sm leading-relaxed whitespace-pre-line">
-                          {typingText}
+                        <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-strong:text-primary">
+                          <ReactMarkdown
+                            components={{
+                              h2: ({ children }) => <h2 className="text-base font-bold text-foreground mt-3 mb-2">{children}</h2>,
+                              h3: ({ children }) => <h3 className="text-sm font-semibold text-foreground mt-2 mb-1">{children}</h3>,
+                              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1.5">{children}</ul>,
+                              li: ({ children }) => <li className="text-sm">{children}</li>,
+                              p: ({ children }) => <p className="my-1.5">{children}</p>,
+                              strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                            }}
+                          >
+                            {typingText}
+                          </ReactMarkdown>
                           <span className="inline-block w-1 h-4 bg-primary ml-0.5 animate-pulse" />
                         </div>
                       ) : (
