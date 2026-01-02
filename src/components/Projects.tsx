@@ -1,7 +1,10 @@
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Github, Database, Brain, Globe, Code2, Users, Activity } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ExternalLink, Github, Database, Brain, Globe, Code2, Users, Activity, Search, Filter, X } from 'lucide-react';
 
 // Import project images
 import bankingImg from '@/assets/banking-project.jpg';
@@ -14,6 +17,9 @@ import medicalImg from '@/assets/medical-project.jpg';
 import clusteringImg from '@/assets/clustering-project.jpg';
 
 const Projects = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTech, setSelectedTech] = useState('all');
   const projects = [
     {
       title: "AI Startup Idea Validator",
@@ -94,6 +100,36 @@ const Projects = () => {
     }
   ];
 
+  // Get unique categories and tech stacks
+  const categories = useMemo(() => {
+    const cats = [...new Set(projects.map(p => p.category))];
+    return cats.sort();
+  }, []);
+
+  const techStacks = useMemo(() => {
+    const techs = [...new Set(projects.flatMap(p => p.tech.map(t => t.trim())))];
+    return techs.sort();
+  }, []);
+
+  // Filter projects
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           project.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || project.category === selectedCategory;
+      const matchesTech = selectedTech === 'all' || project.tech.some(t => t.trim() === selectedTech);
+      return matchesSearch && matchesCategory && matchesTech;
+    });
+  }, [searchQuery, selectedCategory, selectedTech]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setSelectedTech('all');
+  };
+
+  const hasActiveFilters = searchQuery || selectedCategory !== 'all' || selectedTech !== 'all';
+
   return (
     <section id="projects" className="py-20 bg-background/95">
       <div className="container mx-auto px-6">
@@ -106,8 +142,75 @@ const Projects = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {projects.map((project, index) => (
+        {/* Filters */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-card/50 border-accent/20"
+              />
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-48 bg-card/50 border-accent/20">
+                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedTech} onValueChange={setSelectedTech}>
+              <SelectTrigger className="w-full md:w-48 bg-card/50 border-accent/20">
+                <Code2 className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Tech Stack" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Technologies</SelectItem>
+                {techStacks.map((tech) => (
+                  <SelectItem key={tech} value={tech}>{tech}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          {hasActiveFilters && (
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              Showing {filteredProjects.length} of {projects.length} projects
+            </p>
+          )}
+        </div>
+
+        {filteredProjects.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg mb-4">No projects match your filters</p>
+            <Button variant="outline" onClick={clearFilters}>
+              Clear all filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {filteredProjects.map((project, index) => (
             <Card 
               key={index} 
               className="card-gradient shadow-card hover-lift group relative overflow-hidden border-0 bg-card/80 backdrop-blur-sm"
@@ -179,7 +282,8 @@ const Projects = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <Button 
