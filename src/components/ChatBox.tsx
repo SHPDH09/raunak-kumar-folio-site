@@ -3,16 +3,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck, Copy, Download, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
+import jsPDF from 'jspdf';
 
 interface Message {
   id: number;
   text: string;
   isUser: boolean;
   timestamp: Date;
-  file?: { name: string; type: string };
+  file?: { name: string; type: string; content?: string };
   status?: 'sending' | 'sent' | 'read';
 }
 
@@ -77,6 +79,8 @@ const ChatBox = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [pdfContent, setPdfContent] = useState<string>('');
+  const [copiedMessageId, setCopiedMessageId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -161,17 +165,167 @@ const ChatBox = () => {
     }
   };
 
-  const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setAttachedFile(file);
+      
+      // If it's a PDF, extract text content
+      if (file.type === 'application/pdf') {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          // Simple PDF text extraction - for complex PDFs, you might need a more robust solution
+          const text = await extractTextFromPDF(arrayBuffer);
+          setPdfContent(text);
+          toast.success('PDF loaded successfully!');
+        } catch (error) {
+          console.error('Error reading PDF:', error);
+          toast.error('Could not read PDF content');
+        }
+      }
     }
+  };
+
+  // Simple PDF text extraction (basic implementation)
+  const extractTextFromPDF = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    // Convert to string and try to extract readable text
+    const bytes = new Uint8Array(arrayBuffer);
+    let text = '';
+    
+    // This is a simplified extraction - for production, consider using pdf.js
+    for (let i = 0; i < bytes.length; i++) {
+      const char = bytes[i];
+      if (char >= 32 && char <= 126) {
+        text += String.fromCharCode(char);
+      } else if (char === 10 || char === 13) {
+        text += '\n';
+      }
+    }
+    
+    // Clean up the extracted text
+    const cleanText = text
+      .replace(/[^\x20-\x7E\n]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 5000); // Limit to first 5000 chars
+    
+    return cleanText || 'PDF content extracted (binary format - please describe what you need from this file)';
   };
 
   const removeAttachment = () => {
     setAttachedFile(null);
+    setPdfContent('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Copy message to clipboard
+  const copyToClipboard = async (text: string, messageId: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (error) {
+      toast.error('Failed to copy');
+    }
+  };
+
+  // Export chat to PDF
+  const exportChatToPDF = () => {
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+    let yPosition = 20;
+
+    // Title
+    pdf.setFontSize(18);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Raunak's AI Assistant - Chat Export", margin, yPosition);
+    yPosition += 15;
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Exported on: ${new Date().toLocaleString()}`, margin, yPosition);
+    yPosition += 15;
+
+    // Separator line
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Messages
+    messages.forEach((message) => {
+      // Check if we need a new page
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+
+      // Sender label
+      pdf.setFontSize(10);
+      pdf.setTextColor(message.isUser ? 0 : 100, message.isUser ? 100 : 0, message.isUser ? 200 : 150);
+      pdf.text(message.isUser ? 'You' : "Raunak's AI", margin, yPosition);
+      yPosition += 5;
+
+      // Timestamp
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(new Date(message.timestamp).toLocaleString(), margin, yPosition);
+      yPosition += 7;
+
+      // Message content - clean markdown
+      pdf.setFontSize(10);
+      pdf.setTextColor(50, 50, 50);
+      const cleanText = message.text
+        .replace(/#{1,6}\s/g, '')
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/`/g, '')
+        .replace(/---/g, '');
+
+      const lines = pdf.splitTextToSize(cleanText, maxWidth);
+      lines.forEach((line: string) => {
+        if (yPosition > 280) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 10;
+    });
+
+    pdf.save('raunak-ai-chat.pdf');
+    toast.success('Chat exported to PDF!');
+  };
+
+  // Share chat
+  const shareChat = async () => {
+    const chatText = messages
+      .map(m => `${m.isUser ? 'You' : "Raunak's AI"} (${new Date(m.timestamp).toLocaleTimeString()}):\n${m.text}`)
+      .join('\n\n---\n\n');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Raunak's AI Assistant Chat",
+          text: chatText,
+        });
+        toast.success('Chat shared!');
+      } catch (error) {
+        // User cancelled or share failed, fallback to copy
+        await navigator.clipboard.writeText(chatText);
+        toast.success('Chat copied to clipboard!');
+      }
+    } else {
+      // Fallback for browsers without share API
+      await navigator.clipboard.writeText(chatText);
+      toast.success('Chat copied to clipboard!');
     }
   };
 
@@ -252,10 +406,18 @@ const ChatBox = () => {
           content: m.text
         }));
 
-      // Add current message
+      // Add current message with PDF content if available
+      let messageContent = currentInput || '';
+      if (attachedFile) {
+        messageContent += `\n\n[Attached file: ${attachedFile.name}]`;
+        if (pdfContent && attachedFile.type === 'application/pdf') {
+          messageContent += `\n\nPDF Content:\n${pdfContent}`;
+        }
+      }
+      
       conversationHistory.push({
         role: 'user',
-        content: currentInput || `User attached a file: ${attachedFile?.name}`
+        content: messageContent
       });
 
       const { data, error } = await supabase.functions.invoke('raunak-assistant', {
@@ -541,14 +703,34 @@ I can provide information about **Raunak Kumar's**:
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="h-7 w-7 p-0 hover:bg-destructive/20"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={shareChat}
+                className="h-7 w-7 p-0 hover:bg-primary/20"
+                title="Share chat"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={exportChatToPDF}
+                className="h-7 w-7 p-0 hover:bg-primary/20"
+                title="Export to PDF"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="h-7 w-7 p-0 hover:bg-destructive/20"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </CardHeader>
           
           <CardContent className="p-0 flex flex-col flex-1 overflow-hidden">
@@ -564,9 +746,9 @@ I can provide information about **Raunak Kumar's**:
                         <Bot className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
-                    <div className="flex flex-col items-end gap-0.5">
+                    <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} gap-0.5 group`}>
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
+                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed relative ${
                           message.isUser
                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
                             : 'bg-card text-card-foreground border border-border rounded-bl-md'
@@ -607,6 +789,27 @@ I can provide information about **Raunak Kumar's**:
                           </div>
                         )}
                       </div>
+                      {/* Copy button for AI messages */}
+                      {!message.isUser && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(message.text, message.id)}
+                          className="h-6 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                        >
+                          {copiedMessageId === message.id ? (
+                            <>
+                              <Check className="w-3 h-3 mr-1 text-green-500" />
+                              Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3 mr-1" />
+                              Copy
+                            </>
+                          )}
+                        </Button>
+                      )}
                       {message.isUser && (
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground pr-1">
                           {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
