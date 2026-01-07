@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck, Copy, Download, Share2, Sun, Moon } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck, Copy, Download, Share2, Sun, Moon, Settings, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -67,6 +67,7 @@ const ChatBox = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typingText, setTypingText] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
@@ -704,34 +705,93 @@ I can provide information about **Raunak Kumar's**:
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="h-7 w-7 p-0 hover:bg-primary/20"
-                title={isDarkMode ? "Light mode" : "Dark mode"}
-              >
-                {isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={shareChat}
-                className="h-7 w-7 p-0 hover:bg-primary/20"
-                title="Share chat"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={exportChatToPDF}
-                className="h-7 w-7 p-0 hover:bg-primary/20"
-                title="Export to PDF"
-              >
-                <Download className="w-3.5 h-3.5" />
-              </Button>
+            <div className="flex items-center gap-2">
+              {/* 360° Radial Menu */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className={`h-8 w-8 p-0 rounded-full transition-all duration-300 ${isMenuOpen ? 'bg-primary text-primary-foreground rotate-45' : 'hover:bg-primary/20'}`}
+                  title="Menu"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+                
+                {/* Radial Menu Items */}
+                <div className={`absolute top-1/2 left-1/2 transition-all duration-300 ${isMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0 pointer-events-none'}`}>
+                  {/* Dark/Light Mode - Top */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setIsDarkMode(!isDarkMode); setIsMenuOpen(false); }}
+                    className={`absolute h-8 w-8 p-0 rounded-full shadow-lg transition-all duration-300 ${isDarkMode ? 'bg-yellow-500 hover:bg-yellow-400' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
+                    style={{ transform: isMenuOpen ? 'translate(-50%, -180%)' : 'translate(-50%, -50%)' }}
+                    title={isDarkMode ? "Light mode" : "Dark mode"}
+                  >
+                    {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </Button>
+                  
+                  {/* Share - Top Right */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { shareChat(); setIsMenuOpen(false); }}
+                    className="absolute h-8 w-8 p-0 rounded-full bg-blue-500 hover:bg-blue-400 text-white shadow-lg transition-all duration-300"
+                    style={{ transform: isMenuOpen ? 'translate(60%, -140%)' : 'translate(-50%, -50%)' }}
+                    title="Share chat"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                  
+                  {/* Export PDF - Right */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { exportChatToPDF(); setIsMenuOpen(false); }}
+                    className="absolute h-8 w-8 p-0 rounded-full bg-green-500 hover:bg-green-400 text-white shadow-lg transition-all duration-300"
+                    style={{ transform: isMenuOpen ? 'translate(100%, -50%)' : 'translate(-50%, -50%)' }}
+                    title="Export to PDF"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  
+                  {/* Clear Chat - Bottom Right */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { 
+                      setMessages([{ id: 1, text: "Hello! I'm Raunak's AI assistant. How can I help you today?", isUser: false, timestamp: new Date(), status: 'read' }]);
+                      setIsMenuOpen(false);
+                      toast.success('Chat cleared!');
+                    }}
+                    className="absolute h-8 w-8 p-0 rounded-full bg-orange-500 hover:bg-orange-400 text-white shadow-lg transition-all duration-300"
+                    style={{ transform: isMenuOpen ? 'translate(60%, 40%)' : 'translate(-50%, -50%)' }}
+                    title="Clear chat"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                  
+                  {/* Copy All - Bottom */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { 
+                      const allText = messages.map(m => `${m.isUser ? 'You' : 'AI'}: ${m.text}`).join('\n\n');
+                      navigator.clipboard.writeText(allText);
+                      toast.success('Chat copied!');
+                      setIsMenuOpen(false);
+                    }}
+                    className="absolute h-8 w-8 p-0 rounded-full bg-purple-500 hover:bg-purple-400 text-white shadow-lg transition-all duration-300"
+                    style={{ transform: isMenuOpen ? 'translate(-50%, 80%)' : 'translate(-50%, -50%)' }}
+                    title="Copy all chat"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Close Button */}
               <Button
                 variant="ghost"
                 size="sm"
