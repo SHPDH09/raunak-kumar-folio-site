@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck, Copy, Download, Share2 } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Paperclip, FileText, Sparkles, Mic, MicOff, Check, CheckCheck, Copy, Download, Share2, Sun, Moon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -68,6 +68,7 @@ const ChatBox = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingText, setTypingText] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -683,8 +684,8 @@ I can provide information about **Raunak Kumar's**:
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] card-gradient shadow-card border-primary/20 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-border bg-gradient-to-r from-primary/10 to-accent/10">
+        <Card className={`fixed bottom-6 right-6 z-50 w-[380px] h-[520px] shadow-card border-primary/20 flex flex-col transition-colors ${isDarkMode ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'}`}>
+          <CardHeader className={`flex flex-row items-center justify-between p-3 border-b ${isDarkMode ? 'border-slate-700 bg-gradient-to-r from-primary/20 to-accent/20' : 'border-slate-200 bg-gradient-to-r from-primary/10 to-accent/10'}`}>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
                 <Bot className="w-4 h-4 text-primary-foreground" />
@@ -704,6 +705,15 @@ I can provide information about **Raunak Kumar's**:
               </div>
             </div>
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="h-7 w-7 p-0 hover:bg-primary/20"
+                title={isDarkMode ? "Light mode" : "Dark mode"}
+              >
+                {isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -751,7 +761,9 @@ I can provide information about **Raunak Kumar's**:
                         className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed relative ${
                           message.isUser
                             ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
-                            : 'bg-card text-card-foreground border border-border rounded-bl-md'
+                            : isDarkMode 
+                              ? 'bg-slate-800 text-slate-100 border border-slate-700 rounded-bl-md'
+                              : 'bg-slate-100 text-slate-900 border border-slate-200 rounded-bl-md'
                         }`}
                       >
                         {message.file && (
@@ -831,7 +843,7 @@ I can provide information about **Raunak Kumar's**:
                     <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
                       <Bot className="w-3 h-3 text-primary-foreground" />
                     </div>
-                    <div className="bg-card text-card-foreground border border-border rounded-2xl rounded-bl-md p-3 max-w-[85%]">
+                    <div className={`rounded-2xl rounded-bl-md p-3 max-w-[85%] ${isDarkMode ? 'bg-slate-800 text-slate-100 border border-slate-700' : 'bg-slate-100 text-slate-900 border border-slate-200'}`}>
                       {isTyping && typingText ? (
                         <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-strong:text-primary">
                           <ReactMarkdown
@@ -913,7 +925,7 @@ I can provide information about **Raunak Kumar's**:
               </div>
             )}
             
-            <div className="p-3 border-t border-border">
+            <div className={`p-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
               <div className="flex space-x-2">
                 <input
                   type="file"
