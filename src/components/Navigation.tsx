@@ -90,28 +90,46 @@ const Navigation = () => {
             />
           </button>
 
-          {/* Desktop - 360° Radial Menu Toggle */}
+          {/* Desktop - 360° Radial Menu Toggle Button */}
           <div className="hidden md:flex items-center">
-            <div className="relative">
-              {/* Main Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsRadialMenuOpen(!isRadialMenuOpen)}
+              className={`w-12 h-12 rounded-full transition-all duration-300 ${
+                isRadialMenuOpen 
+                  ? 'bg-primary text-primary-foreground rotate-180' 
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              {isRadialMenuOpen ? <X className="h-6 w-6" /> : <Settings className="h-6 w-6" />}
+            </Button>
+          </div>
+
+          {/* Center Screen Radial Menu */}
+          {isRadialMenuOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center">
+              {/* Backdrop */}
+              <div 
+                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                onClick={() => setIsRadialMenuOpen(false)}
+              />
+              
+              {/* Center Toggle Button */}
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsRadialMenuOpen(!isRadialMenuOpen)}
-                className={`relative z-50 w-12 h-12 rounded-full transition-all duration-300 ${
-                  isRadialMenuOpen 
-                    ? 'bg-primary text-primary-foreground rotate-180' 
-                    : 'bg-muted hover:bg-muted/80'
-                }`}
+                onClick={() => setIsRadialMenuOpen(false)}
+                className="relative z-50 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl transition-all duration-300 hover:scale-110"
               >
-                {isRadialMenuOpen ? <X className="h-6 w-6" /> : <Settings className="h-6 w-6" />}
+                <X className="h-8 w-8" />
               </Button>
 
               {/* Radial Menu Items */}
               {radialMenuItems.map((item, index) => {
-                const totalItems = radialMenuItems.length + 1; // +1 for download button
-                const angle = (index * 360) / totalItems - 90; // Start from top
-                const radius = 120;
+                const totalItems = radialMenuItems.length + 1;
+                const angle = (index * 360) / totalItems - 90;
+                const radius = 160;
                 const x = Math.cos((angle * Math.PI) / 180) * radius;
                 const y = Math.sin((angle * Math.PI) / 180) * radius;
 
@@ -119,30 +137,25 @@ const Navigation = () => {
                   <button
                     key={item.name}
                     onClick={() => handleRadialItemClick(item)}
-                    className={`absolute w-10 h-10 rounded-full ${item.color} text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-                      isRadialMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-                    }`}
+                    className={`absolute w-14 h-14 rounded-full ${item.color} text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in`}
                     style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: isRadialMenuOpen 
-                        ? `translate(-50%, -50%) translate(${x}px, ${y}px)` 
-                        : 'translate(-50%, -50%)',
-                      transitionDelay: isRadialMenuOpen ? `${index * 30}ms` : '0ms',
+                      transform: `translate(${x}px, ${y}px)`,
+                      animationDelay: `${index * 40}ms`,
                     }}
                     title={item.name}
                   >
-                    <item.icon className="h-5 w-5" />
+                    <item.icon className="h-6 w-6" />
+                    <span className="text-[8px] font-medium mt-0.5">{item.name}</span>
                   </button>
                 );
               })}
 
-              {/* Download Portfolio Button in Radial */}
+              {/* Download Portfolio Button */}
               {(() => {
                 const index = radialMenuItems.length;
                 const totalItems = radialMenuItems.length + 1;
                 const angle = (index * 360) / totalItems - 90;
-                const radius = 120;
+                const radius = 160;
                 const x = Math.cos((angle * Math.PI) / 180) * radius;
                 const y = Math.sin((angle * Math.PI) / 180) * radius;
 
@@ -150,29 +163,24 @@ const Navigation = () => {
                   <button
                     onClick={handleDownloadPortfolio}
                     disabled={isGenerating}
-                    className={`absolute w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-                      isRadialMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-                    }`}
+                    className="absolute w-14 h-14 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in"
                     style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: isRadialMenuOpen 
-                        ? `translate(-50%, -50%) translate(${x}px, ${y}px)` 
-                        : 'translate(-50%, -50%)',
-                      transitionDelay: isRadialMenuOpen ? `${index * 30}ms` : '0ms',
+                      transform: `translate(${x}px, ${y}px)`,
+                      animationDelay: `${index * 40}ms`,
                     }}
                     title="Download Portfolio"
                   >
                     {isGenerating ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-6 w-6 animate-spin" />
                     ) : (
-                      <Download className="h-5 w-5" />
+                      <Download className="h-6 w-6" />
                     )}
+                    <span className="text-[8px] font-medium mt-0.5">Portfolio</span>
                   </button>
                 );
               })()}
             </div>
-          </div>
+          )}
 
           {/* Mobile Menu Button */}
           <Button
@@ -218,14 +226,6 @@ const Navigation = () => {
           </div>
         )}
       </div>
-
-      {/* Overlay to close radial menu */}
-      {isRadialMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsRadialMenuOpen(false)}
-        />
-      )}
     </nav>
   );
 };
