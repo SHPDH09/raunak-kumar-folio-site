@@ -496,6 +496,399 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_about: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          education: string | null
+          id: string
+          location: string | null
+          name: string
+          resume_url: string | null
+          tagline: string | null
+          university: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          education?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          resume_url?: string | null
+          tagline?: string | null
+          university?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          education?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          resume_url?: string | null
+          tagline?: string | null
+          university?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      portfolio_achievements: {
+        Row: {
+          badge_text: string | null
+          created_at: string | null
+          date_achieved: string | null
+          description: string | null
+          details: Json | null
+          display_order: number | null
+          id: string
+          title: string
+        }
+        Insert: {
+          badge_text?: string | null
+          created_at?: string | null
+          date_achieved?: string | null
+          description?: string | null
+          details?: Json | null
+          display_order?: number | null
+          id?: string
+          title: string
+        }
+        Update: {
+          badge_text?: string | null
+          created_at?: string | null
+          date_achieved?: string | null
+          description?: string | null
+          details?: Json | null
+          display_order?: number | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      portfolio_applications: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          features: string[] | null
+          icon_name: string | null
+          id: string
+          live_url: string | null
+          tech_stack: string[] | null
+          title: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: string[] | null
+          icon_name?: string | null
+          id?: string
+          live_url?: string | null
+          tech_stack?: string[] | null
+          title: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: string[] | null
+          icon_name?: string | null
+          id?: string
+          live_url?: string | null
+          tech_stack?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      portfolio_certifications: {
+        Row: {
+          badge_url: string | null
+          created_at: string | null
+          credential_url: string | null
+          display_order: number | null
+          id: string
+          issue_date: string | null
+          issuer: string | null
+          title: string
+        }
+        Insert: {
+          badge_url?: string | null
+          created_at?: string | null
+          credential_url?: string | null
+          display_order?: number | null
+          id?: string
+          issue_date?: string | null
+          issuer?: string | null
+          title: string
+        }
+        Update: {
+          badge_url?: string | null
+          created_at?: string | null
+          credential_url?: string | null
+          display_order?: number | null
+          id?: string
+          issue_date?: string | null
+          issuer?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      portfolio_contact: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      portfolio_experience: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          location: string | null
+          organization: string
+          start_date: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          organization: string
+          start_date?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          organization?: string
+          start_date?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      portfolio_projects: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          demo_url: string | null
+          description: string | null
+          display_order: number | null
+          github_url: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          tech_stack: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          demo_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          tech_stack?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          demo_url?: string | null
+          description?: string | null
+          display_order?: number | null
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          tech_stack?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      portfolio_publications: {
+        Row: {
+          abstract: string | null
+          authors: string[] | null
+          created_at: string | null
+          display_order: number | null
+          doi_url: string | null
+          id: string
+          pdf_url: string | null
+          publication_date: string | null
+          publication_venue: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          display_order?: number | null
+          doi_url?: string | null
+          id?: string
+          pdf_url?: string | null
+          publication_date?: string | null
+          publication_venue?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          display_order?: number | null
+          doi_url?: string | null
+          id?: string
+          pdf_url?: string | null
+          publication_date?: string | null
+          publication_venue?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      portfolio_skills: {
+        Row: {
+          category: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          proficiency: number | null
+          skill_name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          proficiency?: number | null
+          skill_name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          proficiency?: number | null
+          skill_name?: string
+        }
+        Relationships: []
+      }
+      portfolio_social_links: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          platform: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      portfolio_soft_skills: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon_name: string | null
+          id: string
+          skill_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          skill_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          skill_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
