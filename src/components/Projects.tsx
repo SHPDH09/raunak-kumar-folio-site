@@ -22,6 +22,17 @@ const Projects = () => {
   const [selectedTech, setSelectedTech] = useState('all');
   const projects = [
     {
+      title: "Subject Tutor AI",
+      description: "AI-powered chatbot using LLM for interactive subject tutoring and learning assistance.",
+      tech: ["Next.js", "TypeScript", "LLM", "AI", "React"],
+      icon: <Brain className="w-5 h-5" />,
+      category: "GenAI/LLM",
+      image: aiImg,
+      color: "from-violet-500 to-purple-500",
+      githubLink: "https://github.com/SHPDH09",
+      demoLink: "https://subject-tutor.vercel.app/"
+    },
+    {
       title: "AI Startup Idea Validator",
       description: "AI-powered web app that evaluates startup ideas and generates structured validation reports with market analysis, competitor insights, and profitability scores.",
       tech: ["Next.js", "Node.js", "MongoDB", "OpenAI", "Express"],
