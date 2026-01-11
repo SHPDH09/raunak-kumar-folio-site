@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Github, Linkedin, Mail } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ChevronDown, Github, Linkedin, Mail, Brain, Sparkles } from 'lucide-react';
 import DataAnalytics3D from './DataAnalytics3D';
+
+const AI_LLM_PROJECT_COUNT = 4; // Subject Tutor AI, AI Startup Idea Validator, Data Navigator AI, AI Data Analyzer
 
 const Hero = () => {
   const [typedText, setTypedText] = useState('');
@@ -49,6 +52,18 @@ const Hero = () => {
             BCA Student specializing in <span className="text-gradient">Artificial Intelligence & Data Analytics</span> at LNCT University. 
             Passionate about building intelligent solutions that make a difference.
           </p>
+          
+          {/* AI/LLM Projects Badge */}
+          <div className="flex justify-center mb-6">
+            <Badge 
+              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/50 text-violet-300 hover:from-violet-500/30 hover:to-purple-500/30 transition-all cursor-pointer animate-pulse"
+              onClick={() => scrollToSection('projects')}
+            >
+              <Brain className="w-4 h-4 mr-2" />
+              {AI_LLM_PROJECT_COUNT} AI/LLM Projects
+              <Sparkles className="w-4 h-4 ml-2" />
+            </Badge>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
