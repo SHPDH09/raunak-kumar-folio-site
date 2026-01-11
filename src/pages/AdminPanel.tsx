@@ -6,8 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle2, Shield, Users, Image as ImageIcon, LogOut, FileCheck } from "lucide-react";
+import { CheckCircle2, Shield, Users, Image as ImageIcon, LogOut, FileCheck, Briefcase } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PortfolioAboutAdmin from "@/components/admin/PortfolioAboutAdmin";
+import PortfolioSkillsAdmin from "@/components/admin/PortfolioSkillsAdmin";
+import PortfolioProjectsAdmin from "@/components/admin/PortfolioProjectsAdmin";
+import PortfolioExperienceAdmin from "@/components/admin/PortfolioExperienceAdmin";
+import PortfolioCertificationsAdmin from "@/components/admin/PortfolioCertificationsAdmin";
+import PortfolioAchievementsAdmin from "@/components/admin/PortfolioAchievementsAdmin";
+import PortfolioPublicationsAdmin from "@/components/admin/PortfolioPublicationsAdmin";
+import PortfolioApplicationsAdmin from "@/components/admin/PortfolioApplicationsAdmin";
+import PortfolioSoftSkillsAdmin from "@/components/admin/PortfolioSoftSkillsAdmin";
+import PortfolioContactAdmin from "@/components/admin/PortfolioContactAdmin";
 
 interface Profile {
   id: string;
@@ -294,9 +304,13 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="posts">Pending Posts</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="portfolio">
+              <Briefcase className="w-4 h-4 mr-2" />
+              Portfolio
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts">
@@ -417,6 +431,19 @@ const AdminPanel = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="space-y-6">
+            <PortfolioAboutAdmin />
+            <PortfolioSkillsAdmin />
+            <PortfolioProjectsAdmin />
+            <PortfolioExperienceAdmin />
+            <PortfolioCertificationsAdmin />
+            <PortfolioSoftSkillsAdmin />
+            <PortfolioAchievementsAdmin />
+            <PortfolioPublicationsAdmin />
+            <PortfolioApplicationsAdmin />
+            <PortfolioContactAdmin />
           </TabsContent>
         </Tabs>
       </div>
