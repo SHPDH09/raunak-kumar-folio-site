@@ -1,21 +1,64 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BookOpen, ExternalLink, Calendar, Users } from 'lucide-react';
+import { BookOpen, ExternalLink, Calendar, Users, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Publication {
+  id: string;
+  title: string;
+  authors: string[];
+  publication_venue: string;
+  abstract: string;
+  doi_url: string;
+  status: string;
+  publication_date: string;
+  display_order: number;
+}
 
 const Publications = () => {
-  const publications = [
-    {
-      title: "Employee Attrition Prediction Using Machine Learning Techniques",
-      journal: "Academia.edu",
-      type: "Research Paper",
-      date: "Aug-2025",
-      authors: ["Raunak Kumar"],
-      abstract: "This research paper explores the application of machine learning techniques for predicting employee attrition in organizations. The study analyzes various factors contributing to employee turnover and implements predictive models to help organizations retain talent.",
-      link: "https://www.academia.edu/143335578/Employee_Attrition_Prediction_Using_Machine_Learning_Techniques",
-      keywords: ["Machine Learning", "Employee Attrition", "Predictive Analytics", "HR Analytics"]
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPublications();
+  }, []);
+
+  const loadPublications = async () => {
+    try {
+      const { data } = await supabase
+        .from('portfolio_publications')
+        .select('*')
+        .order('display_order');
+
+      if (data) {
+        setPublications(data as Publication[]);
+      }
+    } catch (error) {
+      console.error('Error loading publications:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
+  if (loading) {
+    return (
+      <section id="publications" className="py-20 bg-muted/30 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </section>
+    );
+  }
+
+  if (publications.length === 0) {
+    return null;
+  }
 
   return (
     <section id="publications" className="py-20 bg-muted/30">
@@ -33,8 +76,8 @@ const Publications = () => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          {publications.map((pub, index) => (
-            <Card key={index} className="card-gradient shadow-card hover-lift mb-8 relative overflow-hidden">
+          {publications.map((pub) => (
+            <Card key={pub.id} className="card-gradient shadow-card hover-lift mb-8 relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 opacity-40"></div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
@@ -57,52 +100,45 @@ const Publications = () => {
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {pub.date}
+                          {formatDate(pub.publication_date)}
                         </div>
                         <div className="flex items-center">
                           <Users className="w-4 h-4 mr-1" />
-                          {pub.authors.join(", ")}
+                          {(pub.authors || []).join(", ")}
                         </div>
                         <Badge variant="outline" className="text-xs">
-                          {pub.type}
+                          {pub.status || 'Research Paper'}
                         </Badge>
                       </div>
                     </div>
 
                     <div>
                       <p className="text-sm text-muted-foreground mb-2 font-medium">Published in:</p>
-                      <p className="text-foreground font-semibold">{pub.journal}</p>
+                      <p className="text-foreground font-semibold">{pub.publication_venue}</p>
                     </div>
 
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 font-medium">Abstract:</p>
-                      <p className="text-foreground leading-relaxed text-sm">
-                        {pub.abstract}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2 font-medium">Keywords:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {pub.keywords.map((keyword, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {keyword}
-                          </Badge>
-                        ))}
+                    {pub.abstract && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2 font-medium">Abstract:</p>
+                        <p className="text-foreground leading-relaxed text-sm">
+                          {pub.abstract}
+                        </p>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="pt-4">
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        className="w-full md:w-auto"
-                        onClick={() => window.open(pub.link, '_blank')}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        View Publication
-                      </Button>
-                    </div>
+                    {pub.doi_url && (
+                      <div className="pt-4">
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          className="w-full md:w-auto"
+                          onClick={() => window.open(pub.doi_url, '_blank')}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          View Publication
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
