@@ -1,137 +1,95 @@
-import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExternalLink, Github, Database, Brain, Globe, Code2, Users, Activity, Search, Filter, X } from 'lucide-react';
+import { ExternalLink, Github, Database, Brain, Globe, Code2, Users, Activity, Search, Filter, X, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
-// Import project images
-import bankingImg from '@/assets/banking-project.jpg';
-import railwayImg from '@/assets/railway-project.jpg';
-import aiImg from '@/assets/ai-project.jpg';
-import quizImg from '@/assets/quiz-project.jpg';
-import analyticsImg from '@/assets/analytics-project.jpg';
-import trackerImg from '@/assets/tracker-project.jpg';
-import medicalImg from '@/assets/medical-project.jpg';
-import clusteringImg from '@/assets/clustering-project.jpg';
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tech_stack: string[];
+  github_url: string;
+  demo_url: string;
+  image_url: string;
+  display_order: number;
+}
 
 const Projects = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTech, setSelectedTech] = useState('all');
-  const projects = [
-    {
-      title: "Subject Tutor AI",
-      description: "AI-powered chatbot using LLM for interactive subject tutoring and learning assistance.",
-      tech: ["Next.js", "TypeScript", "LLM", "AI", "React"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "GenAI/LLM",
-      image: aiImg,
-      color: "from-violet-500 to-purple-500",
-      githubLink: "https://github.com/SHPDH09",
-      demoLink: "https://subject-tutor.vercel.app/"
-    },
-    {
-      title: "AI Startup Idea Validator",
-      description: "AI-powered web app that evaluates startup ideas and generates structured validation reports with market analysis, competitor insights, and profitability scores.",
-      tech: ["Next.js", "Node.js", "MongoDB", "OpenAI", "Express"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "GenAI/LLM",
-      image: analyticsImg,
-      color: "from-emerald-500 to-teal-500",
-      githubLink: "https://github.com/SHPDH09/AI-Idea-Check.git",
-      demoLink: "https://ai-idea-check.vercel.app/"
-    },
-    {
-      title: "Data Navigator AI",
-      description: "GenAI-based SQL assistant that connects to databases, performs analysis, and generates human-like insights using LLMs.",
-      tech: ["Python", "LangChain", "OpenAI", "SQL", "Pandas"],
-      icon: <Brain className="w-5 h-5" />,
-      category: "GenAI/LLM",
-      image: analyticsImg,
-      color: "from-purple-500 to-indigo-500",
-      githubLink: "https://github.com/SHPDH09",
-      demoLink: "https://data-navigator-ai.vercel.app/"
-    },
-   
-    {
-      title: "Objective & Coding Quiz App",
-      description: "Interactive quiz platform with coding IDE integration for assessment.",
-      tech: ["JavaScript", "React", "IDE"],
-      icon: <Code2 className="w-5 h-5" />,
-      category: "Web App",
-      image: quizImg,
-      color: "from-green-500 to-emerald-500",
-      githubLink: "https://github.com/SHPDH09/Quiz-Application-Java/tree/main",
-      demoLink: "https://quiz_application_001.renderforestsites.com/"
-    },
 
-   {
-      title: "AI-Based-Workforce-Productivity-Burnout-Analyzer",
-      description: "AI-Powered Employee Performance & Burnout Analysis Dashboard (Manager Panel)",
-      tech: ["Python", "Streamlit ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
-      icon: <Activity className="w-5 h-5" />,
-      category: "ML/Data Analyst",
-      image: bankingImg,
-      color: "from-cyan-500 to-blue-500",
-      githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
-      demoLink: "https://burnoutai.streamlit.app/"
-    },
-    {
-      title: "AI Data Analyzer",
-      description: "AI-Powered Employee Performance & Burnout Analysis Dashboard (Manager Panel)",
-      tech: ["Python", "Type Script ", "HTML & CSS", "Pandas DataFrame UI" ,"Joblib ","NumPy ","Scikit-learn","Streamlit Cloud"],
-      icon: <Activity className="w-5 h-5" />,
-      category: "ML/Data Analyst",
-      image: bankingImg,
-      color: "from-cyan-300 to-green-500",
-      githubLink: "https://github.com/SHPDH09/AI-Based-Workforce-Productivity-Burnout-Analyzer",
-      demoLink: "https://auto-data-analyst.netlify.app/"
-    },
-    {
-      title: "ETL Pipeline for Sales Data",
-      description: "Automated ETL pipeline for processing large-scale sales data efficiently.",
-      tech: ["Python", "ETL", "Data Pipeline"],
-      icon: <Database className="w-5 h-5" />,
-      category: "Data Engineering",
-      image: clusteringImg,
-      color: "from-yellow-500 to-orange-500",
-      githubLink: "https://github.com/SHPDH09/Blustock-Team-1/blob/main/ETL_Pipeline_for_Sales_Data.ipynb"
-    },
-    {
-      title: "Data Quality Monitoring",
-      description: "Real-time monitoring system ensuring data quality across sources.",
-      tech: ["Python", "Monitoring", "Quality"],
-      icon: <Activity className="w-5 h-5" />,
-      category: "Data Science",
-      image: bankingImg,
-      color: "from-cyan-500 to-blue-500",
-      githubLink: "https://github.com/SHPDH09/Blustock-Team-1/blob/main/Data_Quality_Monitoring_Project.ipynb"
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const { data } = await supabase
+        .from('portfolio_projects')
+        .select('*')
+        .order('display_order');
+
+      if (data) {
+        setProjects(data as Project[]);
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getIcon = (category: string) => {
+    const icons: Record<string, JSX.Element> = {
+      'GenAI/LLM': <Brain className="w-5 h-5" />,
+      'Web App': <Code2 className="w-5 h-5" />,
+      'ML/Data Analyst': <Activity className="w-5 h-5" />,
+      'Data Engineering': <Database className="w-5 h-5" />,
+      'Data Science': <Activity className="w-5 h-5" />
+    };
+    return icons[category] || <Code2 className="w-5 h-5" />;
+  };
+
+  const getColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'GenAI/LLM': 'from-violet-500 to-purple-500',
+      'Web App': 'from-green-500 to-emerald-500',
+      'ML/Data Analyst': 'from-cyan-500 to-blue-500',
+      'Data Engineering': 'from-yellow-500 to-orange-500',
+      'Data Science': 'from-cyan-500 to-blue-500'
+    };
+    return colors[category] || 'from-gray-500 to-slate-500';
+  };
 
   // Get unique categories and tech stacks
   const categories = useMemo(() => {
-    const cats = [...new Set(projects.map(p => p.category))];
+    const cats = [...new Set(projects.map(p => p.category).filter(Boolean))];
     return cats.sort();
-  }, []);
+  }, [projects]);
 
   const techStacks = useMemo(() => {
-    const techs = [...new Set(projects.flatMap(p => p.tech.map(t => t.trim())))];
+    const techs = [...new Set(projects.flatMap(p => (p.tech_stack || []).map(t => t.trim())))];
     return techs.sort();
-  }, []);
+  }, [projects]);
 
   // Filter projects
   const filteredProjects = useMemo(() => {
     return projects.filter(project => {
-      const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           project.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = project.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           project.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || project.category === selectedCategory;
-      const matchesTech = selectedTech === 'all' || project.tech.some(t => t.trim() === selectedTech);
+      const matchesTech = selectedTech === 'all' || (project.tech_stack || []).some(t => t.trim() === selectedTech);
       return matchesSearch && matchesCategory && matchesTech;
     });
-  }, [searchQuery, selectedCategory, selectedTech]);
+  }, [projects, searchQuery, selectedCategory, selectedTech]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -140,6 +98,14 @@ const Projects = () => {
   };
 
   const hasActiveFilters = searchQuery || selectedCategory !== 'all' || selectedTech !== 'all';
+
+  if (loading) {
+    return (
+      <section id="projects" className="py-20 bg-background/95 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </section>
+    );
+  }
 
   return (
     <section id="projects" className="py-20 bg-background/95">
@@ -223,18 +189,13 @@ const Projects = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {filteredProjects.map((project, index) => (
             <Card 
-              key={index} 
+              key={project.id} 
               className="card-gradient shadow-card hover-lift group relative overflow-hidden border-0 bg-card/80 backdrop-blur-sm"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Project Image */}
               <div className="relative h-32 overflow-hidden">
-                <img 
-                  src={project.image} 
-                  alt={project.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-r ${project.color} opacity-60 group-hover:opacity-40 transition-smooth`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-r ${getColor(project.category)} opacity-60 group-hover:opacity-40 transition-smooth`}></div>
                 <div className="absolute top-2 right-2">
                   <Badge variant="secondary" className="text-xs bg-background/80 backdrop-blur-sm">
                     {project.category}
@@ -245,7 +206,7 @@ const Projects = () => {
               <CardContent className="p-4">
                 <div className="flex items-center mb-2">
                   <div className="p-1.5 bg-primary/20 rounded-md text-primary mr-2 group-hover:bg-primary group-hover:text-primary-foreground transition-smooth">
-                    {project.icon}
+                    {getIcon(project.category)}
                   </div>
                   <h3 className="font-semibold text-foreground text-sm group-hover:text-primary transition-smooth">
                     {project.title}
@@ -257,14 +218,14 @@ const Projects = () => {
                 </p>
                 
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {project.tech.slice(0, 2).map((tech, techIndex) => (
+                  {(project.tech_stack || []).slice(0, 2).map((tech, techIndex) => (
                     <Badge key={techIndex} variant="outline" className="text-xs px-2 py-0.5 border-accent/30 text-accent">
                       {tech}
                     </Badge>
                   ))}
-                  {project.tech.length > 2 && (
+                  {(project.tech_stack || []).length > 2 && (
                     <Badge variant="outline" className="text-xs px-2 py-0.5 border-muted-foreground/30">
-                      +{project.tech.length - 2}
+                      +{project.tech_stack.length - 2}
                     </Badge>
                   )}
                 </div>
@@ -274,8 +235,8 @@ const Projects = () => {
                     size="sm" 
                     variant="outline" 
                     className="flex-1 text-xs py-1 h-7 hover-neon"
-                    onClick={() => window.open(project.githubLink, '_blank')}
-                    disabled={!project.githubLink}
+                    onClick={() => project.github_url && window.open(project.github_url, '_blank')}
+                    disabled={!project.github_url}
                   >
                     <Github className="w-3 h-3 mr-1" />
                     Code
@@ -283,8 +244,8 @@ const Projects = () => {
                   <Button 
                     size="sm" 
                     className="flex-1 text-xs py-1 h-7 hover-neon"
-                    onClick={() => project.demoLink && window.open(project.demoLink, '_blank')}
-                    disabled={!project.demoLink}
+                    onClick={() => project.demo_url && window.open(project.demo_url, '_blank')}
+                    disabled={!project.demo_url}
                   >
                     <ExternalLink className="w-3 h-3 mr-1" />
                     Demo

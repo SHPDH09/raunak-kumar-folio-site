@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Download } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github, Linkedin, Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 const contactSchema = z.object({
   name: z.string()
@@ -28,6 +29,19 @@ const contactSchema = z.object({
     .max(2000, "Message must be less than 2000 characters")
 });
 
+interface ContactInfo {
+  email: string;
+  phone: string;
+  address: string;
+}
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon_name: string;
+}
+
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -36,7 +50,44 @@ const Contact = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      // Load contact info
+      const { data: contact } = await supabase
+        .from('portfolio_contact')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (contact) {
+        setContactInfo(contact as ContactInfo);
+      }
+
+      // Load social links
+      const { data: links } = await supabase
+        .from('portfolio_social_links')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (links) {
+        setSocialLinks(links as SocialLink[]);
+      }
+    } catch (error) {
+      console.error('Error loading contact data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -45,89 +96,66 @@ const Contact = () => {
     }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Validate input
-  const result = contactSchema.safeParse(formData);
-  if (!result.success) {
-    toast({
-      title: "Validation Error",
-      description: result.error.errors[0].message,
-      variant: "destructive"
-    });
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    const validatedData = result.data;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(validatedData),
-    });
+    const result = contactSchema.safeParse(formData);
+    if (!result.success) {
+      toast({
+        title: "Validation Error",
+        description: result.error.errors[0].message,
+        variant: "destructive"
+      });
+      return;
+    }
 
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for reaching out 📧. Your message has been sent.",
-    });
+    setIsSubmitting(true);
 
-    setFormData({ name: '', email: '', subject: '', message: '' });
-  } catch (error) {
-    console.error("[Internal] Contact form error:", error);
-    toast({
-      title: "Error!",
-      description: "Could not send message. Please try again later.",
-      variant: "destructive"
-    });
+    try {
+      const validatedData = result.data;
+      
+      await fetch("https://script.google.com/macros/s/AKfycbw2X2jvtkjjAqUNtCb5u-6rnhBG-bGRZxKFharxOaSZ4YrFvc16ELzq687z4h_GXY8NNQ/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validatedData),
+      });
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for reaching out 📧. Your message has been sent.",
+      });
+
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error("[Internal] Contact form error:", error);
+      toast({
+        title: "Error!",
+        description: "Could not send message. Please try again later.",
+        variant: "destructive"
+      });
+    }
+
+    setIsSubmitting(false);
+  };
+
+  const getSocialIcon = (platform: string) => {
+    const icons: Record<string, JSX.Element> = {
+      GitHub: <Github className="w-5 h-5" />,
+      LinkedIn: <Linkedin className="w-5 h-5" />
+    };
+    return icons[platform] || <Github className="w-5 h-5" />;
+  };
+
+  if (loading) {
+    return (
+      <section id="contact" className="py-20 bg-muted/30 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </section>
+    );
   }
-
-  setIsSubmitting(false);
-};
-
-
-
-  const contactInfo = [
-    {
-      icon: <Mail className="w-5 h-5" />,
-      label: "Email",
-      value: "rk331159@gmail.com",
-      link: "mailto:rk331159@gmail.com"
-    },
-    {
-      icon: <Phone className="w-5 h-5" />,
-      label: "Phone",
-      value: "+91 6206158459",
-      link: "tel:+916206158459"
-    },
-    {
-      icon: <MapPin className="w-5 h-5" />,
-      label: "Location",
-      value: "India",
-      link: null
-    }
-  ];
-
-  const socialLinks = [
-    {
-      name: "GitHub",
-      icon: <Github className="w-5 h-5" />,
-      url: "https://github.com/SHPDH09",
-      color: "hover:text-gray-800"
-    },
-    {
-      name: "LinkedIn",
-      icon: <Linkedin className="w-5 h-5" />,
-      url: "https://www.linkedin.com/in/raunak-kumar-766328248/",
-      color: "hover:text-blue-600"
-    }
-  ];
 
   return (
     <section id="contact" className="py-20 bg-muted/30">
@@ -221,26 +249,51 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {contactInfo.map((info, index) => (
-                  <div key={index} className="flex items-center space-x-4">
+                {contactInfo?.email && (
+                  <div className="flex items-center space-x-4">
                     <div className="p-3 bg-primary/10 rounded-lg text-primary">
-                      {info.icon}
+                      <Mail className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{info.label}</p>
-                      {info.link ? (
-                        <a 
-                          href={info.link} 
-                          className="text-muted-foreground hover:text-primary transition-smooth"
-                        >
-                          {info.value}
-                        </a>
-                      ) : (
-                        <p className="text-muted-foreground">{info.value}</p>
-                      )}
+                      <p className="font-medium text-foreground">Email</p>
+                      <a 
+                        href={`mailto:${contactInfo.email}`}
+                        className="text-muted-foreground hover:text-primary transition-smooth"
+                      >
+                        {contactInfo.email}
+                      </a>
                     </div>
                   </div>
-                ))}
+                )}
+                
+                {contactInfo?.phone && (
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-primary/10 rounded-lg text-primary">
+                      <Phone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Phone</p>
+                      <a 
+                        href={`tel:${contactInfo.phone}`}
+                        className="text-muted-foreground hover:text-primary transition-smooth"
+                      >
+                        {contactInfo.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                {contactInfo?.address && (
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-primary/10 rounded-lg text-primary">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Location</p>
+                      <p className="text-muted-foreground">{contactInfo.address}</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -251,37 +304,37 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-foreground mb-3">Social Media</h4>
-                  <div className="flex space-x-4">
-                    {socialLinks.map((social, index) => (
-                      <a
-                        key={index}
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`p-3 bg-muted rounded-lg text-muted-foreground transition-smooth hover:scale-110 ${social.color}`}
-                      >
-                        {social.icon}
-                      </a>
-                    ))}
+                {socialLinks.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-3">Social Media</h4>
+                    <div className="flex space-x-4">
+                      {socialLinks.map((social) => (
+                        <a
+                          key={social.id}
+                          href={social.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 bg-muted rounded-lg text-muted-foreground transition-smooth hover:scale-110 hover:text-primary"
+                        >
+                          {getSocialIcon(social.platform)}
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div>
                   <h4 className="font-semibold text-foreground mb-3">Download Resume</h4>
                   <a 
-  href="/RAUNAK KUMAR.pdf" 
-  download 
-  className="inline-flex items-center justify-center w-full px-4 py-3 text-sm font-medium border rounded-md bg-background hover:bg-accent transition-all">
- 
-
-
-                  <Button variant="outline" className="w-full">
-                    <Download className="w-5 h-5 mr-2" />
-                    Download CV/Resume
-                  </Button>
-                    </a>
+                    href="/RAUNAK KUMAR.pdf" 
+                    download 
+                    className="inline-flex items-center justify-center w-full px-4 py-3 text-sm font-medium border rounded-md bg-background hover:bg-accent transition-all"
+                  >
+                    <Button variant="outline" className="w-full">
+                      <Download className="w-5 h-5 mr-2" />
+                      Download CV/Resume
+                    </Button>
+                  </a>
                 </div>
 
                 <div>
