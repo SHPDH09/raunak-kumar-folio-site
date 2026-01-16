@@ -18,6 +18,7 @@ import PortfolioPublicationsAdmin from "@/components/admin/PortfolioPublications
 import PortfolioApplicationsAdmin from "@/components/admin/PortfolioApplicationsAdmin";
 import PortfolioSoftSkillsAdmin from "@/components/admin/PortfolioSoftSkillsAdmin";
 import PortfolioContactAdmin from "@/components/admin/PortfolioContactAdmin";
+import PortfolioSemesterGradesAdmin from "@/components/admin/PortfolioSemesterGradesAdmin";
 
 interface Profile {
   id: string;
@@ -436,6 +437,7 @@ const AdminPanel = () => {
           <TabsContent value="portfolio" className="space-y-6">
             <PortfolioAboutAdmin />
             <PortfolioSkillsAdmin />
+            <PortfolioSemesterGradesAdmin />
             <PortfolioProjectsAdmin />
             <PortfolioExperienceAdmin />
             <PortfolioCertificationsAdmin />

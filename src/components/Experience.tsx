@@ -17,26 +17,39 @@ interface Experience {
   display_order: number;
 }
 
+interface SemesterGrade {
+  id: string;
+  semester: number;
+  sgpa: number;
+  cgpa: number;
+  year: string;
+  status: string;
+}
+
 const Experience = () => {
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [semesterGrades, setSemesterGrades] = useState<SemesterGrade[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadExperiences();
+    loadData();
   }, []);
 
-  const loadExperiences = async () => {
+  const loadData = async () => {
     try {
-      const { data } = await supabase
-        .from('portfolio_experience')
-        .select('*')
-        .order('display_order');
+      const [expResult, gradesResult] = await Promise.all([
+        supabase.from('portfolio_experience').select('*').order('display_order'),
+        supabase.from('portfolio_semester_grades').select('*').order('semester')
+      ]);
 
-      if (data) {
-        setExperiences(data as Experience[]);
+      if (expResult.data) {
+        setExperiences(expResult.data as Experience[]);
+      }
+      if (gradesResult.data) {
+        setSemesterGrades(gradesResult.data as SemesterGrade[]);
       }
     } catch (error) {
-      console.error('Error loading experiences:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -137,7 +150,42 @@ const Experience = () => {
                     </CardHeader>
                     
                     <CardContent className="pt-0">
-                      {exp.type === 'education' && exp.description ? (
+                      {exp.type === 'education' && exp.title.includes('BCA') ? (
+                        <div className="mb-4">
+                          <p className="text-muted-foreground leading-relaxed mb-4">
+                            {exp.description}
+                          </p>
+                          
+                          {/* Semester Grades Display */}
+                          {semesterGrades.length > 0 && (
+                            <div className="mt-4">
+                              <p className="text-sm font-medium text-foreground mb-3">Semester-wise Performance:</p>
+                              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                {semesterGrades.map((grade) => (
+                                  <div 
+                                    key={grade.id} 
+                                    className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-lg p-3 text-center"
+                                  >
+                                    <p className="text-xs text-muted-foreground mb-1">Sem {grade.semester}</p>
+                                    <p className="text-lg font-bold text-green-400">SGPA: {grade.sgpa}</p>
+                                    <p className="text-sm text-emerald-400">CGPA: {grade.cgpa}</p>
+                                  </div>
+                                ))}
+                              </div>
+                              {semesterGrades.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-4">
+                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-sm px-3 py-1">
+                                    Current CGPA: {semesterGrades[semesterGrades.length - 1]?.cgpa}
+                                  </Badge>
+                                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm px-3 py-1">
+                                    {semesterGrades.length} Semesters Completed
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : exp.type === 'education' && exp.description ? (
                         <div className="mb-4">
                           <p className="text-muted-foreground leading-relaxed mb-3">
                             {exp.description.split('|')[0]?.trim()}
