@@ -137,9 +137,26 @@ const Experience = () => {
                     </CardHeader>
                     
                     <CardContent className="pt-0">
-                      <p className="text-muted-foreground mb-4 leading-relaxed">
-                        {exp.description}
-                      </p>
+                      {exp.type === 'education' && exp.description ? (
+                        <div className="mb-4">
+                          <p className="text-muted-foreground leading-relaxed mb-3">
+                            {exp.description.split('|')[0]?.trim()}
+                          </p>
+                          {exp.description.includes('|') && (
+                            <div className="flex flex-wrap gap-2">
+                              {exp.description.split('|').slice(1).map((stat, idx) => (
+                                <Badge key={idx} className="bg-green-500/20 text-green-400 border-green-500/30 text-sm px-3 py-1">
+                                  {stat.trim()}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground mb-4 leading-relaxed">
+                          {exp.description}
+                        </p>
+                      )}
                       
                       {exp.location && (
                         <Badge variant="secondary" className="text-xs px-2 py-1">
