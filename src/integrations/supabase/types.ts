@@ -805,6 +805,39 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_semester_grades: {
+        Row: {
+          cgpa: number
+          created_at: string | null
+          display_order: number | null
+          id: string
+          semester: number
+          sgpa: number
+          status: string | null
+          year: string | null
+        }
+        Insert: {
+          cgpa: number
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          semester: number
+          sgpa: number
+          status?: string | null
+          year?: string | null
+        }
+        Update: {
+          cgpa?: number
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          semester?: number
+          sgpa?: number
+          status?: string | null
+          year?: string | null
+        }
+        Relationships: []
+      }
       portfolio_skills: {
         Row: {
           category: string
