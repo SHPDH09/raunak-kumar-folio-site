@@ -37,9 +37,9 @@ const PortfolioSemesterGradesAdmin = () => {
   const loadGrades = async () => {
     try {
       const { data, error } = await supabase
-        .from('portfolio_semester_grades')
+        .from('portfolio_semester_grades' as any)
         .select('*')
-        .order('semester');
+        .order('semester') as { data: SemesterGrade[] | null; error: any };
 
       if (error) throw error;
       setGrades(data || []);
@@ -59,7 +59,7 @@ const PortfolioSemesterGradesAdmin = () => {
 
     try {
       const { error } = await supabase
-        .from('portfolio_semester_grades')
+        .from('portfolio_semester_grades' as any)
         .insert({
           semester: newGrade.semester,
           sgpa: parseFloat(newGrade.sgpa),
@@ -90,7 +90,7 @@ const PortfolioSemesterGradesAdmin = () => {
       }
 
       const { error } = await supabase
-        .from('portfolio_semester_grades')
+        .from('portfolio_semester_grades' as any)
         .update(updateData)
         .eq('id', id);
 
@@ -108,7 +108,7 @@ const PortfolioSemesterGradesAdmin = () => {
 
     try {
       const { error } = await supabase
-        .from('portfolio_semester_grades')
+        .from('portfolio_semester_grades' as any)
         .delete()
         .eq('id', id);
 
