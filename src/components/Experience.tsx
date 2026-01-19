@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, GraduationCap, Award, Users, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Briefcase, GraduationCap, Award, Users, Loader2, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Experience {
@@ -30,6 +31,7 @@ const Experience = () => {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [semesterGrades, setSemesterGrades] = useState<SemesterGrade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMarks, setShowMarks] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -164,69 +166,85 @@ const Experience = () => {
                             {exp.description}
                           </p>
                           
-                          {/* Semester Grades Display with Progress Bars */}
+                          {/* View Marks Button */}
                           {semesterGrades.length > 0 && (
                             <div className="mt-4">
-                              <p className="text-sm font-medium text-foreground mb-4">📊 Semester-wise Performance:</p>
-                              <div className="space-y-3">
-                                {semesterGrades.map((grade) => (
-                                  <div 
-                                    key={grade.id} 
-                                    className="bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20 rounded-lg p-3"
-                                  >
-                                    <div className="flex items-center justify-between mb-2">
-                                      <span className="text-sm font-medium text-foreground">Semester {grade.semester}</span>
-                                      <div className="flex gap-3">
-                                        <span className="text-sm text-green-400 font-semibold">SGPA: {grade.sgpa}</span>
-                                        <span className="text-sm text-emerald-400 font-semibold">CGPA: {grade.cgpa}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowMarks(!showMarks)}
+                                className="w-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 hover:from-green-500/20 hover:to-emerald-500/20 text-green-400 hover:text-green-300"
+                              >
+                                <BarChart3 className="w-4 h-4 mr-2" />
+                                {showMarks ? 'Hide Marks' : 'View Marks'}
+                                {showMarks ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
+                              </Button>
+                              
+                              {/* Semester Grades Display with Progress Bars */}
+                              {showMarks && (
+                                <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
+                                  <p className="text-sm font-medium text-foreground mb-4">📊 Semester-wise Performance:</p>
+                                  <div className="space-y-3">
+                                    {semesterGrades.map((grade) => (
+                                      <div 
+                                        key={grade.id} 
+                                        className="bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20 rounded-lg p-3"
+                                      >
+                                        <div className="flex items-center justify-between mb-2">
+                                          <span className="text-sm font-medium text-foreground">Semester {grade.semester}</span>
+                                          <div className="flex gap-3">
+                                            <span className="text-sm text-green-400 font-semibold">SGPA: {grade.sgpa}</span>
+                                            <span className="text-sm text-emerald-400 font-semibold">CGPA: {grade.cgpa}</span>
+                                          </div>
+                                        </div>
+                                        {/* SGPA Progress Bar */}
+                                        <div className="relative h-2 bg-muted/30 rounded-full overflow-hidden">
+                                          <div 
+                                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
+                                            style={{ width: `${(grade.sgpa / 10) * 100}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  
+                                  {/* Summary Stats */}
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                                    <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-lg p-3 text-center">
+                                      <p className="text-xs text-muted-foreground mb-1">Current CGPA</p>
+                                      <p className="text-2xl font-bold text-green-400">{semesterGrades[semesterGrades.length - 1]?.cgpa}</p>
+                                      <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                                        <div 
+                                          className="h-full bg-green-500 rounded-full"
+                                          style={{ width: `${(semesterGrades[semesterGrades.length - 1]?.cgpa / 10) * 100}%` }}
+                                        />
                                       </div>
                                     </div>
-                                    {/* SGPA Progress Bar */}
-                                    <div className="relative h-2 bg-muted/30 rounded-full overflow-hidden">
-                                      <div 
-                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
-                                        style={{ width: `${(grade.sgpa / 10) * 100}%` }}
-                                      />
+                                    <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-3 text-center">
+                                      <p className="text-xs text-muted-foreground mb-1">Semesters Done</p>
+                                      <p className="text-2xl font-bold text-emerald-400">{semesterGrades.length}/6</p>
+                                      <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                                        <div 
+                                          className="h-full bg-emerald-500 rounded-full"
+                                          style={{ width: `${(semesterGrades.length / 6) * 100}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-teal-500/10 to-teal-600/10 border border-teal-500/30 rounded-lg p-3 text-center col-span-2 md:col-span-1">
+                                      <p className="text-xs text-muted-foreground mb-1">Best SGPA</p>
+                                      <p className="text-2xl font-bold text-teal-400">
+                                        {Math.max(...semesterGrades.map(g => g.sgpa))}
+                                      </p>
+                                      <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                                        <div 
+                                          className="h-full bg-teal-500 rounded-full"
+                                          style={{ width: `${(Math.max(...semesterGrades.map(g => g.sgpa)) / 10) * 100}%` }}
+                                        />
+                                      </div>
                                     </div>
                                   </div>
-                                ))}
-                              </div>
-                              
-                              {/* Summary Stats */}
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                                <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-lg p-3 text-center">
-                                  <p className="text-xs text-muted-foreground mb-1">Current CGPA</p>
-                                  <p className="text-2xl font-bold text-green-400">{semesterGrades[semesterGrades.length - 1]?.cgpa}</p>
-                                  <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-green-500 rounded-full"
-                                      style={{ width: `${(semesterGrades[semesterGrades.length - 1]?.cgpa / 10) * 100}%` }}
-                                    />
-                                  </div>
                                 </div>
-                                <div className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-3 text-center">
-                                  <p className="text-xs text-muted-foreground mb-1">Semesters Done</p>
-                                  <p className="text-2xl font-bold text-emerald-400">{semesterGrades.length}/6</p>
-                                  <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-emerald-500 rounded-full"
-                                      style={{ width: `${(semesterGrades.length / 6) * 100}%` }}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="bg-gradient-to-br from-teal-500/10 to-teal-600/10 border border-teal-500/30 rounded-lg p-3 text-center col-span-2 md:col-span-1">
-                                  <p className="text-xs text-muted-foreground mb-1">Best SGPA</p>
-                                  <p className="text-2xl font-bold text-teal-400">
-                                    {Math.max(...semesterGrades.map(g => g.sgpa))}
-                                  </p>
-                                  <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-teal-500 rounded-full"
-                                      style={{ width: `${(Math.max(...semesterGrades.map(g => g.sgpa)) / 10) * 100}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
+                              )}
                             </div>
                           )}
                         </div>
