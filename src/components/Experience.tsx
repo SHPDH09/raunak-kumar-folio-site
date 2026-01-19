@@ -37,16 +37,24 @@ const Experience = () => {
 
   const loadData = async () => {
     try {
-      const [expResult, gradesResult] = await Promise.all([
-        supabase.from('portfolio_experience').select('*').order('display_order'),
-        supabase.from('portfolio_semester_grades').select('*').order('semester')
-      ]);
+      // Load experiences
+      const { data: expData } = await supabase
+        .from('portfolio_experience')
+        .select('*')
+        .order('display_order');
 
-      if (expResult.data) {
-        setExperiences(expResult.data as Experience[]);
+      if (expData) {
+        setExperiences(expData as Experience[]);
       }
-      if (gradesResult.data) {
-        setSemesterGrades(gradesResult.data as SemesterGrade[]);
+
+      // Load semester grades using raw query since table is new
+      const { data: gradesData, error: gradesError } = await supabase
+        .from('portfolio_semester_grades' as any)
+        .select('*')
+        .order('semester') as { data: SemesterGrade[] | null; error: any };
+
+      if (gradesData && !gradesError) {
+        setSemesterGrades(gradesData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
