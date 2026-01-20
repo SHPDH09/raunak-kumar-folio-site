@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Briefcase, GraduationCap, Award, Users, Loader2, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, Users, Loader2, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import MarksheetModal from './MarksheetModal';
 
 interface Experience {
   id: string;
@@ -27,14 +28,43 @@ interface SemesterGrade {
   status: string;
 }
 
+interface SubjectMark {
+  id: string;
+  subject_name: string;
+  max_marks: number;
+  obtained_marks: number;
+  grade: string;
+  display_order: number;
+}
+
+interface EducationMark {
+  id: string;
+  education_type: string;
+  board: string;
+  school_name: string;
+  passing_year: string;
+  overall_percentage: number;
+  overall_grade: string;
+  stream: string | null;
+  subjects: SubjectMark[];
+}
+
 const Experience = () => {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [semesterGrades, setSemesterGrades] = useState<SemesterGrade[]>([]);
+  const [educationMarks, setEducationMarks] = useState<EducationMark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedMarks, setExpandedMarks] = useState<Record<string, boolean>>({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedEducationType, setSelectedEducationType] = useState<'BCA' | '10th' | '12th'>('BCA');
+  const [selectedEducationMark, setSelectedEducationMark] = useState<EducationMark | null>(null);
 
-  const toggleMarks = (id: string) => {
-    setExpandedMarks(prev => ({ ...prev, [id]: !prev[id] }));
+  const openMarksheet = (educationType: 'BCA' | '10th' | '12th') => {
+    setSelectedEducationType(educationType);
+    if (educationType !== 'BCA') {
+      const mark = educationMarks.find(m => m.education_type === educationType);
+      setSelectedEducationMark(mark || null);
+    }
+    setModalOpen(true);
   };
 
   useEffect(() => {
@@ -53,7 +83,7 @@ const Experience = () => {
         setExperiences(expData as Experience[]);
       }
 
-      // Load semester grades using raw query since table is new
+      // Load semester grades
       const { data: gradesData, error: gradesError } = await supabase
         .from('portfolio_semester_grades' as any)
         .select('*')
@@ -61,6 +91,30 @@ const Experience = () => {
 
       if (gradesData && !gradesError) {
         setSemesterGrades(gradesData);
+      }
+
+      // Load education marks (10th, 12th)
+      const { data: marksData, error: marksError } = await supabase
+        .from('portfolio_education_marks' as any)
+        .select('*') as { data: any[] | null; error: any };
+
+      if (marksData && !marksError) {
+        // Load subject marks for each education
+        const marksWithSubjects = await Promise.all(
+          marksData.map(async (mark) => {
+            const { data: subjectsData } = await supabase
+              .from('portfolio_subject_marks' as any)
+              .select('*')
+              .eq('education_marks_id', mark.id)
+              .order('display_order') as { data: SubjectMark[] | null; error: any };
+            
+            return {
+              ...mark,
+              subjects: subjectsData || []
+            } as EducationMark;
+          })
+        );
+        setEducationMarks(marksWithSubjects);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -170,147 +224,25 @@ const Experience = () => {
                             {exp.description?.split('|')[0]?.trim()}
                           </p>
                           
-                          {/* View Marks Button for all education entries */}
+                          {/* View Marks Button - Opens Modal */}
                           <div className="mt-4">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toggleMarks(exp.id)}
+                              onClick={() => {
+                                if (exp.title.includes('BCA')) {
+                                  openMarksheet('BCA');
+                                } else if (exp.title.includes('12th') || exp.title.includes('XII') || exp.title.includes('Higher Secondary')) {
+                                  openMarksheet('12th');
+                                } else if (exp.title.includes('10th') || exp.title.includes('X') || exp.title.includes('Secondary')) {
+                                  openMarksheet('10th');
+                                }
+                              }}
                               className="w-full bg-gradient-to-r from-accent/10 to-primary/10 border-accent/30 hover:from-accent/20 hover:to-primary/20 text-accent hover:text-accent"
                             >
                               <BarChart3 className="w-4 h-4 mr-2" />
-                              {expandedMarks[exp.id] ? 'Hide Marks' : 'View Marks'}
-                              {expandedMarks[exp.id] ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
+                              View Marks
                             </Button>
-                            
-                            {/* Marks Display */}
-                            {expandedMarks[exp.id] && (
-                              <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
-                                {/* BCA - Semester Grades */}
-                                {exp.title.includes('BCA') && semesterGrades.length > 0 && (
-                                  <>
-                                    <p className="text-sm font-medium text-foreground mb-4">📊 Semester-wise Performance:</p>
-                                    <div className="space-y-3">
-                                      {semesterGrades.map((grade) => (
-                                        <div 
-                                          key={grade.id} 
-                                          className="bg-gradient-to-r from-accent/5 to-primary/5 border border-accent/20 rounded-lg p-3"
-                                        >
-                                          <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-foreground">Semester {grade.semester}</span>
-                                            <div className="flex gap-3">
-                                              <span className="text-sm text-accent font-semibold">SGPA: {grade.sgpa}</span>
-                                              <span className="text-sm text-primary font-semibold">CGPA: {grade.cgpa}</span>
-                                            </div>
-                                          </div>
-                                          {/* SGPA Progress Bar */}
-                                          <div className="relative h-2 bg-muted/30 rounded-full overflow-hidden">
-                                            <div 
-                                              className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all duration-500"
-                                              style={{ width: `${(grade.sgpa / 10) * 100}%` }}
-                                            />
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    
-                                    {/* Summary Stats */}
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                                      <div className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Current CGPA</p>
-                                        <p className="text-2xl font-bold text-accent">{semesterGrades[semesterGrades.length - 1]?.cgpa}</p>
-                                        <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                          <div 
-                                            className="h-full bg-accent rounded-full"
-                                            style={{ width: `${(semesterGrades[semesterGrades.length - 1]?.cgpa / 10) * 100}%` }}
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Semesters Done</p>
-                                        <p className="text-2xl font-bold text-primary">{semesterGrades.length}/6</p>
-                                        <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                          <div 
-                                            className="h-full bg-primary rounded-full"
-                                            style={{ width: `${(semesterGrades.length / 6) * 100}%` }}
-                                          />
-                                        </div>
-                                      </div>
-                                      <div className="bg-gradient-to-br from-primary-glow/10 to-primary-glow/5 border border-primary-glow/30 rounded-lg p-3 text-center col-span-2 md:col-span-1">
-                                        <p className="text-xs text-muted-foreground mb-1">Best SGPA</p>
-                                        <p className="text-2xl font-bold text-primary-glow">
-                                          {Math.max(...semesterGrades.map(g => g.sgpa))}
-                                        </p>
-                                        <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                          <div 
-                                            className="h-full bg-primary-glow rounded-full"
-                                            style={{ width: `${(Math.max(...semesterGrades.map(g => g.sgpa)) / 10) * 100}%` }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                                
-                                {/* 12th Class Marks */}
-                                {(exp.title.includes('12th') || exp.title.includes('XII') || exp.title.includes('Intermediate') || exp.title.includes('Higher Secondary')) && (
-                                  <div className="space-y-4">
-                                    <p className="text-sm font-medium text-foreground mb-3">📊 12th Class Performance:</p>
-                                    <div className="bg-gradient-to-r from-accent/5 to-primary/5 border border-accent/20 rounded-lg p-4">
-                                      <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-medium text-foreground">Overall Percentage</span>
-                                        <span className="text-lg font-bold text-accent">72.4%</span>
-                                      </div>
-                                      <div className="relative h-3 bg-muted/30 rounded-full overflow-hidden">
-                                        <div 
-                                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all duration-500"
-                                          style={{ width: '72.4%' }}
-                                        />
-                                      </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Board</p>
-                                        <p className="text-sm font-semibold text-accent">CBSE</p>
-                                      </div>
-                                      <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Stream</p>
-                                        <p className="text-sm font-semibold text-primary">Science (PCM)</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {/* 10th Class Marks */}
-                                {(exp.title.includes('10th') || exp.title.includes('X') || exp.title.includes('Matriculation') || exp.title.includes('Secondary')) && !exp.title.includes('12th') && !exp.title.includes('Higher') && (
-                                  <div className="space-y-4">
-                                    <p className="text-sm font-medium text-foreground mb-3">📊 10th Class Performance:</p>
-                                    <div className="bg-gradient-to-r from-accent/5 to-primary/5 border border-accent/20 rounded-lg p-4">
-                                      <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-medium text-foreground">Overall Percentage</span>
-                                        <span className="text-lg font-bold text-accent">81.0%</span>
-                                      </div>
-                                      <div className="relative h-3 bg-muted/30 rounded-full overflow-hidden">
-                                        <div 
-                                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all duration-500"
-                                          style={{ width: '81%' }}
-                                        />
-                                      </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Board</p>
-                                        <p className="text-sm font-semibold text-accent">CBSE</p>
-                                      </div>
-                                      <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-muted-foreground mb-1">Grade</p>
-                                        <p className="text-sm font-semibold text-primary">A+</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
                       ) : (
@@ -332,6 +264,15 @@ const Experience = () => {
           </div>
         </div>
       </div>
+
+      {/* Marksheet Modal */}
+      <MarksheetModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        educationType={selectedEducationType}
+        educationMark={selectedEducationMark}
+        semesterGrades={semesterGrades}
+      />
     </section>
   );
 };

@@ -676,6 +676,45 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_education_marks: {
+        Row: {
+          board: string | null
+          created_at: string | null
+          education_type: string
+          id: string
+          overall_grade: string | null
+          overall_percentage: number | null
+          passing_year: string | null
+          school_name: string | null
+          stream: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          board?: string | null
+          created_at?: string | null
+          education_type: string
+          id?: string
+          overall_grade?: string | null
+          overall_percentage?: number | null
+          passing_year?: string | null
+          school_name?: string | null
+          stream?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          board?: string | null
+          created_at?: string | null
+          education_type?: string
+          id?: string
+          overall_grade?: string | null
+          overall_percentage?: number | null
+          passing_year?: string | null
+          school_name?: string | null
+          stream?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       portfolio_experience: {
         Row: {
           created_at: string | null
@@ -921,6 +960,47 @@ export type Database = {
           skill_name?: string
         }
         Relationships: []
+      }
+      portfolio_subject_marks: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          education_marks_id: string | null
+          grade: string | null
+          id: string
+          max_marks: number | null
+          obtained_marks: number | null
+          subject_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          education_marks_id?: string | null
+          grade?: string | null
+          id?: string
+          max_marks?: number | null
+          obtained_marks?: number | null
+          subject_name: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          education_marks_id?: string | null
+          grade?: string | null
+          id?: string
+          max_marks?: number | null
+          obtained_marks?: number | null
+          subject_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_subject_marks_education_marks_id_fkey"
+            columns: ["education_marks_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_education_marks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
