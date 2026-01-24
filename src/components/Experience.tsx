@@ -230,11 +230,11 @@ const Experience = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                if (exp.title.includes('BCA')) {
+                                if (exp.title.includes('BCA') || exp.title.includes('Bachelor of Computer Applications')) {
                                   openMarksheet('BCA');
-                                } else if (exp.title.includes('12th') || exp.title.includes('XII') || exp.title.includes('Higher Secondary')) {
+                                } else if (exp.title.includes('12th') || exp.title.includes('XII') || exp.title.includes('Higher Secondary') || exp.title.includes('Intermediate')) {
                                   openMarksheet('12th');
-                                } else if (exp.title.includes('10th') || exp.title.includes('X') || exp.title.includes('Secondary')) {
+                                } else if (exp.title.includes('10th') || exp.title.includes('X') || exp.title.includes('Secondary') || exp.title.includes('Matriculation')) {
                                   openMarksheet('10th');
                                 }
                               }}
