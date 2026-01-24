@@ -1,6 +1,7 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { GraduationCap, Award, Calendar, BookOpen, Building2, User, Hash } from 'lucide-react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface SubjectMark {
   id: string;
@@ -61,6 +62,9 @@ const MarksheetModal = ({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-b from-amber-50 to-white border-0">
+          <VisuallyHidden>
+            <DialogTitle>BCA Grade Card - LNCT University</DialogTitle>
+          </VisuallyHidden>
           {/* Outer Decorative Border */}
           <div className="m-2 border-4 border-double border-amber-800/60 bg-white">
             {/* Inner Border with Pattern */}
@@ -242,6 +246,9 @@ const MarksheetModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-b from-blue-50 to-white border-0">
+        <VisuallyHidden>
+          <DialogTitle>{educationType === '10th' ? 'Class X Marksheet' : 'Class XII Marksheet'}</DialogTitle>
+        </VisuallyHidden>
         {/* Outer Decorative Border */}
         <div className="m-2 border-4 border-double border-blue-800/60 bg-white">
           {/* Inner Border */}
