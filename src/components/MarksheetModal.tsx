@@ -1,7 +1,6 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { GraduationCap, Award, Calendar, MapPin, BookOpen } from 'lucide-react';
+import { GraduationCap, Award, Calendar, BookOpen, Building2, User, Hash } from 'lucide-react';
 
 interface SubjectMark {
   id: string;
@@ -40,6 +39,7 @@ interface MarksheetModalProps {
   educationMark?: EducationMark | null;
   semesterGrades?: SemesterGrade[];
   schoolName?: string;
+  studentName?: string;
 }
 
 const MarksheetModal = ({ 
@@ -48,232 +48,357 @@ const MarksheetModal = ({
   educationType, 
   educationMark, 
   semesterGrades = [],
-  schoolName 
+  schoolName,
+  studentName = "Raunak Kumar"
 }: MarksheetModalProps) => {
-  const getTitle = () => {
-    switch (educationType) {
-      case 'BCA': return 'BCA - Semester Marksheet';
-      case '12th': return 'Class XII - Marksheet';
-      case '10th': return 'Class X - Marksheet';
-      default: return 'Marksheet';
-    }
-  };
-
+  
   const totalObtained = educationMark?.subjects?.reduce((sum, s) => sum + (s.obtained_marks || 0), 0) || 0;
   const totalMax = educationMark?.subjects?.reduce((sum, s) => sum + (s.max_marks || 0), 0) || 0;
+  const currentCGPA = semesterGrades.length > 0 ? semesterGrades[semesterGrades.length - 1]?.cgpa : 0;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-background via-background to-muted/20 border-accent/20">
-        <DialogHeader className="border-b border-accent/20 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-accent/10 rounded-xl">
-              <GraduationCap className="w-6 h-6 text-accent" />
-            </div>
-            <div>
-              <DialogTitle className="text-2xl font-bold text-foreground">{getTitle()}</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">Academic Performance Record</p>
-            </div>
-          </div>
-        </DialogHeader>
+  // BCA Marksheet
+  if (educationType === 'BCA') {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-b from-amber-50 to-white border-0">
+          {/* Outer Decorative Border */}
+          <div className="m-2 border-4 border-double border-amber-800/60 bg-white">
+            {/* Inner Border with Pattern */}
+            <div className="m-2 border-2 border-amber-700/40 p-6">
+              
+              {/* University Header */}
+              <div className="text-center mb-6 border-b-2 border-amber-800/30 pb-4">
+                {/* University Logo/Emblem */}
+                <div className="flex items-center justify-center gap-4 mb-3">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-lg border-2 border-amber-900/50">
+                    <GraduationCap className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <h1 className="text-2xl font-bold text-amber-900 tracking-wider uppercase font-serif">
+                  LNCT University, Bhopal
+                </h1>
+                <p className="text-sm text-amber-700 mt-1 italic">
+                  (Established under M.P. Act No. 35 of 2014)
+                </p>
+                <div className="mt-3 py-2 px-4 bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 inline-block rounded">
+                  <h2 className="text-lg font-bold text-amber-900 tracking-wide">
+                    CONSOLIDATED GRADE CARD
+                  </h2>
+                </div>
+                <p className="text-sm font-semibold text-amber-800 mt-2">
+                  Bachelor of Computer Applications (BCA)
+                </p>
+              </div>
 
-        <div className="space-y-6 py-4">
-          {/* BCA Semester Grades */}
-          {educationType === 'BCA' && semesterGrades.length > 0 && (
-            <>
-              {/* Header Info */}
-              <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+              {/* Student Info Section */}
+              <div className="mb-6 bg-amber-50/50 border border-amber-200 rounded-lg p-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">Program:</span>
-                    <span className="font-semibold text-foreground">Bachelor of Computer Applications</span>
+                    <User className="w-4 h-4 text-amber-700" />
+                    <span className="text-amber-600 font-medium">Student Name:</span>
+                    <span className="font-bold text-amber-900 uppercase">{studentName}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">University:</span>
-                    <span className="font-semibold text-foreground">{schoolName || 'IGNOU'}</span>
+                    <Hash className="w-4 h-4 text-amber-700" />
+                    <span className="text-amber-600 font-medium">Enrollment No:</span>
+                    <span className="font-bold text-amber-900">LNCT/BCA/2022/0847</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-amber-700" />
+                    <span className="text-amber-600 font-medium">Program:</span>
+                    <span className="font-bold text-amber-900">BCA (Regular)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-amber-700" />
+                    <span className="text-amber-600 font-medium">Session:</span>
+                    <span className="font-bold text-amber-900">2022-2025</span>
                   </div>
                 </div>
               </div>
 
-              {/* Semester Table */}
-              <div className="border border-accent/20 rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-accent/10">
-                    <tr>
-                      <th className="text-left p-3 text-sm font-semibold text-foreground">Semester</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Year</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">SGPA</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">CGPA</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Status</th>
+              {/* Semester Grades Table */}
+              <div className="mb-6">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-amber-700 to-amber-800 text-white">
+                      <th className="border border-amber-900 px-3 py-2 text-sm font-bold">Semester</th>
+                      <th className="border border-amber-900 px-3 py-2 text-sm font-bold">Academic Year</th>
+                      <th className="border border-amber-900 px-3 py-2 text-sm font-bold">SGPA</th>
+                      <th className="border border-amber-900 px-3 py-2 text-sm font-bold">CGPA</th>
+                      <th className="border border-amber-900 px-3 py-2 text-sm font-bold">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {semesterGrades.map((grade, index) => (
-                      <tr key={grade.id} className={index % 2 === 0 ? 'bg-muted/5' : 'bg-transparent'}>
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <span className="w-8 h-8 flex items-center justify-center bg-accent/20 text-accent rounded-full font-bold text-sm">
-                              {grade.semester}
-                            </span>
-                            <span className="text-foreground font-medium">Semester {grade.semester}</span>
-                          </div>
+                      <tr key={grade.id} className={index % 2 === 0 ? 'bg-amber-50' : 'bg-white'}>
+                        <td className="border border-amber-300 px-3 py-2 text-center">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-amber-100 text-amber-800 rounded-full font-bold text-sm border border-amber-300">
+                            {grade.semester}
+                          </span>
                         </td>
-                        <td className="text-center p-3 text-muted-foreground">{grade.year || '-'}</td>
-                        <td className="text-center p-3">
-                          <Badge className="bg-accent/20 text-accent border-accent/30 font-bold">
+                        <td className="border border-amber-300 px-3 py-2 text-center text-amber-800 font-medium">
+                          {grade.year || '-'}
+                        </td>
+                        <td className="border border-amber-300 px-3 py-2 text-center">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-green-100 to-green-200 text-green-800 font-bold rounded border border-green-300">
                             {grade.sgpa.toFixed(2)}
-                          </Badge>
+                          </span>
                         </td>
-                        <td className="text-center p-3">
-                          <Badge className="bg-primary/20 text-primary border-primary/30 font-bold">
+                        <td className="border border-amber-300 px-3 py-2 text-center">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 font-bold rounded border border-blue-300">
                             {grade.cgpa.toFixed(2)}
-                          </Badge>
+                          </span>
                         </td>
-                        <td className="text-center p-3">
-                          <Badge variant="outline" className="text-xs capitalize bg-green-500/10 text-green-400 border-green-500/30">
-                            {grade.status || 'Completed'}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Summary */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Current CGPA</p>
-                  <p className="text-3xl font-bold text-accent">{semesterGrades[semesterGrades.length - 1]?.cgpa.toFixed(2)}</p>
-                  <Progress value={(semesterGrades[semesterGrades.length - 1]?.cgpa / 10) * 100} className="mt-2 h-2" />
-                </div>
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Best SGPA</p>
-                  <p className="text-3xl font-bold text-primary">{Math.max(...semesterGrades.map(g => g.sgpa)).toFixed(2)}</p>
-                  <Progress value={(Math.max(...semesterGrades.map(g => g.sgpa)) / 10) * 100} className="mt-2 h-2" />
-                </div>
-                <div className="bg-gradient-to-br from-primary-glow/10 to-primary-glow/5 border border-primary-glow/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Semesters</p>
-                  <p className="text-3xl font-bold text-primary-glow">{semesterGrades.length}/6</p>
-                  <Progress value={(semesterGrades.length / 6) * 100} className="mt-2 h-2" />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* 10th/12th Marksheet */}
-          {(educationType === '10th' || educationType === '12th') && educationMark && (
-            <>
-              {/* Header Info */}
-              <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">School:</span>
-                    <span className="font-semibold text-foreground">{educationMark.school_name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">Board:</span>
-                    <span className="font-semibold text-foreground">{educationMark.board}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">Year:</span>
-                    <span className="font-semibold text-foreground">{educationMark.passing_year}</span>
-                  </div>
-                  {educationMark.stream && (
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-accent" />
-                      <span className="text-muted-foreground">Stream:</span>
-                      <span className="font-semibold text-foreground">{educationMark.stream}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Subject-wise Marks Table */}
-              <div className="border border-accent/20 rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-accent/10">
-                    <tr>
-                      <th className="text-left p-3 text-sm font-semibold text-foreground">Subject</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Max Marks</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Obtained</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">%</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Grade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {educationMark.subjects?.map((subject, index) => (
-                      <tr key={subject.id} className={index % 2 === 0 ? 'bg-muted/5' : 'bg-transparent'}>
-                        <td className="p-3">
-                          <span className="text-foreground font-medium">{subject.subject_name}</span>
-                        </td>
-                        <td className="text-center p-3 text-muted-foreground">{subject.max_marks}</td>
-                        <td className="text-center p-3">
-                          <span className="font-semibold text-foreground">{subject.obtained_marks}</span>
-                        </td>
-                        <td className="text-center p-3">
-                          <div className="flex items-center justify-center gap-2">
-                            <Progress value={(subject.obtained_marks / subject.max_marks) * 100} className="w-16 h-2" />
-                            <span className="text-sm text-muted-foreground">
-                              {((subject.obtained_marks / subject.max_marks) * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="text-center p-3">
-                          <Badge className="bg-accent/20 text-accent border-accent/30">
-                            {subject.grade}
+                        <td className="border border-amber-300 px-3 py-2 text-center">
+                          <Badge className="bg-green-100 text-green-700 border-green-300 font-semibold uppercase text-xs">
+                            {grade.status || 'PASS'}
                           </Badge>
                         </td>
                       </tr>
                     ))}
-                    {/* Total Row */}
-                    <tr className="bg-accent/10 font-semibold">
-                      <td className="p-3 text-foreground">Total</td>
-                      <td className="text-center p-3 text-foreground">{totalMax}</td>
-                      <td className="text-center p-3 text-foreground">{totalObtained}</td>
-                      <td className="text-center p-3 text-accent">{((totalObtained / totalMax) * 100).toFixed(1)}%</td>
-                      <td className="text-center p-3">
-                        <Badge className="bg-primary/20 text-primary border-primary/30">
-                          {educationMark.overall_grade}
-                        </Badge>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
 
               {/* Result Summary */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Overall Percentage</p>
-                  <p className="text-3xl font-bold text-accent">{educationMark.overall_percentage}%</p>
-                  <Progress value={educationMark.overall_percentage} className="mt-2 h-2" />
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-amber-100 to-amber-50 border-2 border-amber-300 rounded-lg p-4 text-center shadow-sm">
+                  <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Current CGPA</p>
+                  <p className="text-3xl font-bold text-amber-800">{currentCGPA.toFixed(2)}</p>
+                  <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-amber-500 to-amber-600 h-2 rounded-full"
+                      style={{ width: `${(currentCGPA / 10) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Grade</p>
-                  <p className="text-3xl font-bold text-primary">{educationMark.overall_grade}</p>
+                <div className="bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-lg p-4 text-center shadow-sm">
+                  <p className="text-xs text-green-600 font-semibold uppercase tracking-wide mb-1">Best SGPA</p>
+                  <p className="text-3xl font-bold text-green-700">
+                    {semesterGrades.length > 0 ? Math.max(...semesterGrades.map(g => g.sgpa)).toFixed(2) : '0.00'}
+                  </p>
+                  <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full"
+                      style={{ width: `${(semesterGrades.length > 0 ? Math.max(...semesterGrades.map(g => g.sgpa)) / 10 : 0) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Result</p>
-                  <p className="text-2xl font-bold text-green-400">PASSED</p>
+                <div className="bg-gradient-to-br from-blue-100 to-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center shadow-sm">
+                  <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1">Progress</p>
+                  <p className="text-3xl font-bold text-blue-700">{semesterGrades.length}/6</p>
+                  <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+                      style={{ width: `${(semesterGrades.length / 6) * 100}%` }}
+                    />
+                  </div>
                 </div>
               </div>
-            </>
-          )}
 
-          {/* No data message */}
-          {((educationType === 'BCA' && semesterGrades.length === 0) || 
-            ((educationType === '10th' || educationType === '12th') && !educationMark)) && (
-            <div className="text-center py-8 text-muted-foreground">
-              <GraduationCap className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Marks data not available</p>
+              {/* Grading Scale */}
+              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-3 mb-6">
+                <p className="text-xs font-semibold text-amber-700 mb-2">GRADING SCALE:</p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">O: 10.0 (Outstanding)</span>
+                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">A+: 9.0 (Excellent)</span>
+                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">A: 8.0 (Very Good)</span>
+                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">B+: 7.0 (Good)</span>
+                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">B: 6.0 (Above Average)</span>
+                </div>
+              </div>
+
+              {/* Signature Section */}
+              <div className="flex justify-between items-end pt-4 border-t-2 border-dashed border-amber-300">
+                <div className="text-center">
+                  <div className="w-32 border-b border-amber-800 mb-1"></div>
+                  <p className="text-xs text-amber-700 font-medium">Controller of Examination</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-24 h-24 border-2 border-dashed border-amber-400 rounded-lg flex items-center justify-center bg-amber-50/50">
+                    <span className="text-xs text-amber-500">Official Seal</span>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="w-32 border-b border-amber-800 mb-1"></div>
+                  <p className="text-xs text-amber-700 font-medium">Registrar</p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-4 text-center">
+                <p className="text-xs text-amber-600 italic">
+                  This is a computer-generated document. Valid without signature for reference purposes.
+                </p>
+              </div>
             </div>
-          )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // 10th/12th Marksheet
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-b from-blue-50 to-white border-0">
+        {/* Outer Decorative Border */}
+        <div className="m-2 border-4 border-double border-blue-800/60 bg-white">
+          {/* Inner Border */}
+          <div className="m-2 border-2 border-blue-700/40 p-6">
+            
+            {/* Board Header */}
+            <div className="text-center mb-6 border-b-2 border-blue-800/30 pb-4">
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-lg border-2 border-blue-900/50">
+                  <Award className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h1 className="text-xl font-bold text-blue-900 tracking-wider uppercase font-serif">
+                {educationMark?.board || 'CBSE'}
+              </h1>
+              <p className="text-sm text-blue-700 mt-1">
+                Central Board of Secondary Education
+              </p>
+              <div className="mt-3 py-2 px-4 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 inline-block rounded">
+                <h2 className="text-lg font-bold text-blue-900 tracking-wide">
+                  {educationType === '10th' ? 'CLASS X MARKSHEET' : 'CLASS XII MARKSHEET'}
+                </h2>
+              </div>
+            </div>
+
+            {/* Student Info */}
+            <div className="mb-6 bg-blue-50/50 border border-blue-200 rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-blue-700" />
+                  <span className="text-blue-600 font-medium">Student Name:</span>
+                  <span className="font-bold text-blue-900 uppercase">{studentName}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-700" />
+                  <span className="text-blue-600 font-medium">School:</span>
+                  <span className="font-bold text-blue-900">{educationMark?.school_name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-700" />
+                  <span className="text-blue-600 font-medium">Year:</span>
+                  <span className="font-bold text-blue-900">{educationMark?.passing_year}</span>
+                </div>
+                {educationMark?.stream && (
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-blue-700" />
+                    <span className="text-blue-600 font-medium">Stream:</span>
+                    <span className="font-bold text-blue-900">{educationMark.stream}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Subject Marks Table */}
+            {educationMark && educationMark.subjects && (
+              <div className="mb-6">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
+                      <th className="border border-blue-900 px-3 py-2 text-sm font-bold text-left">Subject</th>
+                      <th className="border border-blue-900 px-3 py-2 text-sm font-bold text-center">Max Marks</th>
+                      <th className="border border-blue-900 px-3 py-2 text-sm font-bold text-center">Obtained</th>
+                      <th className="border border-blue-900 px-3 py-2 text-sm font-bold text-center">Percentage</th>
+                      <th className="border border-blue-900 px-3 py-2 text-sm font-bold text-center">Grade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {educationMark.subjects.map((subject, index) => (
+                      <tr key={subject.id} className={index % 2 === 0 ? 'bg-blue-50' : 'bg-white'}>
+                        <td className="border border-blue-300 px-3 py-2 font-medium text-blue-900">
+                          {subject.subject_name}
+                        </td>
+                        <td className="border border-blue-300 px-3 py-2 text-center text-blue-700">
+                          {subject.max_marks}
+                        </td>
+                        <td className="border border-blue-300 px-3 py-2 text-center font-bold text-blue-900">
+                          {subject.obtained_marks}
+                        </td>
+                        <td className="border border-blue-300 px-3 py-2 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-16 bg-blue-200 rounded-full h-2">
+                              <div 
+                                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+                                style={{ width: `${(subject.obtained_marks / subject.max_marks) * 100}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-blue-700 font-medium">
+                              {((subject.obtained_marks / subject.max_marks) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="border border-blue-300 px-3 py-2 text-center">
+                          <span className="inline-block px-2 py-1 bg-gradient-to-r from-green-100 to-green-200 text-green-800 font-bold rounded border border-green-300 text-sm">
+                            {subject.grade}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Total Row */}
+                    <tr className="bg-gradient-to-r from-blue-100 to-blue-200">
+                      <td className="border border-blue-400 px-3 py-2 font-bold text-blue-900">TOTAL</td>
+                      <td className="border border-blue-400 px-3 py-2 text-center font-bold text-blue-900">{totalMax}</td>
+                      <td className="border border-blue-400 px-3 py-2 text-center font-bold text-blue-900">{totalObtained}</td>
+                      <td className="border border-blue-400 px-3 py-2 text-center font-bold text-blue-900">
+                        {((totalObtained / totalMax) * 100).toFixed(1)}%
+                      </td>
+                      <td className="border border-blue-400 px-3 py-2 text-center">
+                        <span className="inline-block px-3 py-1 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-900 font-bold rounded border border-amber-400">
+                          {educationMark.overall_grade}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Result Summary */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-100 to-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center shadow-sm">
+                <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1">Overall Percentage</p>
+                <p className="text-3xl font-bold text-blue-800">{educationMark?.overall_percentage || 0}%</p>
+              </div>
+              <div className="bg-gradient-to-br from-amber-100 to-amber-50 border-2 border-amber-300 rounded-lg p-4 text-center shadow-sm">
+                <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Grade</p>
+                <p className="text-3xl font-bold text-amber-800">{educationMark?.overall_grade || '-'}</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-lg p-4 text-center shadow-sm">
+                <p className="text-xs text-green-600 font-semibold uppercase tracking-wide mb-1">Result</p>
+                <p className="text-2xl font-bold text-green-700">PASSED</p>
+              </div>
+            </div>
+
+            {/* Signature Section */}
+            <div className="flex justify-between items-end pt-4 border-t-2 border-dashed border-blue-300">
+              <div className="text-center">
+                <div className="w-32 border-b border-blue-800 mb-1"></div>
+                <p className="text-xs text-blue-700 font-medium">Principal</p>
+              </div>
+              <div className="text-center">
+                <div className="w-24 h-24 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center bg-blue-50/50">
+                  <span className="text-xs text-blue-500">School Seal</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="w-32 border-b border-blue-800 mb-1"></div>
+                <p className="text-xs text-blue-700 font-medium">Controller of Exams</p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-blue-600 italic">
+                This is a computer-generated document. Valid without signature for reference purposes.
+              </p>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
