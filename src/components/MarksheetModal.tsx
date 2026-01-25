@@ -281,6 +281,15 @@ const MarksheetModal = ({
   const percentage = percentageValue.toFixed(1);
   const cgpa = (percentageValue / 9.5).toFixed(2);
   
+  // Calculate division based on BSEB criteria
+  const getDivision = (pct: number) => {
+    if (pct >= 60) return 'FIRST';
+    if (pct >= 45) return 'SECOND';
+    if (pct >= 30) return 'THIRD';
+    return 'FAIL';
+  };
+  const division = getDivision(percentageValue);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-gradient-to-b from-red-50 to-white border-0">
@@ -427,7 +436,7 @@ const MarksheetModal = ({
               </div>
               <div className="bg-gradient-to-br from-amber-100 to-amber-50 border-2 border-amber-300 rounded-lg p-4 text-center shadow-sm">
                 <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Division</p>
-                <p className="text-2xl font-bold text-amber-800">{is12th ? 'SECOND' : 'SECOND'}</p>
+                <p className="text-2xl font-bold text-amber-800">{division}</p>
               </div>
               <div className="bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-lg p-4 text-center shadow-sm">
                 <p className="text-xs text-green-600 font-semibold uppercase tracking-wide mb-1">Result</p>
