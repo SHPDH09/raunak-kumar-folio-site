@@ -277,7 +277,9 @@ const MarksheetModal = ({
   const session = is12th ? '2021-2022' : '2018-2019';
   const totalMarks = is12th ? 310 : 303;
   const totalMaxMarks = is12th ? 500 : 500; // 5 subjects for 10th (excluding English as optional)
-  const percentage = is12th ? ((310/500)*100).toFixed(1) : ((303/500)*100).toFixed(1);
+  const percentageValue = is12th ? (310/500)*100 : (303/500)*100;
+  const percentage = percentageValue.toFixed(1);
+  const cgpa = (percentageValue / 9.5).toFixed(2);
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -410,10 +412,18 @@ const MarksheetModal = ({
             </div>
 
             {/* Result Summary */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="bg-gradient-to-br from-red-100 to-red-50 border-2 border-red-300 rounded-lg p-4 text-center shadow-sm">
-                <p className="text-xs text-red-600 font-semibold uppercase tracking-wide mb-1">Overall Percentage</p>
-                <p className="text-3xl font-bold text-red-800">{percentage}%</p>
+                <p className="text-xs text-red-600 font-semibold uppercase tracking-wide mb-1">Total Marks</p>
+                <p className="text-2xl font-bold text-red-800">{totalMarks}/{totalMaxMarks}</p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-100 to-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center shadow-sm">
+                <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1">Percentage</p>
+                <p className="text-3xl font-bold text-blue-800">{percentage}%</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-100 to-purple-50 border-2 border-purple-300 rounded-lg p-4 text-center shadow-sm">
+                <p className="text-xs text-purple-600 font-semibold uppercase tracking-wide mb-1">CGPA</p>
+                <p className="text-3xl font-bold text-purple-800">{cgpa}</p>
               </div>
               <div className="bg-gradient-to-br from-amber-100 to-amber-50 border-2 border-amber-300 rounded-lg p-4 text-center shadow-sm">
                 <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide mb-1">Division</p>
