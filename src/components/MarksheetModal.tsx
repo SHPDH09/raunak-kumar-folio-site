@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Award, Calendar, BookOpen, Building2, User, Hash } from 'lucide-react';
+import { GraduationCap, Award, Calendar, BookOpen, Building2, User, Hash, ShieldCheck } from 'lucide-react';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-
+import lnctLogo from '@/assets/lnct-logo.png';
 interface SubjectMark {
   id: string;
   subject_name: string;
@@ -72,15 +72,14 @@ const MarksheetModal = ({
               
               {/* University Header */}
               <div className="text-center mb-6 border-b-2 border-amber-800/30 pb-4">
-                {/* University Logo/Emblem */}
+                {/* University Logo */}
                 <div className="flex items-center justify-center gap-4 mb-3">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-lg border-2 border-amber-900/50">
-                    <GraduationCap className="w-8 h-8 text-white" />
-                  </div>
+                  <img 
+                    src={lnctLogo} 
+                    alt="LNCT University Logo" 
+                    className="h-16 w-auto object-contain"
+                  />
                 </div>
-                <h1 className="text-2xl font-bold text-amber-900 tracking-wider uppercase font-serif">
-                  LNCT University, Bhopal
-                </h1>
                 <p className="text-sm text-amber-700 mt-1 italic">
                   (Established under M.P. Act No. 35 of 2014)
                 </p>
@@ -105,17 +104,17 @@ const MarksheetModal = ({
                   <div className="flex items-center gap-2">
                     <Hash className="w-4 h-4 text-amber-700" />
                     <span className="text-amber-600 font-medium">Enrollment No:</span>
-                    <span className="font-bold text-amber-900">LNCT/BCA/2022/0847</span>
+                    <span className="font-bold text-amber-900">LNCDBCA21186</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-amber-700" />
-                    <span className="text-amber-600 font-medium">Program:</span>
-                    <span className="font-bold text-amber-900">BCA (Regular)</span>
+                    <span className="text-amber-600 font-medium">Specialization:</span>
+                    <span className="font-bold text-amber-900">AI & Data Analyst</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-amber-700" />
                     <span className="text-amber-600 font-medium">Session:</span>
-                    <span className="font-bold text-amber-900">2022-2025</span>
+                    <span className="font-bold text-amber-900">2023-2026</span>
                   </div>
                 </div>
               </div>
@@ -201,38 +200,46 @@ const MarksheetModal = ({
               </div>
 
               {/* Grading Scale */}
-              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-3 mb-6">
-                <p className="text-xs font-semibold text-amber-700 mb-2">GRADING SCALE:</p>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">O: 10.0 (Outstanding)</span>
-                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">A+: 9.0 (Excellent)</span>
-                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">A: 8.0 (Very Good)</span>
-                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">B+: 7.0 (Good)</span>
-                  <span className="px-2 py-1 bg-white border border-amber-200 rounded">B: 6.0 (Above Average)</span>
+              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-4 mb-6">
+                <p className="text-sm font-bold text-amber-800 mb-3 uppercase tracking-wide border-b border-amber-200 pb-2">Grading Scale</p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                  <div className="px-3 py-2 bg-white border border-amber-200 rounded text-center">
+                    <span className="font-bold text-amber-900">O</span>
+                    <span className="text-amber-600 block">10.0 (Outstanding)</span>
+                  </div>
+                  <div className="px-3 py-2 bg-white border border-amber-200 rounded text-center">
+                    <span className="font-bold text-amber-900">A+</span>
+                    <span className="text-amber-600 block">9.0 (Excellent)</span>
+                  </div>
+                  <div className="px-3 py-2 bg-white border border-amber-200 rounded text-center">
+                    <span className="font-bold text-amber-900">A</span>
+                    <span className="text-amber-600 block">8.0 (Very Good)</span>
+                  </div>
+                  <div className="px-3 py-2 bg-white border border-amber-200 rounded text-center">
+                    <span className="font-bold text-amber-900">B+</span>
+                    <span className="text-amber-600 block">7.0 (Good)</span>
+                  </div>
+                  <div className="px-3 py-2 bg-white border border-amber-200 rounded text-center">
+                    <span className="font-bold text-amber-900">B</span>
+                    <span className="text-amber-600 block">6.0 (Above Avg)</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Signature Section */}
-              <div className="flex justify-between items-end pt-4 border-t-2 border-dashed border-amber-300">
+              {/* Digital Verification Section */}
+              <div className="flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-green-50 via-green-100 to-green-50 border-2 border-green-300 rounded-lg">
+                <ShieldCheck className="w-8 h-8 text-green-600" />
                 <div className="text-center">
-                  <div className="w-32 border-b border-amber-800 mb-1"></div>
-                  <p className="text-xs text-amber-700 font-medium">Controller of Examination</p>
+                  <p className="text-sm font-bold text-green-800 uppercase tracking-wide">Digitally Verified</p>
+                  <p className="text-xs text-green-600">This document is digitally verified by LNCT University, Bhopal</p>
                 </div>
-                <div className="text-center">
-                  <div className="w-24 h-24 border-2 border-dashed border-amber-400 rounded-lg flex items-center justify-center bg-amber-50/50">
-                    <span className="text-xs text-amber-500">Official Seal</span>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="w-32 border-b border-amber-800 mb-1"></div>
-                  <p className="text-xs text-amber-700 font-medium">Registrar</p>
-                </div>
+                <ShieldCheck className="w-8 h-8 text-green-600" />
               </div>
 
               {/* Footer */}
               <div className="mt-4 text-center">
                 <p className="text-xs text-amber-600 italic">
-                  This is a computer-generated document. Valid without signature for reference purposes.
+                  This is a computer-generated document and does not require a physical signature.
                 </p>
               </div>
             </div>
