@@ -12,6 +12,52 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify user with anon client first
+    const supabaseAnon = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: claimsData, error: authError } = await supabaseAnon.auth.getClaims(token)
+    
+    if (authError || !claimsData?.claims) {
+      console.error('Auth error:', authError)
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const userId = claimsData.claims.sub
+
+    // Check admin role
+    const { data: roles, error: roleError } = await supabaseAnon
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (roleError || !roles) {
+      console.error('Role check failed:', roleError)
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Now safe to use service role for updates
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -23,12 +69,9 @@ serve(async (req) => {
       throw new Error('Username is required')
     }
 
-    console.log(`Updating LeetCode stats for ${username}`)
+    console.log(`Updating LeetCode stats for ${username} by admin ${userId}`)
 
     // Fetch LeetCode profile data
-    // Note: LeetCode doesn't have an official API, so we'll simulate data updates
-    // In a real implementation, you would scrape the profile or use a third-party service
-    
     const updatedStats = await fetchLeetCodeStats(username)
     
     // Update main stats
@@ -133,11 +176,11 @@ async function fetchLeetCodeStats(username: string) {
       ranking: 1306289,
       contestRating: 1414,
       acceptanceRate: 79.64,
-      streak: 0, // Current streak from profile
+      streak: 0,
       easy: { solved: 22, total: 895 },
       medium: { solved: 59, total: 1911 },
       hard: { solved: 18, total: 865 },
-      monthlyProgress: 108, // submissions in past year
+      monthlyProgress: 108,
       recentSubmissions: [
         { problem: "Two Sum", difficulty: "Easy", result: "Accepted" },
         { problem: "Add Two Numbers", difficulty: "Medium", result: "Accepted" },
