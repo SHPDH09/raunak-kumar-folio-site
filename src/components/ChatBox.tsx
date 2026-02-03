@@ -816,14 +816,14 @@ I can provide information about **Raunak Kumar's**:
                         <Bot className="w-3 h-3 text-primary-foreground" />
                       </div>
                     )}
-                    <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} gap-0.5 group`}>
+                    <div className={`flex flex-col ${message.isUser ? 'items-end' : 'items-start'} gap-0.5 group max-w-[90%]`}>
                       <div
-                        className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed relative ${
+                        className={`p-3 rounded-2xl text-sm leading-relaxed relative ${
                           message.isUser
-                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md'
+                            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-md max-w-full'
                             : isDarkMode 
-                              ? 'bg-slate-800 text-slate-100 border border-slate-700 rounded-bl-md'
-                              : 'bg-slate-100 text-slate-900 border border-slate-200 rounded-bl-md'
+                              ? 'bg-gradient-to-br from-slate-800 to-slate-850 text-slate-50 border border-slate-600 rounded-bl-md shadow-lg'
+                              : 'bg-gradient-to-br from-white to-slate-50 text-slate-900 border border-slate-200 rounded-bl-md shadow-lg'
                         }`}
                       >
                         {message.file && (
@@ -833,26 +833,84 @@ I can provide information about **Raunak Kumar's**:
                           </div>
                         )}
                         {message.isUser ? (
-                          <span className="whitespace-pre-line">{message.text}</span>
+                          <span className="whitespace-pre-line break-words">{message.text}</span>
                         ) : (
-                          <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-headings:mt-3 prose-headings:mb-2 prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-primary prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-hr:my-3 prose-hr:border-border">
+                          <div className="ai-response-content space-y-2 break-words overflow-hidden">
                             <ReactMarkdown
                               components={{
-                                h2: ({ children }) => <h2 className="text-base font-bold text-foreground mt-3 mb-2">{children}</h2>,
-                                h3: ({ children }) => <h3 className="text-sm font-semibold text-foreground mt-2 mb-1">{children}</h3>,
-                                ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1.5">{children}</ul>,
-                                ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 my-1.5">{children}</ol>,
-                                li: ({ children }) => <li className="text-sm">{children}</li>,
-                                p: ({ children }) => <p className="my-1.5">{children}</p>,
-                                strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
-                                a: ({ href, children }) => (
-                                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                                h2: ({ children }) => (
+                                  <h2 className={`text-base font-bold mt-4 mb-2 pb-1 border-b flex items-center gap-2 ${isDarkMode ? 'text-blue-300 border-slate-600' : 'text-blue-700 border-slate-300'}`}>
                                     {children}
+                                  </h2>
+                                ),
+                                h3: ({ children }) => (
+                                  <h3 className={`text-sm font-semibold mt-3 mb-1.5 ${isDarkMode ? 'text-purple-300' : 'text-purple-700'}`}>
+                                    {children}
+                                  </h3>
+                                ),
+                                h4: ({ children }) => (
+                                  <h4 className={`text-sm font-medium mt-2 mb-1 ${isDarkMode ? 'text-teal-300' : 'text-teal-700'}`}>
+                                    {children}
+                                  </h4>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className={`space-y-1.5 my-2 ml-1 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                    {children}
+                                  </ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className={`space-y-1.5 my-2 ml-1 list-decimal list-inside ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                    {children}
+                                  </ol>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="flex items-start gap-2 text-sm leading-relaxed">
+                                    <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`} />
+                                    <span className="flex-1">{children}</span>
+                                  </li>
+                                ),
+                                p: ({ children }) => (
+                                  <p className={`my-2 leading-relaxed text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                    {children}
+                                  </p>
+                                ),
+                                strong: ({ children }) => (
+                                  <strong className={`font-bold ${isDarkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                                    {children}
+                                  </strong>
+                                ),
+                                em: ({ children }) => (
+                                  <em className={`italic ${isDarkMode ? 'text-cyan-300' : 'text-cyan-700'}`}>
+                                    {children}
+                                  </em>
+                                ),
+                                a: ({ href, children }) => (
+                                  <a 
+                                    href={href} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className={`underline underline-offset-2 font-medium transition-colors ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}
+                                  >
+                                    {children} ↗
                                   </a>
                                 ),
-                                hr: () => <hr className="my-3 border-border" />,
+                                hr: () => (
+                                  <hr className={`my-4 ${isDarkMode ? 'border-slate-600' : 'border-slate-300'}`} />
+                                ),
                                 code: ({ children }) => (
-                                  <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
+                                  <code className={`px-1.5 py-0.5 rounded text-xs font-mono ${isDarkMode ? 'bg-slate-700 text-emerald-300' : 'bg-slate-200 text-emerald-700'}`}>
+                                    {children}
+                                  </code>
+                                ),
+                                pre: ({ children }) => (
+                                  <pre className={`p-3 rounded-lg my-2 overflow-x-auto text-xs ${isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-slate-100 border border-slate-300'}`}>
+                                    {children}
+                                  </pre>
+                                ),
+                                blockquote: ({ children }) => (
+                                  <blockquote className={`border-l-4 pl-3 my-2 italic ${isDarkMode ? 'border-purple-500 text-slate-300' : 'border-purple-500 text-slate-600'}`}>
+                                    {children}
+                                  </blockquote>
                                 ),
                               }}
                             >
@@ -903,17 +961,42 @@ I can provide information about **Raunak Kumar's**:
                     <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center flex-shrink-0 mt-1">
                       <Bot className="w-3 h-3 text-primary-foreground" />
                     </div>
-                    <div className={`rounded-2xl rounded-bl-md p-3 max-w-[85%] ${isDarkMode ? 'bg-slate-800 text-slate-100 border border-slate-700' : 'bg-slate-100 text-slate-900 border border-slate-200'}`}>
+                    <div className={`rounded-2xl rounded-bl-md p-3 max-w-[90%] ${isDarkMode ? 'bg-gradient-to-br from-slate-800 to-slate-850 text-slate-50 border border-slate-600 shadow-lg' : 'bg-gradient-to-br from-white to-slate-50 text-slate-900 border border-slate-200 shadow-lg'}`}>
                       {isTyping && typingText ? (
-                        <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-strong:text-primary">
+                        <div className="ai-response-content space-y-2 break-words overflow-hidden">
                           <ReactMarkdown
                             components={{
-                              h2: ({ children }) => <h2 className="text-base font-bold text-foreground mt-3 mb-2">{children}</h2>,
-                              h3: ({ children }) => <h3 className="text-sm font-semibold text-foreground mt-2 mb-1">{children}</h3>,
-                              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1.5">{children}</ul>,
-                              li: ({ children }) => <li className="text-sm">{children}</li>,
-                              p: ({ children }) => <p className="my-1.5">{children}</p>,
-                              strong: ({ children }) => <strong className="font-semibold text-primary">{children}</strong>,
+                              h2: ({ children }) => (
+                                <h2 className={`text-base font-bold mt-4 mb-2 pb-1 border-b flex items-center gap-2 ${isDarkMode ? 'text-blue-300 border-slate-600' : 'text-blue-700 border-slate-300'}`}>
+                                  {children}
+                                </h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className={`text-sm font-semibold mt-3 mb-1.5 ${isDarkMode ? 'text-purple-300' : 'text-purple-700'}`}>
+                                  {children}
+                                </h3>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className={`space-y-1.5 my-2 ml-1 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                  {children}
+                                </ul>
+                              ),
+                              li: ({ children }) => (
+                                <li className="flex items-start gap-2 text-sm leading-relaxed">
+                                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}`} />
+                                  <span className="flex-1">{children}</span>
+                                </li>
+                              ),
+                              p: ({ children }) => (
+                                <p className={`my-2 leading-relaxed text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                  {children}
+                                </p>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className={`font-bold ${isDarkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                                  {children}
+                                </strong>
+                              ),
                             }}
                           >
                             {typingText}
