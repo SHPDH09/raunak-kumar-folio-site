@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Save, User } from "lucide-react";
+import { Save, User, Upload, FileText, Loader2 } from "lucide-react";
 
 interface AboutData {
   id?: string;
@@ -23,6 +23,8 @@ interface AboutData {
 
 const PortfolioAboutAdmin = () => {
   const [loading, setLoading] = useState(false);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<AboutData>({
     name: "",
     tagline: "",
@@ -109,6 +111,55 @@ const PortfolioAboutAdmin = () => {
     }
   };
 
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setUploadingResume(true);
+    try {
+      const fileName = `resume_${Date.now()}.pdf`;
+      const filePath = `resumes/${fileName}`;
+
+      // Upload to avatars bucket (public bucket)
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setData({ ...data, resume_url: urlData.publicUrl });
+      toast.success("Resume uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+      toast.error("Failed to upload resume");
+    } finally {
+      setUploadingResume(false);
+      if (resumeInputRef.current) {
+        resumeInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -184,13 +235,49 @@ const PortfolioAboutAdmin = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="resume">Resume URL</Label>
-            <Input
-              id="resume"
-              value={data.resume_url}
-              onChange={(e) => setData({ ...data, resume_url: e.target.value })}
-              placeholder="https://..."
-            />
+            <Label htmlFor="resume">Resume</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="resume"
+                  value={data.resume_url}
+                  onChange={(e) => setData({ ...data, resume_url: e.target.value })}
+                  placeholder="https://... or upload PDF"
+                  className="flex-1"
+                />
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleResumeUpload}
+                  className="hidden"
+                  id="resume-upload"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={uploadingResume}
+                >
+                  {uploadingResume ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              {data.resume_url && (
+                <a 
+                  href={data.resume_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm text-primary hover:underline"
+                >
+                  <FileText className="w-4 h-4 mr-1" />
+                  View Current Resume
+                </a>
+              )}
+            </div>
           </div>
         </div>
         <div className="space-y-2">
