@@ -174,82 +174,69 @@ const Certifications = () => {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Certificate Card - Realistic Design */}
-                <div className="relative bg-gradient-to-br from-amber-50 via-white to-amber-50 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/40 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border-2 border-amber-200/50 dark:border-amber-700/30 hover:scale-[1.02]">
+                <div className="relative bg-gradient-to-br from-amber-50 via-white to-amber-50 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/40 rounded-md overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-amber-200/50 dark:border-amber-700/30 hover:scale-[1.01]">
                   
                   {/* Decorative Border Pattern */}
-                  <div className="absolute inset-2 border border-amber-300/50 dark:border-amber-600/30 rounded pointer-events-none" />
-                  <div className="absolute inset-3 border border-amber-200/30 dark:border-amber-700/20 rounded pointer-events-none" />
+                  <div className="absolute inset-1 border border-amber-300/40 dark:border-amber-600/20 rounded-sm pointer-events-none" />
                   
-                  {/* Corner Decorations */}
-                  <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-amber-400/60 rounded-tl" />
-                  <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-amber-400/60 rounded-tr" />
-                  <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-amber-400/60 rounded-bl" />
-                  <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-amber-400/60 rounded-br" />
+                  {/* Corner Decorations - Smaller */}
+                  <div className="absolute top-1 left-1 w-4 h-4 border-t border-l border-amber-400/50 rounded-tl-sm" />
+                  <div className="absolute top-1 right-1 w-4 h-4 border-t border-r border-amber-400/50 rounded-tr-sm" />
+                  <div className="absolute bottom-1 left-1 w-4 h-4 border-b border-l border-amber-400/50 rounded-bl-sm" />
+                  <div className="absolute bottom-1 right-1 w-4 h-4 border-b border-r border-amber-400/50 rounded-br-sm" />
                   
-                  {/* Gold Seal */}
-                  <div className="absolute -top-3 -right-3 w-20 h-20">
-                    <div className={`w-full h-full rounded-full bg-gradient-to-br ${style.color} shadow-lg flex items-center justify-center transform rotate-12 group-hover:rotate-0 transition-transform duration-300`}>
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
-                        <Shield className="w-7 h-7 text-amber-800" />
+                  {/* Gold Seal - Smaller */}
+                  <div className="absolute -top-2 -right-2 w-12 h-12">
+                    <div className={`w-full h-full rounded-full bg-gradient-to-br ${style.color} shadow-md flex items-center justify-center transform rotate-12 group-hover:rotate-0 transition-transform duration-300`}>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-amber-800" />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="relative p-6 pt-8">
-                    {/* Header */}
-                    <div className="text-center mb-4">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-amber-700 dark:text-amber-400 font-medium mb-2">
-                        Certificate of Completion
+                  <div className="relative p-4">
+                    {/* Header - Compact */}
+                    <div className="text-center mb-2">
+                      <p className="text-[8px] uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400 font-medium">
+                        Certificate
                       </p>
-                      <div className="flex justify-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
                     </div>
                     
-                    {/* Title */}
-                    <h3 className="text-center text-lg font-bold text-foreground mb-4 leading-tight min-h-[3rem] flex items-center justify-center">
+                    {/* Title - Smaller */}
+                    <h3 className="text-center text-sm font-bold text-foreground mb-2 leading-tight line-clamp-2">
                       {cert.title}
                     </h3>
                     
-                    {/* Decorative Line */}
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <div className="h-px w-8 bg-gradient-to-r from-transparent to-amber-400" />
-                      <Award className={`w-5 h-5 ${style.accent}`} />
-                      <div className="h-px w-8 bg-gradient-to-l from-transparent to-amber-400" />
+                    {/* Decorative Line - Smaller */}
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <div className="h-px w-6 bg-gradient-to-r from-transparent to-amber-400" />
+                      <Award className={`w-3 h-3 ${style.accent}`} />
+                      <div className="h-px w-6 bg-gradient-to-l from-transparent to-amber-400" />
                     </div>
                     
-                    {/* Issuer */}
-                    <div className="text-center mb-4">
-                      <p className="text-xs text-muted-foreground mb-1">Issued By</p>
-                      <Badge className={`bg-gradient-to-r ${style.color} text-white border-0 font-semibold px-4 py-1`}>
+                    {/* Issuer - Compact */}
+                    <div className="text-center mb-2">
+                      <Badge className={`bg-gradient-to-r ${style.color} text-white border-0 text-xs px-2 py-0.5`}>
                         {cert.issuer}
                       </Badge>
                     </div>
                     
-                    {/* Date */}
-                    <div className="flex items-center justify-center text-sm text-muted-foreground mb-4">
-                      <Calendar className="h-4 w-4 mr-2" />
+                    {/* Date - Smaller */}
+                    <div className="flex items-center justify-center text-xs text-muted-foreground mb-2">
+                      <Calendar className="h-3 w-3 mr-1" />
                       {formatDate(cert.issue_date)}
                     </div>
                     
-                    {/* Recipient */}
-                    <div className="text-center mb-4 py-2 bg-amber-100/50 dark:bg-amber-900/20 rounded border border-amber-200/50 dark:border-amber-700/30">
-                      <p className="text-xs text-muted-foreground mb-1">Awarded To</p>
-                      <p className="font-semibold text-foreground">Raunak Kumar</p>
-                    </div>
-                    
-                    {/* Verify Button */}
+                    {/* Verify Button - Compact */}
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0 font-medium shadow-md"
+                      className="w-full h-7 text-xs bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0 font-medium shadow-sm"
                       onClick={() => cert.credential_url && window.open(cert.credential_url, '_blank')}
                       disabled={!cert.credential_url || cert.credential_url === '#'}
                     >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Verify Certificate
+                      <ExternalLink className="h-3 w-3 mr-1" />
+                      Verify
                     </Button>
                   </div>
                 </div>
