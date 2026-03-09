@@ -80,6 +80,23 @@ export const PostCard = ({
   const [likesViewerOpen, setLikesViewerOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  useEffect(() => {
+    checkSavedStatus();
+  }, [id, currentUserId]);
+
+  const checkSavedStatus = async () => {
+    if (!currentUserId) return;
+
+    const { data } = await supabase
+      .from('saved_posts')
+      .select('id')
+      .eq('image_id', id)
+      .eq('user_id', currentUserId)
+      .single();
+
+    setIsSaved(!!data);
+  };
+
   const MAX_TEXT_LENGTH = 150;
   const fullText = caption || '';
   const shouldTruncate = fullText.length > MAX_TEXT_LENGTH;
