@@ -7,18 +7,10 @@ import { SavedPosts } from "@/components/SavedPosts";
 import { Home, User, Heart, LogOut, MessageSquare, Settings, Image, Bookmark } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { Home, User, Heart, LogOut, MessageSquare, Settings, Image, Bookmark } from "lucide-react";
-import { useState, useEffect } from "react";
-
-interface User {
-  id: string;
-  email: string;
-}
-
 export default function SocialNavigation() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
     checkUser();
