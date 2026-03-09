@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfilePage } from "@/components/ProfilePage";
 import { CreatePost } from "@/components/CreatePost";
 import { Messenger } from "@/components/Messenger";
-import { SavedPosts } from "@/components/SavedPosts";
+
 
 interface Profile {
   id: string;
