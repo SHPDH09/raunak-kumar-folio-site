@@ -160,6 +160,38 @@ export const PostCard = ({
     }
   };
 
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUserId) {
+      toast.error("Please log in to save posts");
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        await supabase
+          .from('saved_posts')
+          .delete()
+          .eq('image_id', id)
+          .eq('user_id', currentUserId);
+        setIsSaved(false);
+        toast.success("Post removed from saved");
+      } else {
+        await supabase
+          .from('saved_posts')
+          .insert({
+            image_id: id,
+            user_id: currentUserId
+          });
+        setIsSaved(true);
+        toast.success("Post saved!");
+      }
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast.error("Failed to save post");
+    }
+  };
+
   const showFollowButton = currentUserId && userId && currentUserId !== userId;
   const hasImage = imageUrl && !imageError;
 
