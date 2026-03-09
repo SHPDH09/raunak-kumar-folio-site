@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Trash2, Edit, UserPlus, UserCheck, Repeat2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Trash2, Edit, UserPlus, UserCheck, Repeat2, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProfileDialog } from "@/components/ProfilePage";
 import { LikesViewer } from "@/components/LikesViewer";
+import { useEffect } from "react";
 
 interface PostCardProps {
   id: string;
@@ -77,6 +78,24 @@ export const PostCard = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [likesViewerOpen, setLikesViewerOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    checkSavedStatus();
+  }, [id, currentUserId]);
+
+  const checkSavedStatus = async () => {
+    if (!currentUserId) return;
+
+    const { data } = await supabase
+      .from('saved_posts')
+      .select('id')
+      .eq('image_id', id)
+      .eq('user_id', currentUserId)
+      .single();
+
+    setIsSaved(!!data);
+  };
 
   const MAX_TEXT_LENGTH = 150;
   const fullText = caption || '';
@@ -138,6 +157,38 @@ export const PostCard = ({
     e.stopPropagation();
     if (userId) {
       setProfileOpen(true);
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUserId) {
+      toast.error("Please log in to save posts");
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        await supabase
+          .from('saved_posts')
+          .delete()
+          .eq('image_id', id)
+          .eq('user_id', currentUserId);
+        setIsSaved(false);
+        toast.success("Post removed from saved");
+      } else {
+        await supabase
+          .from('saved_posts')
+          .insert({
+            image_id: id,
+            user_id: currentUserId
+          });
+        setIsSaved(true);
+        toast.success("Post saved!");
+      }
+    } catch (error) {
+      console.error('Error saving post:', error);
+      toast.error("Failed to save post");
     }
   };
 
@@ -331,6 +382,19 @@ export const PostCard = ({
             <Share2 className="h-5 w-5" />
             <span className="hidden sm:inline">Share</span>
           </Button>
+          {currentUserId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`flex-1 gap-2 h-11 rounded-none hover-scale ${
+                isSaved ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={handleSave}
+            >
+              <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
+              <span className="hidden sm:inline">{isSaved ? "Saved" : "Save"}</span>
+            </Button>
+          )}
         </CardFooter>
       </Card>
 

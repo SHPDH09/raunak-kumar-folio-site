@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Home, Upload, LogOut, Shield, Plus, MessageCircle } from "lucide-react";
+import { Home, Upload, LogOut, Shield, Plus, MessageCircle, Bookmark } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfilePage } from "@/components/ProfilePage";
 import { CreatePost } from "@/components/CreatePost";
 import { Messenger } from "@/components/Messenger";
+
 
 interface Profile {
   id: string;
@@ -336,9 +337,13 @@ const UserDashboard = () => {
       <main className="container py-8">
         <div className="max-w-4xl mx-auto">
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+              <TabsTrigger value="saved" className="flex items-center gap-2">
+                <Bookmark className="w-4 h-4" />
+                Saved
+              </TabsTrigger>
               <TabsTrigger value="feed">Feed</TabsTrigger>
             </TabsList>
 
@@ -397,6 +402,13 @@ const UserDashboard = () => {
                   </Button>
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="saved">
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-semibold mb-2">Saved Posts</h3>
+                <p className="text-muted-foreground">Your saved posts will appear here.</p>
+              </div>
             </TabsContent>
 
             <TabsContent value="feed" className="space-y-6 mt-6">
