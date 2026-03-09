@@ -261,7 +261,7 @@ export default function SocialNavigation() {
                   <User className="w-4 h-4 mr-2" />
                   Dashboard
                 </Button>
-                <Button variant="ghost" onClick={handleLogout} className="justify-start text-red-400">
+                <Button variant="ghost" onClick={handleLogout} className="justify-start text-destructive hover:text-destructive/80">
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
