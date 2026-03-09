@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Trash2, Edit, UserPlus, UserCheck, Repeat2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Trash2, Edit, UserPlus, UserCheck, Repeat2, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProfileDialog } from "@/components/ProfilePage";
 import { LikesViewer } from "@/components/LikesViewer";
+import { useEffect } from "react";
 
 interface PostCardProps {
   id: string;
