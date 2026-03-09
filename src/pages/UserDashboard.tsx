@@ -336,9 +336,13 @@ const UserDashboard = () => {
       <main className="container py-8">
         <div className="max-w-4xl mx-auto">
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+              <TabsTrigger value="saved" className="flex items-center gap-2">
+                <Bookmark className="w-4 h-4" />
+                Saved
+              </TabsTrigger>
               <TabsTrigger value="feed">Feed</TabsTrigger>
             </TabsList>
 
