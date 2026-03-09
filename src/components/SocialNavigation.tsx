@@ -148,7 +148,7 @@ export default function SocialNavigation() {
               >
                 <Bell className="w-4 h-4" />
                 {notificationCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-gradient-to-r from-red-500 to-pink-500 animate-pulse">
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-gradient-to-r from-destructive to-destructive/80 animate-pulse">
                     {notificationCount}
                   </Badge>
                 )}
