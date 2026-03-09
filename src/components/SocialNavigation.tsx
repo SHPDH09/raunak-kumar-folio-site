@@ -3,8 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Home, User, Heart, LogOut, MessageSquare, Settings, Image, Bookmark } from "lucide-react";
+import { 
+  Home, User, Heart, LogOut, MessageSquare, Settings, Image, Bookmark,
+  Sun, Moon, Search, Bell, Plus, Menu
+} from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 export default function SocialNavigation() {
   const navigate = useNavigate();
