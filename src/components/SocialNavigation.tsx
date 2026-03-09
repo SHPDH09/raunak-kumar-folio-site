@@ -221,7 +221,7 @@ export default function SocialNavigation() {
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 font-medium group"
+              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 font-medium group"
             >
               <LogOut className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
               Logout
