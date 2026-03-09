@@ -254,7 +254,7 @@ export default function SocialNavigation() {
                   <Bell className="w-4 h-4 mr-2" />
                   Notifications
                   {notificationCount > 0 && (
-                    <Badge className="ml-2 h-5 w-5 p-0 text-xs bg-red-500">{notificationCount}</Badge>
+                  <Badge className="ml-2 h-5 w-5 p-0 text-xs bg-destructive">{notificationCount}</Badge>
                   )}
                 </Button>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="justify-start">
