@@ -77,7 +77,10 @@ export default function SocialNavigation() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh]">
-                <SavedPosts />
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold mb-4">Saved Posts</h2>
+                  <p className="text-muted-foreground">Your saved posts will appear here.</p>
+                </div>
               </DialogContent>
             </Dialog>
             <Button

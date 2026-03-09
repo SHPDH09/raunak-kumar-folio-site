@@ -405,7 +405,10 @@ const UserDashboard = () => {
             </TabsContent>
 
             <TabsContent value="saved">
-              <SavedPosts />
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-semibold mb-2">Saved Posts</h3>
+                <p className="text-muted-foreground">Your saved posts will appear here.</p>
+              </div>
             </TabsContent>
 
             <TabsContent value="feed" className="space-y-6 mt-6">
