@@ -78,6 +78,7 @@ export const PostCard = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [likesViewerOpen, setLikesViewerOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const MAX_TEXT_LENGTH = 150;
   const fullText = caption || '';
