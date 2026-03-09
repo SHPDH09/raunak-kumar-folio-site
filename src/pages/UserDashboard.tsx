@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Home, Upload, LogOut, Shield, Plus, MessageCircle } from "lucide-react";
+import { Home, Upload, LogOut, Shield, Plus, MessageCircle, Bookmark } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { CommentSection } from "@/components/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfilePage } from "@/components/ProfilePage";
 import { CreatePost } from "@/components/CreatePost";
 import { Messenger } from "@/components/Messenger";
+import { SavedPosts } from "@/components/SavedPosts";
 
 interface Profile {
   id: string;
