@@ -382,6 +382,19 @@ export const PostCard = ({
             <Share2 className="h-5 w-5" />
             <span className="hidden sm:inline">Share</span>
           </Button>
+          {currentUserId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`flex-1 gap-2 h-11 rounded-none hover-scale ${
+                isSaved ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={handleSave}
+            >
+              <Bookmark className={`h-5 w-5 ${isSaved ? "fill-current" : ""}`} />
+              <span className="hidden sm:inline">{isSaved ? "Saved" : "Save"}</span>
+            </Button>
+          )}
         </CardFooter>
       </Card>
 

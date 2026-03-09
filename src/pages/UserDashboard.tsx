@@ -403,6 +403,10 @@ const UserDashboard = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="saved">
+              <SavedPosts />
+            </TabsContent>
+
             <TabsContent value="feed" className="space-y-6 mt-6">
               {feedPosts.map((post) => (
                 <PostCard
