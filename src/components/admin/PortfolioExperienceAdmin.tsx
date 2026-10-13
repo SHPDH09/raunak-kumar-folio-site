@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit, Briefcase, GraduationCap } from "lucide-react";
+import { officialDocumentUrl } from '@/components/EducationDocumentModal';
 
 interface Experience {
   id: string;
@@ -22,6 +23,9 @@ interface Experience {
   description: string;
   location: string;
   display_order: number;
+  enrollment_number?: string | null;
+  academic_session?: string | null;
+  certificate_url?: string | null;
 }
 
 const emptyExperience: Omit<Experience, "id"> = {
@@ -66,6 +70,10 @@ const PortfolioExperienceAdmin = () => {
 
     setLoading(true);
     try {
+      if (editing.certificate_url && !officialDocumentUrl(editing.certificate_url)) {
+        toast.error('Enter a valid HTTPS certificate link');
+        return;
+      }
       if (editing.id) {
         const { error } = await supabase
           .from("portfolio_experience")
@@ -78,6 +86,9 @@ const PortfolioExperienceAdmin = () => {
             is_current: editing.is_current,
             description: editing.description,
             location: editing.location,
+            enrollment_number: editing.enrollment_number || null,
+            academic_session: editing.academic_session || null,
+            certificate_url: editing.certificate_url || null,
           })
           .eq("id", editing.id);
 
@@ -93,6 +104,9 @@ const PortfolioExperienceAdmin = () => {
           is_current: editing.is_current,
           description: editing.description,
           location: editing.location,
+          enrollment_number: editing.enrollment_number || null,
+          academic_session: editing.academic_session || null,
+          certificate_url: editing.certificate_url || null,
           display_order: experiences.length,
         });
 
@@ -151,7 +165,7 @@ const PortfolioExperienceAdmin = () => {
                 Add Entry
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editing?.id ? "Edit Entry" : "Add New Entry"}</DialogTitle>
               </DialogHeader>
@@ -237,6 +251,13 @@ const PortfolioExperienceAdmin = () => {
                     rows={3}
                   />
                 </div>
+                {editing?.type === 'education' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2"><Label htmlFor="academic-session">Academic session</Label><Input id="academic-session" value={editing.academic_session || ''} onChange={(e) => setEditing({ ...editing, academic_session: e.target.value })} placeholder="2026-2028" /></div>
+                    <div className="space-y-2"><Label htmlFor="enrollment-number">Roll / Enrollment number</Label><Input id="enrollment-number" value={editing.enrollment_number || ''} onChange={(e) => setEditing({ ...editing, enrollment_number: e.target.value })} /></div>
+                    <div className="space-y-2"><Label htmlFor="certificate-url">Official certificate link (PDF or image)</Label><Input id="certificate-url" type="url" value={editing.certificate_url || ''} onChange={(e) => setEditing({ ...editing, certificate_url: e.target.value })} placeholder="https://…" /></div>
+                  </div>
+                )}
                 <Button onClick={handleSave} disabled={loading} className="w-full">
                   {loading ? "Saving..." : "Save"}
                 </Button>

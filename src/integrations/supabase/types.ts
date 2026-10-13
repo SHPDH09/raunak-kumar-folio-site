@@ -780,10 +780,13 @@ export type Database = {
       }
       portfolio_experience: {
         Row: {
+          academic_session: string | null
+          certificate_url: string | null
           created_at: string | null
           description: string | null
           display_order: number | null
           end_date: string | null
+          enrollment_number: string | null
           id: string
           is_current: boolean | null
           location: string | null
@@ -793,10 +796,13 @@ export type Database = {
           type: string
         }
         Insert: {
+          academic_session?: string | null
+          certificate_url?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
           end_date?: string | null
+          enrollment_number?: string | null
           id?: string
           is_current?: boolean | null
           location?: string | null
@@ -806,10 +812,13 @@ export type Database = {
           type: string
         }
         Update: {
+          academic_session?: string | null
+          certificate_url?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
           end_date?: string | null
+          enrollment_number?: string | null
           id?: string
           is_current?: boolean | null
           location?: string | null

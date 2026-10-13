@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Briefcase, GraduationCap, Award, Users, Loader2, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import MarksheetModal from './MarksheetModal';
+import EducationDocumentModal, { officialDocumentUrl } from './EducationDocumentModal';
 
 interface Experience {
   id: string;
@@ -17,6 +18,9 @@ interface Experience {
   description: string;
   location: string;
   display_order: number;
+  enrollment_number?: string | null;
+  academic_session?: string | null;
+  certificate_url?: string | null;
 }
 
 interface SemesterGrade {
@@ -55,6 +59,8 @@ const Experience = () => {
   const [educationMarks, setEducationMarks] = useState<EducationMark[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [documentEntry, setDocumentEntry] = useState<Experience | null>(null);
+  const [documentMode, setDocumentMode] = useState<'record' | 'certificate'>('record');
   const [selectedEducationType, setSelectedEducationType] = useState<'BCA' | '10th' | '12th'>('BCA');
   const [selectedEducationMark, setSelectedEducationMark] = useState<EducationMark | null>(null);
 
@@ -226,11 +232,15 @@ const Experience = () => {
                           
                           {/* View Marks Button - Opens Modal */}
                           <div className="mt-4">
+                            {exp.academic_session && <p className="text-sm text-muted-foreground mb-3">Session: {exp.academic_session} · Roll: {exp.enrollment_number || '—'}</p>}
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                if (exp.title.includes('BCA') || exp.title.includes('Bachelor of Computer Applications')) {
+                                if (/institute of technology patna/i.test(exp.organization)) {
+                                  setDocumentMode('record');
+                                  setDocumentEntry(exp);
+                                } else if (exp.title.includes('BCA') || exp.title.includes('Bachelor of Computer Applications')) {
                                   openMarksheet('BCA');
                                 } else if (exp.title.includes('12th') || exp.title.includes('XII') || exp.title.includes('Higher Secondary') || exp.title.includes('Intermediate')) {
                                   openMarksheet('12th');
@@ -241,8 +251,13 @@ const Experience = () => {
                               className="w-full bg-gradient-to-r from-accent/10 to-primary/10 border-accent/30 hover:from-accent/20 hover:to-primary/20 text-accent hover:text-accent"
                             >
                               <BarChart3 className="w-4 h-4 mr-2" />
-                              View Marks
+                              {/institute of technology patna/i.test(exp.organization) ? 'View Academic Record' : 'View Marks'}
                             </Button>
+                            {(officialDocumentUrl(exp.certificate_url) || /LNCT/i.test(exp.organization)) && (
+                              <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => { setDocumentMode('certificate'); setDocumentEntry(exp); }}>
+                                <Award className="size-4 mr-2" />View Certificate
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -266,6 +281,7 @@ const Experience = () => {
       </div>
 
       {/* Marksheet Modal */}
+      <EducationDocumentModal document={documentEntry} mode={documentMode} onClose={() => setDocumentEntry(null)} />
       <MarksheetModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
