@@ -1,0 +1,3 @@
+CREATE POLICY "Admins can upload resumes" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'avatars' AND (storage.foldername(name))[1] = 'resumes' AND public.has_role(auth.uid(), 'admin'::public.app_role));
+CREATE POLICY "Admins can update resumes" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = 'resumes' AND public.has_role(auth.uid(), 'admin'::public.app_role));
+CREATE POLICY "Admins can delete resumes" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'avatars' AND (storage.foldername(name))[1] = 'resumes' AND public.has_role(auth.uid(), 'admin'::public.app_role));

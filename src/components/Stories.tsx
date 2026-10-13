@@ -38,7 +38,7 @@ export const Stories = ({ currentUserId, onRefresh }: StoriesProps) => {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const progressInterval = useRef<NodeJS.Timeout | null>(null);
+  const progressInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadStories();
