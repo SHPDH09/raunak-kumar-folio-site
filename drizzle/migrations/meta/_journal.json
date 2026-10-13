@@ -8,6 +8,13 @@
       "when": 1791887354248,
       "tag": "0000_admin_resume_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791888012662,
+      "tag": "0001_education_document_details",
+      "breakpoints": true
     }
   ]
 }

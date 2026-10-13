@@ -1,0 +1,2 @@
+ALTER TABLE public.portfolio_experience ADD COLUMN IF NOT EXISTS enrollment_number text, ADD COLUMN IF NOT EXISTS academic_session text, ADD COLUMN IF NOT EXISTS certificate_url text;
+COMMENT ON COLUMN public.portfolio_experience.certificate_url IS 'Official user-provided education certificate URL; never generated credentials.';
