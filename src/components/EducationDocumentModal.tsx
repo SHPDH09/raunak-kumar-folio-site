@@ -2,6 +2,9 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GraduationCap, FileCheck2, ExternalLink, Clock3 } from 'lucide-react';
+import iitPatnaLogo from '@/assets/iit-patna-logo.png';
+import lnctLogo from '@/assets/lnct-logo.png';
+import bsebLogo from '@/assets/bseb-logo.png';
 
 export interface EducationDocument {
   title: string;
@@ -19,6 +22,14 @@ export const officialDocumentUrl = (value?: string | null) => {
   } catch {
     return null;
   }
+};
+
+const getInstitutionLogo = (organization?: string | null) => {
+  const name = (organization || '').toLowerCase();
+  if (/institute of technology patna|iit patna|iit-?p\b/.test(name)) return iitPatnaLogo;
+  if (/lnct|lakshmi narain/.test(name)) return lnctLogo;
+  if (/bseb|bihar school/.test(name)) return bsebLogo;
+  return null;
 };
 
 export default function EducationDocumentModal({ document, mode, onClose }: {
