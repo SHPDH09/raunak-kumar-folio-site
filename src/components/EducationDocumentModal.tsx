@@ -43,7 +43,21 @@ export default function EducationDocumentModal({ document, mode, onClose }: {
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-8 bg-background">
         <div className="border-4 border-double border-primary/40 p-4 sm:p-6 rounded-lg">
           <div className="text-center border-b border-border pb-5">
-            <GraduationCap className="size-10 text-primary mx-auto mb-3" />
+            {(() => {
+              const logo = getInstitutionLogo(document?.organization);
+              return logo ? (
+                <img
+                  src={logo}
+                  alt={`${document?.organization} logo`}
+                  className="size-20 sm:size-24 mx-auto mb-3 object-contain drop-shadow-md"
+                  loading="lazy"
+                  width={1024}
+                  height={1024}
+                />
+              ) : (
+                <GraduationCap className="size-10 text-primary mx-auto mb-3" />
+              );
+            })()}
             <p className="text-xs text-muted-foreground uppercase mb-2">{mode === 'certificate' ? 'Education certificate' : 'Academic record · Portfolio'}</p>
             <DialogTitle className="text-xl sm:text-2xl leading-snug">{document?.organization}</DialogTitle>
             <DialogDescription className="mt-2 text-base">{document?.title}</DialogDescription>
