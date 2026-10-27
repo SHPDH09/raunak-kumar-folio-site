@@ -74,20 +74,34 @@ const Navigation = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
-      isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-elegant' : 'bg-transparent'
+      isScrolled 
+        ? 'bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-elegant' 
+        : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Logo */}
+          {/* Branded logo lockup */}
           <button 
             onClick={() => scrollToSection('hero')}
-            className="hover:scale-105 transition-smooth"
+            className="flex items-center gap-3 group hover:scale-105 transition-smooth"
+            aria-label="Go to top"
           >
-            <img 
-              src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png" 
-              alt="Portfolio Logo" 
-              className="h-10 w-10 object-contain rounded-full opacity-80"
-            />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-[var(--neon-gradient)] opacity-0 group-hover:opacity-60 blur-sm transition-smooth" />
+              <img 
+                src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png" 
+                alt="Portfolio Logo" 
+                className="relative h-10 w-10 object-contain rounded-full ring-1 ring-primary/40 group-hover:ring-primary/70 transition-smooth"
+              />
+            </div>
+            <div className="hidden sm:flex flex-col items-start leading-none">
+              <span className="text-sm font-bold tracking-wide text-foreground">
+                Raunak <span className="text-gradient">Kumar</span>
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">
+                AI & Data Analyst
+              </span>
+            </div>
           </button>
 
           {/* Desktop - 360° Radial Menu Toggle Button */}
@@ -98,8 +112,8 @@ const Navigation = () => {
               onClick={() => setIsRadialMenuOpen(!isRadialMenuOpen)}
               className={`w-12 h-12 rounded-full transition-all duration-300 ${
                 isRadialMenuOpen 
-                  ? 'bg-primary text-primary-foreground rotate-180' 
-                  : 'bg-muted hover:bg-muted/80'
+                  ? 'bg-primary text-primary-foreground rotate-180 shadow-glow' 
+                  : 'bg-muted/80 backdrop-blur-sm border border-border hover:border-primary/50 hover:shadow-glow'
               }`}
             >
               {isRadialMenuOpen ? <X className="h-6 w-6" /> : <Settings className="h-6 w-6" />}
@@ -111,7 +125,7 @@ const Navigation = () => {
             <div className="fixed inset-0 z-[100] flex items-center justify-center">
               {/* Backdrop */}
               <div 
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                className="absolute inset-0 bg-background/80 backdrop-blur-md"
                 onClick={() => setIsRadialMenuOpen(false)}
               />
               
@@ -120,7 +134,7 @@ const Navigation = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsRadialMenuOpen(false)}
-                className="relative z-50 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl transition-all duration-300 hover:scale-110"
+                className="relative z-50 w-16 h-16 rounded-full bg-[var(--neon-gradient)] text-white shadow-glow transition-all duration-300 hover:scale-110"
               >
                 <X className="h-8 w-8" />
               </Button>
@@ -137,7 +151,7 @@ const Navigation = () => {
                   <button
                     key={item.name}
                     onClick={() => handleRadialItemClick(item)}
-                    className={`absolute w-14 h-14 rounded-full ${item.color} text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in`}
+                    className={`absolute w-14 h-14 rounded-full ${item.color} text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20`}
                     style={{
                       transform: `translate(${x}px, ${y}px)`,
                       animationDelay: `${index * 40}ms`,
@@ -163,7 +177,7 @@ const Navigation = () => {
                   <button
                     onClick={handleDownloadPortfolio}
                     disabled={isGenerating}
-                    className="absolute w-14 h-14 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in"
+                    className="absolute w-14 h-14 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20"
                     style={{
                       transform: `translate(${x}px, ${y}px)`,
                       animationDelay: `${index * 40}ms`,
@@ -195,7 +209,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-14 sm:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border">
+          <div className="md:hidden absolute top-14 sm:top-16 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border">
             <div className="py-2 sm:py-4 space-y-1">
               {radialMenuItems.map((item) => (
                 <button

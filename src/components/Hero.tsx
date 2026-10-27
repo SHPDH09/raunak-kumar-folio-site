@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, Github, Linkedin, Mail, Brain, Sparkles } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Mail, Brain, Sparkles, ArrowRight } from 'lucide-react';
 import DataAnalytics3D from './DataAnalytics3D';
 
 const AI_LLM_PROJECT_COUNT = 4; // Subject Tutor AI, AI Startup Idea Validator, Data Navigator AI, AI Data Analyzer
@@ -30,15 +30,42 @@ const Hero = () => {
 
   return (
     <section 
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5"
+      className="min-h-screen flex items-center justify-center relative overflow-hidden hero-gradient"
     >
       {/* 3D Animated Data Analytics Background */}
       <DataAnalytics3D />
       
+      {/* Branded glow accents */}
+      <div className="pointer-events-none absolute -top-32 -left-32 size-96 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -right-24 size-[28rem] rounded-full bg-accent/15 blur-3xl" />
+      
       <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
         <div className="animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 font-inter">
-            Hi, I'm <span className="text-neon animate-pulse-neon">Raunak Kumar</span>
+          {/* Brand mark */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-[var(--neon-gradient)] blur-md opacity-60 scale-110" />
+              <img
+                src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png"
+                alt="Raunak Kumar brand mark"
+                className="relative size-20 sm:size-24 rounded-full object-contain ring-2 ring-primary/50 shadow-glow"
+                width={512}
+                height={512}
+              />
+            </div>
+          </div>
+
+          <p className="inline-flex items-center gap-2 text-xs sm:text-sm uppercase tracking-[0.3em] text-muted-foreground mb-4 px-4 py-1.5 rounded-full border border-border bg-card/40 backdrop-blur-sm">
+            <Sparkles className="size-3.5 text-accent" />
+            Portfolio · 2026
+          </p>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 font-inter tracking-tight">
+            Hi, I'm{' '}
+            <span className="relative inline-block">
+              <span className="text-gradient">Raunak Kumar</span>
+              <span className="block h-1 mt-1 rounded-full bg-[var(--neon-gradient)] opacity-80" />
+            </span>
           </h1>
           
           <div className="h-12 sm:h-16 mb-6 sm:mb-8">
@@ -49,19 +76,19 @@ const Hero = () => {
           </div>
           
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4">
-            BCA Student specializing in <span className="text-gradient">Artificial Intelligence & Data Analytics</span> at LNCT University. 
+            BCA Student specializing in <span className="text-gradient font-semibold">Artificial Intelligence & Data Analytics</span> at LNCT University. 
             Passionate about building intelligent solutions that make a difference.
           </p>
           
           {/* AI/LLM Projects Badge */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-8">
             <Badge 
-              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/50 text-violet-300 hover:from-violet-500/30 hover:to-purple-500/30 transition-all cursor-pointer animate-pulse"
+              className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-violet-500/15 to-accent/15 border border-primary/40 text-foreground hover:border-primary hover:shadow-neon transition-smooth cursor-pointer rounded-full"
               onClick={() => scrollToSection('projects')}
             >
-              <Brain className="w-4 h-4 mr-2" />
-              {AI_LLM_PROJECT_COUNT} AI/LLM Projects
-              <Sparkles className="w-4 h-4 ml-2" />
+              <Brain className="w-4 h-4 mr-2 text-primary" />
+              <span className="font-semibold">{AI_LLM_PROJECT_COUNT} AI/LLM Projects</span>
+              <Sparkles className="w-4 h-4 ml-2 text-accent" />
             </Badge>
           </div>
           
@@ -69,10 +96,11 @@ const Hero = () => {
             <Button 
               variant="hero"
               size="lg" 
-              className="px-8 py-6 text-lg font-semibold hover-neon"
+              className="px-8 py-6 text-lg font-semibold hover-neon group"
               onClick={() => scrollToSection('about')}
             >
               About Me
+              <ArrowRight className="size-5 ml-2 transition-smooth group-hover:translate-x-1" />
             </Button>
             <Button 
               size="lg" 
@@ -84,32 +112,32 @@ const Hero = () => {
             </Button>
           </div>
           
-          <div className="flex justify-center space-x-6">
-            <a 
-              href="https://github.com/SHPDH09" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-smooth hover:scale-110 hover-neon p-3 rounded-full"
-            >
-              <Github size={28} />
-            </a>
-            <a 
-              href="https://www.linkedin.com/in/raunak-kumar-766328248/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-accent transition-smooth hover:scale-110 hover-neon p-3 rounded-full"
-            >
-              <Linkedin size={28} />
-            </a>
+          <div className="flex justify-center gap-5">
+            {[
+              { href: 'https://github.com/SHPDH09', icon: Github, label: 'GitHub' },
+              { href: 'https://www.linkedin.com/in/raunak-kumar-766328248/', icon: Linkedin, label: 'LinkedIn' },
+            ].map(({ href, icon: Icon, label }) => (
+              <a 
+                key={label}
+                href={href} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="size-12 rounded-full border border-border bg-card/40 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/60 hover:shadow-glow hover:-translate-y-1 transition-smooth"
+              >
+                <Icon size={22} />
+              </a>
+            ))}
             <a 
               href="#contact" 
-              className="text-muted-foreground hover:text-accent transition-smooth hover:scale-110 hover-neon p-3 rounded-full"
+              aria-label="Email"
+              className="size-12 rounded-full border border-border bg-card/40 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-accent hover:border-accent/60 hover:shadow-glow hover:-translate-y-1 transition-smooth"
               onClick={(e) => {
                 e.preventDefault();
                 scrollToSection('contact');
               }}
             >
-              <Mail size={28} />
+              <Mail size={22} />
             </a>
           </div>
         </div>
@@ -118,7 +146,8 @@ const Hero = () => {
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <button 
           onClick={() => scrollToSection('about')}
-          className="text-muted-foreground hover:text-accent transition-smooth hover-neon p-3 rounded-full"
+          aria-label="Scroll to about section"
+          className="text-muted-foreground hover:text-accent transition-smooth hover-neon p-3 rounded-full border border-transparent hover:border-accent/40"
         >
           <ChevronDown size={32} />
         </button>
