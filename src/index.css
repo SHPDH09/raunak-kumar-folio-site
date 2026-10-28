@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Raunak Kumar Portfolio Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;600;700;800&display=swap');
 
 @layer base {
   :root {
@@ -296,5 +296,21 @@
   
   .certification-card:hover::before {
     background: linear-gradient(45deg, hsl(var(--primary)/80%), hsl(var(--accent)/80%), hsl(var(--primary)/80%));
+  }
+
+  /* Professional display type */
+  .font-display {
+    font-family: 'Sora', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Subtle engineering grid overlay for the hero */
+  .hero-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.14) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.14) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 85% 65% at 50% 38%, black 15%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 38%, black 15%, transparent 72%);
   }
 }
