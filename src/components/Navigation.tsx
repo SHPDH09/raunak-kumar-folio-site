@@ -16,7 +16,7 @@ const Navigation = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -26,6 +26,15 @@ const Navigation = () => {
     setIsMobileMenuOpen(false);
     setIsRadialMenuOpen(false);
   };
+
+  const desktopLinks = [
+    { name: 'Home', id: 'hero' },
+    { name: 'About', id: 'about' },
+    { name: 'Projects', id: 'projects' },
+    { name: 'Experience', id: 'experience' },
+    { name: 'Certifications', id: 'certifications' },
+    { name: 'Contact', id: 'contact' },
+  ];
 
   const radialMenuItems = [
     { name: 'Home', id: 'hero', icon: Home, color: 'bg-blue-500' },
@@ -74,23 +83,23 @@ const Navigation = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
-      isScrolled 
-        ? 'bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-elegant' 
+      isScrolled
+        ? 'bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-elegant'
         : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-4">
           {/* Branded logo lockup */}
-          <button 
+          <button
             onClick={() => scrollToSection('hero')}
             className="flex items-center gap-3 group hover:scale-105 transition-smooth"
             aria-label="Go to top"
           >
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-[var(--neon-gradient)] opacity-0 group-hover:opacity-60 blur-sm transition-smooth" />
-              <img 
-                src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png" 
-                alt="Portfolio Logo" 
+              <img
+                src="/lovable-uploads/9d0cc340-cedb-4c57-8e0f-bdd49a77d90d.png"
+                alt="Portfolio Logo"
                 className="relative h-10 w-10 object-contain rounded-full ring-1 ring-primary/40 group-hover:ring-primary/70 transition-smooth"
               />
             </div>
@@ -104,6 +113,19 @@ const Navigation = () => {
             </div>
           </button>
 
+          {/* Desktop inline links */}
+          <div className="hidden lg:flex items-center gap-1 rounded-full border border-border/60 bg-card/40 backdrop-blur-md px-2 py-1.5 shadow-card">
+            {desktopLinks.map((link) => (
+              <button
+                key={link.name}
+                onClick={() => scrollToSection(link.id)}
+                className="px-3.5 py-1.5 rounded-full text-sm text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-smooth"
+              >
+                {link.name}
+              </button>
+            ))}
+          </div>
+
           {/* Desktop - 360° Radial Menu Toggle Button */}
           <div className="hidden md:flex items-center">
             <Button
@@ -111,90 +133,14 @@ const Navigation = () => {
               size="icon"
               onClick={() => setIsRadialMenuOpen(!isRadialMenuOpen)}
               className={`w-12 h-12 rounded-full transition-all duration-300 ${
-                isRadialMenuOpen 
-                  ? 'bg-primary text-primary-foreground rotate-180 shadow-glow' 
+                isRadialMenuOpen
+                  ? 'bg-primary text-primary-foreground rotate-180 shadow-glow'
                   : 'bg-muted/80 backdrop-blur-sm border border-border hover:border-primary/50 hover:shadow-glow'
               }`}
             >
               {isRadialMenuOpen ? <X className="h-6 w-6" /> : <Settings className="h-6 w-6" />}
             </Button>
           </div>
-
-          {/* Center Screen Radial Menu */}
-          {isRadialMenuOpen && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center">
-              {/* Backdrop */}
-              <div 
-                className="absolute inset-0 bg-background/80 backdrop-blur-md"
-                onClick={() => setIsRadialMenuOpen(false)}
-              />
-              
-              {/* Center Toggle Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsRadialMenuOpen(false)}
-                className="relative z-50 w-16 h-16 rounded-full bg-[var(--neon-gradient)] text-white shadow-glow transition-all duration-300 hover:scale-110"
-              >
-                <X className="h-8 w-8" />
-              </Button>
-
-              {/* Radial Menu Items */}
-              {radialMenuItems.map((item, index) => {
-                const totalItems = radialMenuItems.length + 1;
-                const angle = (index * 360) / totalItems - 90;
-                const radius = 160;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => handleRadialItemClick(item)}
-                    className={`absolute w-14 h-14 rounded-full ${item.color} text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20`}
-                    style={{
-                      transform: `translate(${x}px, ${y}px)`,
-                      animationDelay: `${index * 40}ms`,
-                    }}
-                    title={item.name}
-                  >
-                    <item.icon className="h-6 w-6" />
-                    <span className="text-[8px] font-medium mt-0.5">{item.name}</span>
-                  </button>
-                );
-              })}
-
-              {/* Download Portfolio Button */}
-              {(() => {
-                const index = radialMenuItems.length;
-                const totalItems = radialMenuItems.length + 1;
-                const angle = (index * 360) / totalItems - 90;
-                const radius = 160;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
-
-                return (
-                  <button
-                    onClick={handleDownloadPortfolio}
-                    disabled={isGenerating}
-                    className="absolute w-14 h-14 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20"
-                    style={{
-                      transform: `translate(${x}px, ${y}px)`,
-                      animationDelay: `${index * 40}ms`,
-                    }}
-                    title="Download Portfolio"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <Download className="h-6 w-6" />
-                    )}
-                    <span className="text-[8px] font-medium mt-0.5">Portfolio</span>
-                  </button>
-                );
-              })()}
-            </div>
-          )}
 
           {/* Mobile Menu Button */}
           <Button
@@ -240,6 +186,82 @@ const Navigation = () => {
           </div>
         )}
       </div>
+
+      {/* Center Screen Radial Menu */}
+      {isRadialMenuOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-background/80 backdrop-blur-md"
+            onClick={() => setIsRadialMenuOpen(false)}
+          />
+
+          {/* Center Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsRadialMenuOpen(false)}
+            className="relative z-50 w-16 h-16 rounded-full bg-[var(--neon-gradient)] text-white shadow-glow transition-all duration-300 hover:scale-110"
+          >
+            <X className="h-8 w-8" />
+          </Button>
+
+          {/* Radial Menu Items */}
+          {radialMenuItems.map((item, index) => {
+            const totalItems = radialMenuItems.length + 1;
+            const angle = (index * 360) / totalItems - 90;
+            const radius = 160;
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+            return (
+              <button
+                key={item.name}
+                onClick={() => handleRadialItemClick(item)}
+                className={`absolute w-14 h-14 rounded-full ${item.color} text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20`}
+                style={{
+                  transform: `translate(${x}px, ${y}px)`,
+                  animationDelay: `${index * 40}ms`,
+                }}
+                title={item.name}
+              >
+                <item.icon className="h-6 w-6" />
+                <span className="text-[8px] font-medium mt-0.5">{item.name}</span>
+              </button>
+            );
+          })}
+
+          {/* Download Portfolio Button */}
+          {(() => {
+            const index = radialMenuItems.length;
+            const totalItems = radialMenuItems.length + 1;
+            const angle = (index * 360) / totalItems - 90;
+            const radius = 160;
+            const x = Math.cos((angle * Math.PI) / 180) * radius;
+            const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+            return (
+              <button
+                onClick={handleDownloadPortfolio}
+                disabled={isGenerating}
+                className="absolute w-14 h-14 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-125 animate-scale-in ring-2 ring-white/20"
+                style={{
+                  transform: `translate(${x}px, ${y}px)`,
+                  animationDelay: `${index * 40}ms`,
+                }}
+                title="Download Portfolio"
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <Download className="h-6 w-6" />
+                )}
+                <span className="text-[8px] font-medium mt-0.5">Portfolio</span>
+              </button>
+            );
+          })()}
+        </div>
+      )}
     </nav>
   );
 };

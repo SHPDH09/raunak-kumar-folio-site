@@ -1,15 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, Github, Linkedin, Mail, Brain, Sparkles, ArrowRight } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Mail, Brain, Sparkles, ArrowRight, GraduationCap, FolderGit2, TrendingUp } from 'lucide-react';
 import DataAnalytics3D from './DataAnalytics3D';
 
 const AI_LLM_PROJECT_COUNT = 4; // Subject Tutor AI, AI Startup Idea Validator, Data Navigator AI, AI Data Analyzer
 
+const HERO_STATS = [
+  { icon: FolderGit2, value: `${AI_LLM_PROJECT_COUNT}`, label: 'AI / LLM Projects' },
+  { icon: TrendingUp, value: '8.80', label: 'Current CGPA' },
+  { icon: GraduationCap, value: '5 / 6', label: 'Semesters Done' },
+];
+
+const SOCIALS = [
+  { href: 'https://github.com/SHPDH09', icon: Github, label: 'GitHub' },
+  { href: 'https://www.linkedin.com/in/raunak-kumar-766328248/', icon: Linkedin, label: 'LinkedIn' },
+];
+
 const Hero = () => {
   const [typedText, setTypedText] = useState('');
   const fullText = "AI & ML Developer | Data Analyst | Data Visualization";
-  
+
   useEffect(() => {
     let i = 0;
     const timer = setInterval(() => {
@@ -20,7 +31,7 @@ const Hero = () => {
         clearInterval(timer);
       }
     }, 100);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -29,20 +40,23 @@ const Hero = () => {
   };
 
   return (
-    <section 
+    <section
       className="min-h-screen flex items-center justify-center relative overflow-hidden hero-gradient"
     >
       {/* 3D Animated Data Analytics Background */}
       <DataAnalytics3D />
-      
+
+      {/* Subtle engineering grid */}
+      <div className="pointer-events-none absolute inset-0 hero-grid" aria-hidden="true" />
+
       {/* Branded glow accents */}
       <div className="pointer-events-none absolute -top-32 -left-32 size-96 rounded-full bg-primary/20 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-24 size-[28rem] rounded-full bg-accent/15 blur-3xl" />
-      
+
       <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
         <div className="animate-fade-in">
           {/* Brand mark */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-5">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-[var(--neon-gradient)] blur-md opacity-60 scale-110" />
               <img
@@ -55,34 +69,37 @@ const Hero = () => {
             </div>
           </div>
 
-          <p className="inline-flex items-center gap-2 text-xs sm:text-sm uppercase tracking-[0.3em] text-muted-foreground mb-4 px-4 py-1.5 rounded-full border border-border bg-card/40 backdrop-blur-sm">
-            <Sparkles className="size-3.5 text-accent" />
-            Portfolio · 2026
-          </p>
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 font-inter tracking-tight">
-            Hi, I'm{' '}
-            <span className="relative inline-block">
-              <span className="text-gradient">Raunak Kumar</span>
-              <span className="block h-1 mt-1 rounded-full bg-[var(--neon-gradient)] opacity-80" />
+          {/* Live status pill */}
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-card/50 backdrop-blur-md px-4 py-1.5 mb-6 text-xs sm:text-sm text-muted-foreground">
+            <span className="relative flex size-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full size-2 bg-emerald-400" />
             </span>
+            <span>
+              Currently working as <span className="text-foreground font-medium">Associate Analyst @ Aspect Vision</span>
+            </span>
+          </div>
+
+          {/* Name */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-3 font-display tracking-tight">
+            Raunak <span className="text-gradient">Kumar</span>
           </h1>
-          
-          <div className="h-12 sm:h-16 mb-6 sm:mb-8">
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground/90 font-mono min-h-[1.5rem] px-2">
+
+          {/* Typing line */}
+          <div className="h-10 sm:h-12 mb-5">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground/85 font-mono tracking-tight">
               {typedText}
               <span className="animate-pulse border-r-2 border-accent ml-1"></span>
             </p>
           </div>
-          
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4">
-            BCA Student specializing in <span className="text-gradient font-semibold">Artificial Intelligence & Data Analytics</span> at LNCT University. 
-            Passionate about building intelligent solutions that make a difference.
+
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-2">
+            BCA student specializing in <span className="text-gradient font-semibold">Artificial Intelligence &amp; Data Analytics</span> at LNCT University — building intelligent solutions that turn data into decisions.
           </p>
-          
+
           {/* AI/LLM Projects Badge */}
-          <div className="flex justify-center mb-8">
-            <Badge 
+          <div className="flex justify-center mb-9">
+            <Badge
               className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-violet-500/15 to-accent/15 border border-primary/40 text-foreground hover:border-primary hover:shadow-neon transition-smooth cursor-pointer rounded-full"
               onClick={() => scrollToSection('projects')}
             >
@@ -91,36 +108,48 @@ const Hero = () => {
               <Sparkles className="w-4 h-4 ml-2 text-accent" />
             </Badge>
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button 
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
+            <Button
               variant="hero"
-              size="lg" 
+              size="lg"
               className="px-8 py-6 text-lg font-semibold hover-neon group"
               onClick={() => scrollToSection('about')}
             >
               About Me
               <ArrowRight className="size-5 ml-2 transition-smooth group-hover:translate-x-1" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
               className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent transition-smooth px-8 py-6 text-lg hover-neon"
               onClick={() => scrollToSection('projects')}
             >
               View Projects
             </Button>
           </div>
-          
+
+          {/* Stats strip */}
+          <div className="mx-auto mb-10 max-w-xl grid grid-cols-3 divide-x divide-border/60 rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md shadow-card overflow-hidden">
+            {HERO_STATS.map(({ icon: Icon, value, label }) => (
+              <div key={label} className="px-2 sm:px-6 py-4 sm:py-5 text-center">
+                <Icon className="size-4 sm:size-5 mx-auto mb-1.5 text-accent" aria-hidden="true" />
+                <div className="text-lg sm:text-2xl font-bold font-display leading-none">{value}</div>
+                <div className="mt-1.5 text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground leading-tight">
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Socials */}
           <div className="flex justify-center gap-5">
-            {[
-              { href: 'https://github.com/SHPDH09', icon: Github, label: 'GitHub' },
-              { href: 'https://www.linkedin.com/in/raunak-kumar-766328248/', icon: Linkedin, label: 'LinkedIn' },
-            ].map(({ href, icon: Icon, label }) => (
-              <a 
+            {SOCIALS.map(({ href, icon: Icon, label }) => (
+              <a
                 key={label}
-                href={href} 
-                target="_blank" 
+                href={href}
+                target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
                 className="size-12 rounded-full border border-border bg-card/40 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/60 hover:shadow-glow hover:-translate-y-1 transition-smooth"
@@ -128,8 +157,8 @@ const Hero = () => {
                 <Icon size={22} />
               </a>
             ))}
-            <a 
-              href="#contact" 
+            <a
+              href="#contact"
               aria-label="Email"
               className="size-12 rounded-full border border-border bg-card/40 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-accent hover:border-accent/60 hover:shadow-glow hover:-translate-y-1 transition-smooth"
               onClick={(e) => {
@@ -142,9 +171,9 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <button 
+        <button
           onClick={() => scrollToSection('about')}
           aria-label="Scroll to about section"
           className="text-muted-foreground hover:text-accent transition-smooth hover-neon p-3 rounded-full border border-transparent hover:border-accent/40"
