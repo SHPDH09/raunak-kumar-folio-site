@@ -76,7 +76,7 @@ const Hero = () => {
               <span className="relative inline-flex rounded-full size-2 bg-emerald-400" />
             </span>
             <span>
-              Currently working as <span className="text-foreground font-medium">Associate Analyst @ Aspect Vision</span>
+              Currently pursuing <span className="text-foreground font-medium">M.C.A. @ IIT Patna</span>
             </span>
           </div>
 
